@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe User, type: :model do
   describe 'validations' do
-    subject { User.new(email: 'test@cuhk.edu.hk', password: 'password1', role: 'student') }
+    subject { User.new(email: 'test@link.cuhk.edu.hk', password: 'password1', role: 'student') }
 
     it 'is valid with valid attributes' do
       expect(subject).to be_valid
@@ -15,7 +15,7 @@ RSpec.describe User, type: :model do
     end
 
     it 'is invalid with a duplicate email' do
-      User.create!(email: 'test@cuhk.edu.hk', password: 'password1', role: 'student')
+      User.create!(email: 'test@link.cuhk.edu.hk', password: 'password1', role: 'student')
       expect(subject).not_to be_valid
       expect(subject.errors[:email]).to include('has already been taken')
     end
@@ -39,7 +39,7 @@ RSpec.describe User, type: :model do
     end
 
     it 'is invalid without a password on create' do
-      user = User.new(email: 'new@cuhk.edu.hk', role: 'student', password: '')
+      user = User.new(email: 'new@link.cuhk.edu.hk', role: 'student', password: '')
       expect(user).not_to be_valid
       expect(user.errors[:password]).to include("can't be blank")
     end
@@ -47,17 +47,17 @@ RSpec.describe User, type: :model do
 
   describe 'roles' do
     it 'accepts student role' do
-      user = User.new(email: 'a@cuhk.edu.hk', password: 'password1', role: 'student')
+      user = User.new(email: 'a@link.cuhk.edu.hk', password: 'password1', role: 'student')
       expect(user).to be_valid
     end
 
     it 'accepts staff role' do
-      user = User.new(email: 'b@cuhk.edu.hk', password: 'password1', role: 'staff')
+      user = User.new(email: 'b@link.cuhk.edu.hk', password: 'password1', role: 'staff')
       expect(user).to be_valid
     end
 
     it 'accepts admin role' do
-      user = User.new(email: 'c@cuhk.edu.hk', password: 'password1', role: 'admin')
+      user = User.new(email: 'c@link.cuhk.edu.hk', password: 'password1', role: 'admin')
       expect(user).to be_valid
     end
 
@@ -75,20 +75,20 @@ RSpec.describe User, type: :model do
 
   describe 'has_secure_password' do
     it 'authenticates with correct password' do
-      user = User.create!(email: 'auth@cuhk.edu.hk', password: 'password1', role: 'student')
+      user = User.create!(email: 'auth@link.cuhk.edu.hk', password: 'password1', role: 'student')
       expect(user.authenticate('password1')).to eq(user)
     end
 
     it 'does not authenticate with wrong password' do
-      user = User.create!(email: 'auth@cuhk.edu.hk', password: 'password1', role: 'student')
+      user = User.create!(email: 'auth@link.cuhk.edu.hk', password: 'password1', role: 'student')
       expect(user.authenticate('wrong')).to be_falsey
     end
   end
 
   describe '.find_by_email_case_insensitive' do
     it 'finds users regardless of email case' do
-      User.create!(email: 'Student@CUHK.edu.hk', password: 'password1', role: 'student')
-      expect(User.find_by_email_case_insensitive('student@cuhk.edu.hk')).to be_present
+      User.create!(email: 'Student@LINK.CUHK.edu.hk', password: 'password1', role: 'student')
+      expect(User.find_by_email_case_insensitive('student@link.cuhk.edu.hk')).to be_present
     end
   end
 end
