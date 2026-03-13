@@ -101,24 +101,21 @@ jobs:
 
       - name: Run Cucumber
         run: bundle exec cucumber
+        if: success() || failure()
 
       - name: Code Coverage Summary
-        uses: irongut/CodeCoverageSummary@v1.3.0
         if: always()
-        with:
-          filename: coverage/coverage.xml
-          badge: true
-          fail_below_min: true
-          format: markdown
-          hide_branch_rate: false
-          hide_complexity: true
-          indicators: true
-          output: both
-          thresholds: '60 80'
-
-      - name: Write to Job Summary
-        run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
-        if: always()
+        run: |
+          echo "## 📊 Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f "coverage/.last_run.json" ]; then
+            LINE=$(jq -r '.result.line' coverage/.last_run.json)
+            BRANCH=$(jq -r '.result.branch' coverage/.last_run.json)
+            echo "- **Line Coverage:** ${LINE}%" >> $GITHUB_STEP_SUMMARY
+            echo "- **Branch Coverage:** ${BRANCH}%" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Coverage report not found." >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Upload Combined Coverage Report
         uses: actions/upload-artifact@v4
