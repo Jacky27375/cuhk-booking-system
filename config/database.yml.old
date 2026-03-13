@@ -1,0 +1,59 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  host: <%= ENV.fetch("POSTGRES_HOST", "127.0.0.1") %>
+  port: <%= ENV.fetch("POSTGRES_PORT", 5432) %>
+  username: <%= ENV.fetch("POSTGRES_USER", "postgres") %>
+  password: <%= ENV.fetch("POSTGRES_PASSWORD", "postgres") %>
+
+development:
+  primary:
+    <<: *default
+    database: <%= ENV.fetch("POSTGRES_DB", "cuhk_booking_system_development") %>
+  cache:
+    <<: *default
+    database: <%= ENV.fetch("POSTGRES_CACHE_DB", "cuhk_booking_system_development_cache") %>
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *default
+    database: <%= ENV.fetch("POSTGRES_QUEUE_DB", "cuhk_booking_system_development_queue") %>
+    migrations_paths: db/queue_migrate
+  cable:
+    <<: *default
+    database: <%= ENV.fetch("POSTGRES_CABLE_DB", "cuhk_booking_system_development_cable") %>
+    migrations_paths: db/cable_migrate
+
+test:
+  primary:
+    <<: *default
+    database: <%= ENV.fetch("POSTGRES_TEST_DB", "cuhk_booking_system_test") %>
+  cache:
+    <<: *default
+    database: <%= ENV.fetch("POSTGRES_TEST_CACHE_DB", "cuhk_booking_system_test_cache") %>
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *default
+    database: <%= ENV.fetch("POSTGRES_TEST_QUEUE_DB", "cuhk_booking_system_test_queue") %>
+    migrations_paths: db/queue_migrate
+  cable:
+    <<: *default
+    database: <%= ENV.fetch("POSTGRES_TEST_CABLE_DB", "cuhk_booking_system_test_cable") %>
+    migrations_paths: db/cable_migrate
+
+production:
+  primary:
+    <<: *default
+    database: <%= ENV.fetch("POSTGRES_DB", "cuhk_booking_system_production") %>
+  cache:
+    <<: *default
+    database: <%= ENV.fetch("POSTGRES_CACHE_DB", "cuhk_booking_system_production_cache") %>
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *default
+    database: <%= ENV.fetch("POSTGRES_QUEUE_DB", "cuhk_booking_system_production_queue") %>
+    migrations_paths: db/queue_migrate
+  cable:
+    <<: *default
+    database: <%= ENV.fetch("POSTGRES_CABLE_DB", "cuhk_booking_system_production_cable") %>
+    migrations_paths: db/cable_migrate

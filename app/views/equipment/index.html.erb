@@ -1,0 +1,10 @@
+<h1>Equipment#index</h1>
+<p>Find me in app/views/equipment/index.html.erb</p>
+<h1>Available Equipment</h1>
+
+<% @equipment.each do |eq| %>
+  <div>
+    <strong><%= eq.name %></strong> - 
+    available: <%= eq.quantity %>
+  </div>
+<% end %>
