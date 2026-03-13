@@ -2,93 +2,111 @@ require 'rails_helper'
 
 RSpec.describe User, type: :model do
   describe 'validations' do
-    subject { User.new(email: 'test@link.cuhk.edu.hk', password: 'password1', role: 'student') }
-
     it 'is valid with valid attributes' do
-      expect(subject).to be_valid
+      expect(build(:user, :admin)).to be_valid
     end
 
-    it 'is invalid without an email' do
-      subject.email = nil
-      expect(subject).not_to be_valid
-      expect(subject.errors[:email]).to include("can't be blank")
-    end
-
-    it 'is invalid with a duplicate email' do
-      User.create!(email: 'test@link.cuhk.edu.hk', password: 'password1', role: 'student')
-      expect(subject).not_to be_valid
-      expect(subject.errors[:email]).to include('has already been taken')
-    end
-
-    it 'is invalid with a badly formatted email' do
-      subject.email = 'not-an-email'
-      expect(subject).not_to be_valid
-      expect(subject.errors[:email]).to include('is invalid')
-    end
-
-    it 'is invalid without a role' do
-      subject.role = nil
-      expect(subject).not_to be_valid
-      expect(subject.errors[:role]).to include("can't be blank")
-    end
-
-    it 'is invalid with an unrecognised role' do
-      subject.role = 'superuser'
-      expect(subject).not_to be_valid
-      expect(subject.errors[:role]).to include('is not included in the list')
-    end
-
-    it 'is invalid without a password on create' do
-      user = User.new(email: 'new@link.cuhk.edu.hk', role: 'student', password: '')
+    it 'requires an email' do
+      user = build(:user, email: nil)
       expect(user).not_to be_valid
-      expect(user.errors[:password]).to include("can't be blank")
+      expect(user.errors[:email]).to include("can't be blank")
+    end
+
+    it 'requires a unique email (case-insensitive)' do
+      create(:user, email: 'test@cuhk.edu.hk')
+      user = build(:user, email: 'TEST@cuhk.edu.hk')
+      expect(user).not_to be_valid
+      expect(user.errors[:email]).to include("has already been taken")
+    end
+
+    it 'requires a valid email format' do
+      user = build(:user, email: 'invalid-email')
+      expect(user).not_to be_valid
+      expect(user.errors[:email]).to include("is invalid")
+    end
+
+    it 'requires a password on create' do
+      user = build(:user, password: nil)
+      expect(user).not_to be_valid
+    end
+
+    it 'requires a password of at least 8 characters' do
+      user = build(:user, password: 'short')
+      expect(user).not_to be_valid
+      expect(user.errors[:password]).to include("is too short (minimum is 8 characters)")
+    end
+
+    it 'normalizes email to lowercase' do
+      user = create(:user, email: ' Admin@CUHK.edu.hk ')
+      expect(user.email).to eq('admin@cuhk.edu.hk')
     end
   end
 
   describe 'roles' do
-    it 'accepts student role' do
-      user = User.new(email: 'a@link.cuhk.edu.hk', password: 'password1', role: 'student')
-      expect(user).to be_valid
+    it 'defines admin role' do
+      expect(build(:user, :admin)).to be_admin
     end
 
-    it 'accepts staff role' do
-      user = User.new(email: 'b@link.cuhk.edu.hk', password: 'password1', role: 'staff')
-      expect(user).to be_valid
+    it 'defines staff role' do
+      expect(build(:user, :staff)).to be_staff
     end
 
-    it 'accepts admin role' do
-      user = User.new(email: 'c@link.cuhk.edu.hk', password: 'password1', role: 'admin')
-      expect(user).to be_valid
+    it 'defines society_member role' do
+      expect(build(:user, :society_member)).to be_society_member
     end
 
-    it 'provides role query methods' do
-      student = User.new(role: 'student')
-      staff   = User.new(role: 'staff')
-      admin   = User.new(role: 'admin')
+    it 'defaults to society_member' do
+      expect(User.new).to be_society_member
+    end
 
-      expect(student.student?).to be true
-      expect(student.staff?).to be false
-      expect(staff.staff?).to be true
-      expect(admin.admin?).to be true
+    it 'can list all roles' do
+      expect(User.roles.keys).to contain_exactly('society_member', 'staff', 'admin')
     end
   end
 
-  describe 'has_secure_password' do
+  describe 'associations' do
+    it 'optionally belongs to a tenant' do
+      assoc = User.reflect_on_association(:tenant)
+      expect(assoc).not_to be_nil
+      expect(assoc.macro).to eq(:belongs_to)
+    end
+
+    it 'optionally belongs to a society' do
+      assoc = User.reflect_on_association(:society)
+      expect(assoc).not_to be_nil
+      expect(assoc.macro).to eq(:belongs_to)
+    end
+
+    it 'is valid without a tenant' do
+      expect(build(:user, tenant: nil)).to be_valid
+    end
+
+    it 'is valid without a society' do
+      expect(build(:user, society: nil)).to be_valid
+    end
+
+    it 'can belong to a tenant' do
+      tenant = create(:tenant)
+      user = create(:user, :staff, tenant: tenant)
+      expect(user.tenant).to eq(tenant)
+    end
+
+    it 'can belong to a society' do
+      society = create(:society)
+      user = create(:user, :society_member, society: society)
+      expect(user.society).to eq(society)
+    end
+  end
+
+  describe 'authentication' do
+    let(:user) { create(:user, :admin) }
+
     it 'authenticates with correct password' do
-      user = User.create!(email: 'auth@link.cuhk.edu.hk', password: 'password1', role: 'student')
-      expect(user.authenticate('password1')).to eq(user)
+      expect(user.authenticate('Password1!')).to eq(user)
     end
 
-    it 'does not authenticate with wrong password' do
-      user = User.create!(email: 'auth@link.cuhk.edu.hk', password: 'password1', role: 'student')
-      expect(user.authenticate('wrong')).to be_falsey
-    end
-  end
-
-  describe '.find_by_email_case_insensitive' do
-    it 'finds users regardless of email case' do
-      User.create!(email: 'Student@LINK.CUHK.edu.hk', password: 'password1', role: 'student')
-      expect(User.find_by_email_case_insensitive('student@link.cuhk.edu.hk')).to be_present
+    it 'rejects incorrect password' do
+      expect(user.authenticate('wrongpassword')).to be_falsey
     end
   end
 end
