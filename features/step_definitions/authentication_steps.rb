@@ -1,10 +1,6 @@
 Given('the following users exist:') do |table|
-  table.hashes.each do |row|
-    User.create!(
-      email: row['email'],
-      password: row['password'],
-      role: row['role']
-    )
+  table.hashes.each do |hash|
+    create(:user, email: hash['email'], password: hash['password'], role: hash['role'].to_sym)
   end
 end
 
@@ -12,43 +8,37 @@ Given('I am on the login page') do
   visit login_path
 end
 
-Given('I am logged in as {string}') do |email|
-  visit login_path
-  fill_in 'Email', with: email
-  fill_in 'Password', with: 'password1'
-  click_button 'Log In'
-end
-
 When('I fill in {string} with {string}') do |field, value|
   fill_in field, with: value
 end
 
-When('I click {string}') do |button_or_link|
-  if page.has_button?(button_or_link)
-    click_button button_or_link
-  else
-    click_link button_or_link
-  end
-end
-
-When('I visit the staff dashboard') do
-  visit staff_dashboard_path
+When('I press {string}') do |button|
+  click_button button
 end
 
 Then('I should see {string}') do |text|
   expect(page).to have_content(text)
 end
 
-Then('I should be on the student dashboard') do
-  expect(page).to have_current_path(dashboard_path)
-  expect(page).to have_content('Student Dashboard')
+Given('I am logged in as {string} with password {string}') do |email, password|
+  visit login_path
+  fill_in 'Email', with: email
+  fill_in 'Password', with: password
+  click_button 'Log in'
+end
+
+When('I click {string}') do |link_or_button|
+  click_on link_or_button
 end
 
 Then('I should be on the login page') do
-  expect(page).to have_current_path(login_path)
+  expect(current_path).to eq(login_path)
 end
 
-Then('I should be redirected to the student dashboard') do
-  expect(page).to have_current_path(dashboard_path)
-  expect(page).to have_content('Student Dashboard')
+When('I try to visit the dashboard') do
+  visit dashboard_path
+end
+
+When('I visit the admin panel') do
+  visit admin_path
 end

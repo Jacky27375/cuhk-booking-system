@@ -48,7 +48,7 @@ group :development, :test do
   gem "bundler-audit", require: false
 
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
-  gem "brakeman", require: false
+  gem "brakeman", "~> 8.0.4", require: false
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
@@ -71,4 +71,6 @@ group :test do
   gem "database_cleaner-active_record"
 
   gem "simplecov", require: false
+  gem "simplecov-cobertura", "~> 3.1"
+  gem "rspec-github", "~> 3.0"
 end
