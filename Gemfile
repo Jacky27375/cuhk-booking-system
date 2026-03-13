@@ -71,4 +71,6 @@ group :test do
   gem "database_cleaner-active_record"
 
   gem "simplecov", require: false
+  gem "simplecov-cobertura", "~> 3.1"
+  gem "rspec-github", "~> 3.0"
 end
