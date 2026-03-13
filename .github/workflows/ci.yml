@@ -5,35 +5,33 @@ on: [push, pull_request]
 jobs:
   scan_ruby:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
 
-      - name: Scan for common Rails security vulnerabilities using static analysis
+      - name: Scan for common Rails security vulnerabilities
         run: bin/brakeman --no-pager
       
-      - name: Scan for known security vulnerabilities in gems used
+      - name: Scan for known security vulnerabilities in gems
         run: bin/bundler-audit
       
   scan_js:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
 
-      - name: Scan for security vulnerabilities in JavaScript dependencies
+      - name: Scan for security vulnerabilities in JS dependencies
         run: bin/importmap audit
 
   lint:
@@ -42,7 +40,7 @@ jobs:
       RUBOCOP_CACHE_ROOT: tmp/rubocop
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -64,7 +62,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:16
@@ -78,29 +75,40 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          
+    # Centralized ENV vars for the job
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4 # Fixed version
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
 
+      - name: Setup Database
+        run: bin/rails db:create db:schema:load
+
       - name: Run RSpec (Unit Tests)
-        env:
-          RAILS_ENV: test
-          POSTGRES_HOST: 127.0.0.1
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        run: |
-          bin/rails db:test:prepare
-          bundle exec rspec
+        run: bundle exec rspec
+        
+      - name: Upload RSpec Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always() # Uploads even if tests fail
+        with:
+          name: rspec-coverage
+          path: coverage/
+          retention-days: 7
 
   cucumber:
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:16
@@ -114,22 +122,34 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          
+    # Centralized ENV vars for the job
+    env:
+      RAILS_ENV: test
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4 # Fixed version
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
 
+      - name: Setup Database
+        run: bin/rails db:create db:schema:load
+
       - name: Run Cucumber (BDD)
-        env:
-          RAILS_ENV: test
-          POSTGRES_HOST: 127.0.0.1
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        run: |
-          bin/rails db:test:prepare
-          bundle exec cucumber
+        run: bundle exec cucumber
+
+      - name: Upload Cucumber Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cucumber-coverage
+          path: coverage/
+          retention-days: 7
