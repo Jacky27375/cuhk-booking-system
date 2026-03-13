@@ -46,6 +46,11 @@ You need the following installed to run this project:
 
 This project uses RSpec for unit testing and Cucumber for BDD/system testing.
 
+To check test coverage directly from GitHub Actions:
+[![Rspec/Cucumber CI](https://github.com/Jacky27375/cuhk-booking-system/actions/workflows/ci.yml/badge.svg)](https://github.com/Jacky27375/cuhk-booking-system/actions/workflows/ci.yml)
+
+*(You can download the full HTML coverage reports for both RSpec and Cucumber from the **Artifacts** section of the latest CI build in GitHub Actions).*
+
 Before running tests, ensure your test database is setup:
 ```bash
 rails db:create db:prepare RAILS_ENV=test
