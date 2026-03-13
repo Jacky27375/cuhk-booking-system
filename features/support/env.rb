@@ -5,14 +5,7 @@
 # files.
 
 require 'simplecov'
-SimpleCov.start 'rails' do
-  add_filter '/spec/'
-  add_filter '/features/'
-  add_filter '/config/'
-  add_filter '/db/'
-  add_filter '/vendor/'
-  minimum_coverage 80
-end unless SimpleCov.running
+# SimpleCov configuration is loaded from .simplecov
 
 require 'cucumber/rails'
 
