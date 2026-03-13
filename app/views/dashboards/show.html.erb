@@ -1,0 +1,16 @@
+<h1>Dashboard</h1>
+
+<p>Welcome, <%= current_user.email %></p>
+
+<p>Role: <strong><%= current_user.role.humanize.titleize %></strong></p>
+
+<% if current_user.admin? %>
+  <p>You have <strong>Admin</strong> privileges.</p>
+  <%= link_to "Admin Panel", admin_path %>
+<% elsif current_user.staff? %>
+  <p>You are logged in as <strong>Staff</strong>.</p>
+<% else %>
+  <p>You are a <strong>Society Member</strong>.</p>
+<% end %>
+
+<%= button_to "Log out", logout_path, method: :delete %>

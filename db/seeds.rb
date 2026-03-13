@@ -1,9 +1,42 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
+# Seed data for CUHK Booking System
+
+# Create default tenants
+cs_dept = Tenant.find_or_create_by!(slug: "cs-dept") do |t|
+  t.name = "Computer Science Department"
+  t.description = "Department of Computer Science and Engineering"
+end
+
+sc_college = Tenant.find_or_create_by!(slug: "shaw-college") do |t|
+  t.name = "Shaw College"
+  t.description = "Shaw College, CUHK"
+end
+
+# Create default society
+cs_society = Society.find_or_create_by!(name: "Computer Science Society") do |s|
+  s.description = "CUHK Computer Science Student Society"
+end
+
+# Create default admin user
+User.find_or_create_by!(email: "admin@cuhk.edu.hk") do |u|
+  u.password = "Password1!"
+  u.role = :admin
+end
+
+# Create default staff user
+User.find_or_create_by!(email: "staff@cuhk.edu.hk") do |u|
+  u.password = "Password1!"
+  u.role = :staff
+  u.tenant = cs_dept
+end
+
+# Create default society member
+User.find_or_create_by!(email: "member@cuhk.edu.hk") do |u|
+  u.password = "Password1!"
+  u.role = :society_member
+  u.society = cs_society
+end
+
+puts "Seed data created successfully."
+puts "  Admin:  admin@cuhk.edu.hk  / Password1!"
+puts "  Staff:  staff@cuhk.edu.hk  / Password1!"
+puts "  Member: member@cuhk.edu.hk / Password1!"
