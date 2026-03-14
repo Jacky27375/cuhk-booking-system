@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @venue %>
+
+<div>
+  <% if current_user&.admin? || current_user&.staff? %>
+    <%= link_to "Edit", edit_venue_path(@venue) %> |
+    <%= button_to "Destroy", @venue, method: :delete %> |
+  <% end %>
+
+  <% if current_user %>
+    <%= link_to "Book Venue", new_booking_path(venue_id: @venue.id) %> |
+  <% end %>
+
+  <%= link_to "Back to venues", venues_path %>
+</div>

@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Bookings" %>
+
+<h1>Bookings</h1>
+
+<div id="bookings">
+  <% @bookings.each do |booking| %>
+    <%= render booking %>
+    <p>
+      <%= link_to "Show this booking", booking %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New booking", new_booking_path %>

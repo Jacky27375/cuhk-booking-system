@@ -6,6 +6,8 @@ Rails.application.routes.draw do
   get "dashboard", to: "dashboards#show"
   get "admin",     to: "admin#show"
 
+  resources :bookings
+  resources :venues
   get "home/index"
 
   root "home#index"
