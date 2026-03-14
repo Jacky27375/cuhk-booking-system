@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe "venues/show", type: :view do
   before(:each) do
+    def view.current_user; nil; end
     assign(:venue, Venue.create!(
       name: "Name",
       description: "MyText"

@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :booking do
-    venue { nil }
-    user { nil }
-    start_time { "2026-03-15 01:46:41" }
-    end_time { "2026-03-15 01:46:41" }
+    association :venue
+    association :user
+    start_time { 1.day.from_now }
+    end_time { 1.day.from_now + 2.hours }
   end
 end

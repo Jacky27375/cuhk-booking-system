@@ -23,9 +23,7 @@ RSpec.describe Venue, type: :model do
     it 'destroys dependent bookings' do
       venue = create(:venue)
       create(:booking, venue: venue)
-      
       expect { venue.destroy }.to change { Booking.count }.by(-1)
     end
   end
 end
-

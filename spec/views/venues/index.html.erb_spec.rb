@@ -2,22 +2,26 @@ require 'rails_helper'
 
 RSpec.describe "venues/index", type: :view do
   before(:each) do
+    def view.current_user; nil; end
     assign(:venues, [
       Venue.create!(
-        name: "Name",
-        description: "MyText"
+        name: "Venue 1",
+        description: "Desc 1"
       ),
       Venue.create!(
-        name: "Name",
-        description: "MyText"
+        name: "Venue 2",
+        description: "Desc 2"
       )
     ])
   end
 
   it "renders a list of venues" do
     render
-    cell_selector = 'div>p'
-    assert_select cell_selector, text: Regexp.new("Name".to_s), count: 2
-    assert_select cell_selector, text: Regexp.new("MyText".to_s), count: 2
+    assert_select "div>strong", text: "Name:", count: 2
+    assert_select "div>strong", text: "Description:", count: 2
+    assert_select "div", text: /Venue 1/
+    assert_select "div", text: /Venue 2/
+    assert_select "div", text: /Desc 1/
+    assert_select "div", text: /Desc 2/
   end
 end

@@ -66,6 +66,6 @@ class VenuesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def venue_params
-      params.expect(venue: [ :name, :description ])
+      params.expect(venue: [:name, :description])
     end
 end
