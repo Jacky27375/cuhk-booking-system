@@ -10,5 +10,5 @@ Rails.application.routes.draw do
   resources :venues
   get "home/index"
 
-  root "home#index"
+  root "sessions#new"
 end
