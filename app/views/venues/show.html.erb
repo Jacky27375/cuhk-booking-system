@@ -8,7 +8,7 @@
     <%= button_to "Destroy", @venue, method: :delete %> |
   <% end %>
 
-  <% if current_user %>
+  <% if current_user&.society_member? %>
     <%= link_to "Book Venue", new_booking_path(venue_id: @venue.id) %> |
   <% end %>
 

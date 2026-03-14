@@ -16,3 +16,4 @@
 <% if current_user&.admin? || current_user&.staff? %>
   <%= link_to "New Venue", new_venue_path %>
 <% end %>
+<%= link_to "Back to Dashboard", dashboard_path %>
