@@ -48,6 +48,20 @@ Feature: Venue Booking System
     And I click "Create Booking"
     Then I should see "Booking was successfully created."
 
+  Scenario: Admin cannot book a venue
+    Given there is a venue "Lecture Hall A"
+    And I am logged in as "admin@example.com"
+    When I visit the venues page
+    And I click "Lecture Hall A"
+    Then I should not see "Book Venue"
+
+  Scenario: Staff cannot book a venue
+    Given there is a venue "Lecture Hall A"
+    And I am logged in as "staff@example.com"
+    When I visit the venues page
+    And I click "Lecture Hall A"
+    Then I should not see "Book Venue"
+
   Scenario: Admin can see booking requests
     Given there is a venue "Lecture Hall A"
     And there is a booking for "Lecture Hall A" by "member@example.com" from "2026-03-20 10:00:00" to "2026-03-20 12:00:00"
