@@ -1,0 +1,19 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Venues" %>
+
+<h1>Venues</h1>
+
+<div id="venues">
+  <% @venues.each do |venue| %>
+    <%= render venue %>
+    <p>
+      <%= link_to venue.name, venue %>
+    </p>
+  <% end %>
+</div>
+
+<% if current_user&.admin? || current_user&.staff? %>
+  <%= link_to "New Venue", new_venue_path %>
+<% end %>
+<%= link_to "Back to Dashboard", dashboard_path %>
