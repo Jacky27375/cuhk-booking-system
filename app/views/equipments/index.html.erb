@@ -1,0 +1,38 @@
+<h1>Equipment</h1>
+
+<% if current_user.admin? || current_user.staff? %>
+  <p><%= link_to "New Equipment", new_equipment_path %></p>
+<% end %>
+
+<% if @equipments.any? %>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Total Quantity</th>
+        <th>Available Quantity</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @equipments.each do |equipment| %>
+        <tr>
+          <td><%= equipment.name %></td>
+          <td><%= equipment.quantity %></td>
+          <td><%= equipment.available_quantity %></td>
+          <td>
+            <%= link_to "View", equipment_path(equipment) %>
+            <% if current_user.admin? || current_user.staff? %>
+              | <%= link_to "Edit", edit_equipment_path(equipment) %>
+              | <%= button_to "Delete", equipment_path(equipment), method: :delete, form: { style: "display:inline" }, data: { turbo_confirm: "Delete this equipment?" } %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No equipment found.</p>
+<% end %>
+
+<p><%= link_to "Back to Dashboard", dashboard_path %></p>

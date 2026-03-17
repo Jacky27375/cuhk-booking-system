@@ -10,9 +10,31 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_13_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_15_071355) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "bookings", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "end_date"
+    t.bigint "equipment_id", null: false
+    t.integer "quantity"
+    t.date "start_date"
+    t.string "status"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["equipment_id"], name: "index_bookings_on_equipment_id"
+    t.index ["user_id"], name: "index_bookings_on_user_id"
+  end
+
+  create_table "equipment", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.integer "quantity", default: 0, null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tenant_id"], name: "index_equipment_on_tenant_id"
+  end
 
   create_table "societies", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -43,6 +65,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_13_000003) do
     t.index ["tenant_id"], name: "index_users_on_tenant_id"
   end
 
+  add_foreign_key "bookings", "equipment"
+  add_foreign_key "bookings", "users"
+  add_foreign_key "equipment", "tenants"
   add_foreign_key "users", "societies"
   add_foreign_key "users", "tenants"
 end

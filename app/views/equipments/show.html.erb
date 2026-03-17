@@ -1,0 +1,11 @@
+<h1><%= @equipment.name %></h1>
+
+<p><strong>Total Quantity:</strong> <%= @equipment.quantity %></p>
+<p><strong>Available Quantity:</strong> <%= @equipment.available_quantity %></p>
+
+<p>
+  <%= link_to "Back to Equipment", equipments_path %>
+  <% if current_user.admin? || current_user.staff? %>
+    | <%= link_to "Edit", edit_equipment_path(@equipment) %>
+  <% end %>
+</p>

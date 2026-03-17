@@ -8,5 +8,7 @@ Rails.application.routes.draw do
 
   get "home/index"
 
+  resources :equipments
+
   root "home#index"
 end
