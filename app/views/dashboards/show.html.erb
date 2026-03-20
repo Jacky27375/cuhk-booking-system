@@ -9,11 +9,13 @@
   <%= link_to "Admin Panel", admin_path %>
 <% elsif current_user.staff? %>
   <p>You are logged in as <strong>Staff</strong>.</p>
+  <%= link_to "Approval Dashboard", approval_dashboard_path %>
 <% else %>
   <p>You are a <strong>Society Member</strong>.</p>
 <% end %>
 
 <%= link_to "Venues", venues_path %>  
 <%= link_to "Booking", bookings_path %>
+<%= link_to "My Bookings", my_bookings_path %>
 
 <%= button_to "Log out", logout_path, method: :delete %>

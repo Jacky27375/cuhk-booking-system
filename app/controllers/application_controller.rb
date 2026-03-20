@@ -7,7 +7,7 @@ class ApplicationController < ActionController::Base
 
   before_action :require_authentication
 
-  helper_method :current_user, :logged_in?
+  helper_method :current_user, :logged_in?, :current_user_department
 
   private
 
@@ -35,5 +35,9 @@ class ApplicationController < ActionController::Base
     unless current_user&.admin?
       redirect_to root_path, alert: "You are not authorized to perform this action."
     end
+  end
+
+  def current_user_department
+    current_user&.tenant&.name
   end
 end
