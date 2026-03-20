@@ -1,10 +1,15 @@
 class BookingsController < ApplicationController
-  before_action :set_booking, only: %i[ show edit update destroy ]
-  before_action :require_admin_or_staff, only: %i[ index ]
+  before_action :set_booking, only: %i[ show edit update destroy approve reject ]
+  before_action :require_admin_or_staff, only: %i[ index approve reject ]
 
   # GET /bookings or /bookings.json
   def index
     @bookings = Booking.all
+  end
+
+  # GET /bookings/my
+  def my
+    @bookings = current_user.bookings.includes(:venue).order(start_time: :desc)
   end
 
   # GET /bookings/1 or /bookings/1.json
@@ -50,6 +55,25 @@ class BookingsController < ApplicationController
     end
   end
 
+  def approve
+    return unless authorize_staff_for_booking
+
+    @booking.approve!
+    BookingMailer.with(booking: @booking).approved.deliver_now
+
+    redirect_to approval_dashboard_path, notice: "Booking approved."
+  end
+
+  def reject
+    return unless authorize_staff_for_booking
+
+    reason = params[:rejection_reason].to_s.strip
+    @booking.reject!(reason)
+    BookingMailer.with(booking: @booking, reason: reason).rejected.deliver_now
+
+    redirect_to approval_dashboard_path, notice: "Booking rejected."
+  end
+
   # DELETE /bookings/1 or /bookings/1.json
   def destroy
     @booking.destroy!
@@ -69,5 +93,17 @@ class BookingsController < ApplicationController
     # Only allow a list of trusted parameters through.
     def booking_params
       params.require(:booking).permit(:venue_id, :start_time, :end_time)
+    end
+
+    def authorize_staff_for_booking
+      return true if current_user.admin?
+
+      department = current_user_department
+      if department.present? && @booking.venue.department == department
+        true
+      else
+        redirect_to approval_dashboard_path, alert: "You are not authorized to manage this booking."
+        false
+      end
     end
 end
