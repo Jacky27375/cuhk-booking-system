@@ -1,0 +1,39 @@
+<h1>Approval Dashboard</h1>
+
+<% if @bookings.empty? %>
+  <p>No pending bookings.</p>
+<% else %>
+  <table>
+    <thead>
+      <tr>
+        <th>Venue</th>
+        <th>Department</th>
+        <th>User</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @bookings.each do |booking| %>
+        <tr id="<%= dom_id(booking) %>">
+          <td><%= booking.venue.name %></td>
+          <td><%= booking.venue.department %></td>
+          <td><%= booking.user.email %></td>
+          <td><%= booking.start_time.to_date %></td>
+          <td><%= booking.status.titleize %></td>
+          <td>
+            <%= button_to "Approve", approve_booking_path(booking), method: :patch %>
+            <%= form_with url: reject_booking_path(booking), method: :patch, local: true do |f| %>
+              <%= f.label :rejection_reason, "Reason" %>
+              <%= f.text_field :rejection_reason %>
+              <%= f.submit "Reject" %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+
+<%= link_to "Back to Dashboard", dashboard_path %>

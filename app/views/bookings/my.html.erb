@@ -1,0 +1,32 @@
+<h1>My Bookings</h1>
+
+<div data-controller="booking-status">
+  <% if @bookings.empty? %>
+    <p>No bookings found.</p>
+  <% else %>
+    <table>
+      <thead>
+        <tr>
+          <th>Venue</th>
+          <th>Date</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @bookings.each do |booking| %>
+          <tr>
+            <td><%= booking.venue.name %></td>
+            <td><%= booking.start_time.to_date %></td>
+            <td><%= booking.start_time.strftime("%H:%M") %></td>
+            <td><%= booking.end_time.strftime("%H:%M") %></td>
+            <td data-booking-id="<%= booking.id %>"><%= booking.status.titleize %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+</div>
+
+<%= link_to "Back to Dashboard", dashboard_path %>

@@ -4,5 +4,6 @@ FactoryBot.define do
     association :user
     start_time { 1.day.from_now }
     end_time { 1.day.from_now + 2.hours }
+    status { :pending }
   end
 end

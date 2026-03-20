@@ -1,6 +1,8 @@
 class User < ApplicationRecord
   has_secure_password
 
+  has_many :bookings, dependent: :destroy
+
   enum :role, { society_member: 0, staff: 1, admin: 2 }
 
   belongs_to :tenant, optional: true

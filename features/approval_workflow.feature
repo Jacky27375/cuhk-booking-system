@@ -6,7 +6,7 @@ Feature: Booking Approval Workflow
   Background:
     Given the following users exist:
       | email                 | password  | role    |
-      | student@link.cuhk.edu.hk   | password1 | student |
+      | student@link.cuhk.edu.hk   | password1 | society_member |
       | staff@link.cuhk.edu.hk | password1 | staff   |
     And the following venues exist:
       | name     | department      |
@@ -37,6 +37,13 @@ Feature: Booking Approval Workflow
     When I visit the approval dashboard
     Then I should not see the booking for "LT1"
 
+  Scenario: Society member cannot access approval dashboard
+    Given I am logged in as "student@link.cuhk.edu.hk"
+    When I visit the approval dashboard
+    Then I should see "You are not authorized to perform this action."
+    And I should not be on the approval dashboard page
+
+  @javascript
   Scenario: Student is notified in real-time when booking is approved
     Given I am logged in as "student@link.cuhk.edu.hk"
     And I am viewing "My Bookings"
