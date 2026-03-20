@@ -1,6 +1,15 @@
 Given('the following users exist:') do |table|
   table.hashes.each do |hash|
-    create(:user, email: hash['email'], password: hash['password'], role: hash['role'].to_sym)
+    role_name = hash['role']
+    role_name = 'society_member' if role_name == 'student'
+    role = role_name.to_sym
+    tenant = nil
+
+    if role == :staff
+      tenant = Tenant.find_by(name: "Science Faculty") || create(:tenant, name: "Science Faculty")
+    end
+
+    create(:user, email: hash['email'], password: hash['password'], role: role, tenant: tenant)
   end
 end
 
