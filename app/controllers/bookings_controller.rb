@@ -6,9 +6,9 @@ class BookingsController < ApplicationController
   def index
     @bookings = if current_user.admin?
                   Booking.includes(:venue, :user).order(start_time: :desc)
-                else
+    else
                   Booking.for_tenant(current_user.tenant).includes(:venue, :user).order(start_time: :desc)
-                end
+    end
   end
 
   # GET /bookings/my
