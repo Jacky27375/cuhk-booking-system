@@ -21,7 +21,7 @@
             <td><%= booking.start_time.to_date %></td>
             <td><%= booking.start_time.strftime("%H:%M") %></td>
             <td><%= booking.end_time.strftime("%H:%M") %></td>
-            <td data-booking-id="<%= booking.id %>"><%= booking.status.titleize %></td>
+            <td data-booking-id="<%= booking.id %>" data-status="<%= booking.status %>"><%= booking.status.titleize %></td>
           </tr>
         <% end %>
       </tbody>

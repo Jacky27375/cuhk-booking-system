@@ -4,7 +4,11 @@ class BookingsController < ApplicationController
 
   # GET /bookings or /bookings.json
   def index
-    @bookings = Booking.all
+    @bookings = if current_user.admin?
+                  Booking.includes(:venue, :user).order(start_time: :desc)
+                else
+                  Booking.for_tenant(current_user.tenant).includes(:venue, :user).order(start_time: :desc)
+                end
   end
 
   # GET /bookings/my
@@ -98,8 +102,7 @@ class BookingsController < ApplicationController
     def authorize_staff_for_booking
       return true if current_user.admin?
 
-      department = current_user_department
-      if department.present? && @booking.venue.department == department
+      if @booking.venue.accessible_by_tenant?(current_user.tenant)
         true
       else
         redirect_to approval_dashboard_path, alert: "You are not authorized to manage this booking."
