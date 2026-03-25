@@ -1,6 +1,7 @@
 Given("the following venues exist:") do |table|
   table.hashes.each do |hash|
-    create(:venue, name: hash["name"], department: hash["department"])
+    tenant = Tenant.find_by(name: hash["department"]) || create(:tenant, name: hash["department"])
+    create(:venue, name: hash["name"], department: hash["department"], tenant: tenant)
   end
 end
 
@@ -82,7 +83,8 @@ Then("{string} should receive a rejection email with {string}") do |email, reaso
 end
 
 Given("there is a pending booking for {string} which belongs to {string}") do |venue_name, department|
-  venue = create(:venue, name: venue_name, department: department)
+  tenant = Tenant.find_by(name: department) || create(:tenant, name: department)
+  venue = create(:venue, name: venue_name, department: department, tenant: tenant)
   user = User.find_by(role: :society_member) || create(:user)
   create(:booking, venue: venue, user: user, status: :pending)
 end

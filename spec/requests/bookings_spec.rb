@@ -125,4 +125,66 @@ RSpec.describe "/bookings", type: :request do
       expect(response).to redirect_to(bookings_url)
     end
   end
+
+  describe "GET /approval_dashboard" do
+    let(:science_tenant) { create(:tenant, name: "Science Faculty") }
+    let(:arts_tenant) { create(:tenant, name: "Arts Faculty") }
+    let(:staff_user) { create(:user, :staff, tenant: science_tenant) }
+
+    before do
+      log_in_as(staff_user)
+    end
+
+    it "shows only pending bookings in the staff tenant" do
+      scoped_venue = create(:venue, name: "Room 101", department: science_tenant.name, tenant: science_tenant)
+      foreign_venue = create(:venue, name: "LT1", department: arts_tenant.name, tenant: arts_tenant)
+      create(:booking, venue: scoped_venue, user: user, status: :pending)
+      create(:booking, venue: foreign_venue, user: user, status: :pending)
+
+      get approval_dashboard_path
+
+      expect(response).to be_successful
+      expect(response.body).to include("Room 101")
+      expect(response.body).not_to include("LT1")
+    end
+
+    it "keeps legacy venues visible when department matches tenant name" do
+      legacy_venue = create(:venue, name: "Legacy Room", department: science_tenant.name, tenant: nil)
+      create(:booking, venue: legacy_venue, user: user, status: :pending)
+
+      get approval_dashboard_path
+
+      expect(response.body).to include("Legacy Room")
+    end
+  end
+
+  describe "PATCH /bookings/:id/approve" do
+    let(:science_tenant) { create(:tenant, name: "Science Faculty") }
+    let(:arts_tenant) { create(:tenant, name: "Arts Faculty") }
+    let(:staff_user) { create(:user, :staff, tenant: science_tenant) }
+
+    before do
+      log_in_as(staff_user)
+    end
+
+    it "allows staff to approve a booking in their tenant" do
+      scoped_venue = create(:venue, department: science_tenant.name, tenant: science_tenant)
+      booking = create(:booking, venue: scoped_venue, user: user, status: :pending)
+
+      patch approve_booking_path(booking)
+
+      expect(response).to redirect_to(approval_dashboard_path)
+      expect(booking.reload.status).to eq("approved")
+    end
+
+    it "rejects approval for bookings outside staff tenant" do
+      foreign_venue = create(:venue, department: arts_tenant.name, tenant: arts_tenant)
+      booking = create(:booking, venue: foreign_venue, user: user, status: :pending)
+
+      patch approve_booking_path(booking)
+
+      expect(response).to redirect_to(approval_dashboard_path)
+      expect(booking.reload.status).to eq("pending")
+    end
+  end
 end

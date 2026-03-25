@@ -8,11 +8,7 @@ class DashboardsController < ApplicationController
     @bookings = Booking.includes(:venue, :user).pending
 
     if current_user.staff?
-      if current_user_department.present?
-        @bookings = @bookings.joins(:venue).where(venues: { department: current_user_department })
-      else
-        @bookings = Booking.none
-      end
+      @bookings = @bookings.for_tenant(current_user.tenant)
     end
   end
 end

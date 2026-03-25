@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_20_090100) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_25_093000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -61,11 +61,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_20_090100) do
     t.string "department"
     t.text "description"
     t.string "name"
+    t.bigint "tenant_id"
     t.datetime "updated_at", null: false
+    t.index ["tenant_id"], name: "index_venues_on_tenant_id"
   end
 
   add_foreign_key "bookings", "users"
   add_foreign_key "bookings", "venues"
   add_foreign_key "users", "societies"
   add_foreign_key "users", "tenants"
+  add_foreign_key "venues", "tenants"
 end

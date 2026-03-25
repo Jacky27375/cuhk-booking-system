@@ -31,4 +31,27 @@ RSpec.describe Booking, type: :model do
       expect(association.macro).to eq(:belongs_to)
     end
   end
+
+  describe '.for_tenant' do
+    let(:science_tenant) { create(:tenant, name: 'Science Faculty') }
+    let(:arts_tenant) { create(:tenant, name: 'Arts Faculty') }
+    let(:science_user) { create(:user, tenant: science_tenant) }
+    let(:arts_user) { create(:user, tenant: arts_tenant) }
+
+    it 'includes bookings on venues linked to the same tenant' do
+      scoped_venue = create(:venue, department: science_tenant.name, tenant: science_tenant)
+      other_venue = create(:venue, department: arts_tenant.name, tenant: arts_tenant)
+      included_booking = create(:booking, venue: scoped_venue, user: science_user)
+      create(:booking, venue: other_venue, user: arts_user)
+
+      expect(Booking.for_tenant(science_tenant)).to contain_exactly(included_booking)
+    end
+
+    it 'supports legacy venues without tenant_id using department name fallback' do
+      legacy_venue = create(:venue, department: science_tenant.name, tenant: nil)
+      booking = create(:booking, venue: legacy_venue, user: science_user)
+
+      expect(Booking.for_tenant(science_tenant)).to include(booking)
+    end
+  end
 end
