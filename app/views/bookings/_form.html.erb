@@ -17,7 +17,7 @@
   <% else %>
     <div>
       <%= form.label :venue_id, style: "display: block" %>
-      <%= form.collection_select :venue_id, Venue.all, :id, :name %>
+      <%= form.collection_select :venue_id, (@venues || Venue.none), :id, :name %>
     </div>
   <% end %>
 

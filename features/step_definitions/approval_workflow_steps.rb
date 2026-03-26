@@ -86,13 +86,42 @@ Given("there is a pending booking for {string} which belongs to {string}") do |v
   tenant = Tenant.find_by(name: department) || create(:tenant, name: department)
   venue = create(:venue, name: venue_name, department: department, tenant: tenant)
   user = User.find_by(role: :society_member) || create(:user)
-  create(:booking, venue: venue, user: user, status: :pending)
+  create(
+    :booking,
+    venue: venue,
+    user: user,
+    status: :pending,
+    start_time: Time.zone.parse("2026-04-20 10:00"),
+    end_time: Time.zone.parse("2026-04-20 12:00")
+  )
+end
+
+When("I attempt to approve the booking for {string} on {string} directly") do |venue_name, date|
+  booking = Booking.joins(:venue)
+                   .where(venues: { name: venue_name })
+                   .where(start_time: Time.zone.parse(date).all_day)
+                   .first
+
+  page.driver.submit :patch, approve_booking_path(booking), {}
+end
+
+Then("the booking for {string} on {string} should remain {string}") do |venue_name, date, status|
+  booking = Booking.joins(:venue)
+                   .where(venues: { name: venue_name })
+                   .where(start_time: Time.zone.parse(date).all_day)
+                   .first
+
+  expect(booking.reload.status).to eq(status.downcase)
 end
 
 Given("I am viewing {string}") do |page_name|
   case page_name
   when "My Bookings"
     visit my_bookings_path
+    expect(page).to have_css(
+      "[data-controller='booking-status'][data-booking-status-connection='connected']",
+      wait: 10
+    )
   else
     raise "Unknown page: #{page_name}"
   end
@@ -119,7 +148,7 @@ end
 
 Then("I should see the status update to {string} without refreshing the page") do |status|
   booking = @current_booking || Booking.last
-  expect(page).to have_css("[data-booking-id='#{booking.id}']", text: status)
+  expect(page).to have_css("[data-booking-id='#{booking.id}']", text: status, wait: 10)
 end
 
 Then("I should not be on the approval dashboard page") do
