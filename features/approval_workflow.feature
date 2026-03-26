@@ -37,6 +37,13 @@ Feature: Booking Approval Workflow
     When I visit the approval dashboard
     Then I should not see the booking for "LT1"
 
+  Scenario: Staff cannot approve another department booking via direct request
+    Given I am logged in as "staff@link.cuhk.edu.hk"
+    And there is a pending booking for "LT1" which belongs to "Arts Faculty"
+    When I attempt to approve the booking for "LT1" on "2026-04-20" directly
+    Then the booking for "LT1" on "2026-04-20" should remain "Pending"
+    And I should see "You are not authorized to access this booking."
+
   Scenario: Society member cannot access approval dashboard
     Given I am logged in as "student@link.cuhk.edu.hk"
     When I visit the approval dashboard

@@ -4,11 +4,7 @@ class BookingsController < ApplicationController
 
   # GET /bookings or /bookings.json
   def index
-    @bookings = if current_user.admin?
-                  Booking.includes(:venue, :user).order(start_time: :desc)
-    else
-                  Booking.for_tenant(current_user.tenant).includes(:venue, :user).order(start_time: :desc)
-    end
+    @bookings = booking_scope.order(start_time: :desc)
   end
 
   # GET /bookings/my
@@ -23,17 +19,28 @@ class BookingsController < ApplicationController
   # GET /bookings/new
   def new
     @booking = Booking.new
-    @booking.venue_id = params[:venue_id] if params[:venue_id]
+    @venues = accessible_venues.order(:name)
+    if params[:venue_id].present? && venue_accessible?(params[:venue_id])
+      @booking.venue_id = params[:venue_id]
+    end
   end
 
   # GET /bookings/1/edit
   def edit
+    @venues = accessible_venues.order(:name)
   end
 
   # POST /bookings or /bookings.json
   def create
     @booking = Booking.new(booking_params)
     @booking.user = current_user
+    @venues = accessible_venues.order(:name)
+
+    unless venue_accessible?(@booking.venue_id)
+      @booking.errors.add(:venue, "is not accessible for your account")
+      render :new, status: :unprocessable_entity
+      return
+    end
 
     respond_to do |format|
       if @booking.save
@@ -48,6 +55,14 @@ class BookingsController < ApplicationController
 
   # PATCH/PUT /bookings/1 or /bookings/1.json
   def update
+    @venues = accessible_venues.order(:name)
+    requested_venue_id = booking_params[:venue_id].presence || @booking.venue_id
+    unless venue_accessible?(requested_venue_id)
+      @booking.errors.add(:venue, "is not accessible for your account")
+      render :edit, status: :unprocessable_entity
+      return
+    end
+
     respond_to do |format|
       if @booking.update(booking_params)
         format.html { redirect_to @booking, notice: "Booking was successfully updated.", status: :see_other }
@@ -60,8 +75,6 @@ class BookingsController < ApplicationController
   end
 
   def approve
-    return unless authorize_staff_for_booking
-
     @booking.approve!
     BookingMailer.with(booking: @booking).approved.deliver_now
 
@@ -69,8 +82,6 @@ class BookingsController < ApplicationController
   end
 
   def reject
-    return unless authorize_staff_for_booking
-
     reason = params[:rejection_reason].to_s.strip
     @booking.reject!(reason)
     BookingMailer.with(booking: @booking, reason: reason).rejected.deliver_now
@@ -91,7 +102,9 @@ class BookingsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_booking
-      @booking = Booking.find(params.expect(:id))
+      @booking = booking_scope.find(params.expect(:id))
+    rescue ActiveRecord::RecordNotFound
+      redirect_to unauthorized_booking_redirect_path, alert: "You are not authorized to access this booking."
     end
 
     # Only allow a list of trusted parameters through.
@@ -99,14 +112,27 @@ class BookingsController < ApplicationController
       params.require(:booking).permit(:venue_id, :start_time, :end_time)
     end
 
-    def authorize_staff_for_booking
-      return true if current_user.admin?
-
-      if @booking.venue.accessible_by_tenant?(current_user.tenant)
-        true
+    def booking_scope
+      if current_user.admin?
+        Booking.includes(:venue, :user)
+      elsif current_user.staff?
+        Booking.for_tenant(current_user.tenant).includes(:venue, :user)
       else
-        redirect_to approval_dashboard_path, alert: "You are not authorized to manage this booking."
-        false
+        current_user.bookings.includes(:venue, :user)
       end
+    end
+
+    def accessible_venues
+      Venue.visible_to_user(current_user)
+    end
+
+    def venue_accessible?(venue_id)
+      accessible_venues.exists?(id: venue_id)
+    end
+
+    def unauthorized_booking_redirect_path
+      return approval_dashboard_path if action_name.in?(["approve", "reject"])
+
+      current_user.admin? || current_user.staff? ? bookings_path : my_bookings_path
     end
 end

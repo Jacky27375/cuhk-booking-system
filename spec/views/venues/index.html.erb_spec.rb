@@ -6,11 +6,13 @@ RSpec.describe "venues/index", type: :view do
     assign(:venues, [
       Venue.create!(
         name: "Venue 1",
-        description: "Desc 1"
+        description: "Desc 1",
+        department: "Science Faculty"
       ),
       Venue.create!(
         name: "Venue 2",
-        description: "Desc 2"
+        description: "Desc 2",
+        department: "Science Faculty"
       )
     ])
   end

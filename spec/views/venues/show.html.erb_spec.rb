@@ -5,7 +5,8 @@ RSpec.describe "venues/show", type: :view do
     def view.current_user; nil; end
     assign(:venue, Venue.create!(
       name: "Name",
-      description: "MyText"
+      description: "MyText",
+      department: "Science Faculty"
     ))
   end
 

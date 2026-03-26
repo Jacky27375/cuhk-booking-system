@@ -4,7 +4,7 @@ class VenuesController < ApplicationController
 
   # GET /venues or /venues.json
   def index
-    @venues = Venue.all
+    @venues = accessible_venues.order(:name)
   end
 
   # GET /venues/1 or /venues/1.json
@@ -23,6 +23,7 @@ class VenuesController < ApplicationController
   # POST /venues or /venues.json
   def create
     @venue = Venue.new(venue_params)
+    apply_staff_tenant_defaults
 
     respond_to do |format|
       if @venue.save
@@ -37,6 +38,8 @@ class VenuesController < ApplicationController
 
   # PATCH/PUT /venues/1 or /venues/1.json
   def update
+    apply_staff_tenant_defaults
+
     respond_to do |format|
       if @venue.update(venue_params)
         format.html { redirect_to @venue, notice: "Venue was successfully updated.", status: :see_other }
@@ -61,11 +64,28 @@ class VenuesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_venue
-      @venue = Venue.find(params.expect(:id))
+      @venue = accessible_venues.find(params.expect(:id))
+    rescue ActiveRecord::RecordNotFound
+      redirect_to venues_path, alert: "You are not authorized to access this venue."
     end
 
     # Only allow a list of trusted parameters through.
     def venue_params
-      params.expect(venue: [:name, :description, :department])
+      permitted = [:name, :description]
+      if current_user.admin?
+        permitted += [:department, :tenant_id]
+      end
+      params.expect(venue: permitted)
+    end
+
+    def accessible_venues
+      Venue.visible_to_user(current_user)
+    end
+
+    def apply_staff_tenant_defaults
+      return if current_user.admin?
+
+      @venue.tenant = current_user.tenant
+      @venue.department = current_user.tenant&.name
     end
 end

@@ -2,12 +2,15 @@ require 'rails_helper'
 
 RSpec.describe "/venues", type: :request do
   let(:valid_attributes) {
-    { name: "Lecture Sol 1", description: "Large hall for 200 people" }
+    { name: "Lecture Sol 1", description: "Large hall for 200 people", department: "Science Faculty" }
   }
 
   let(:invalid_attributes) {
     { name: nil }
   }
+
+  let(:science_tenant) { create(:tenant, name: "Science Faculty") }
+  let(:arts_tenant) { create(:tenant, name: "Arts Faculty") }
 
   let(:admin) { FactoryBot.create(:user, :admin) }
 
@@ -21,6 +24,19 @@ RSpec.describe "/venues", type: :request do
       get venues_url
       expect(response).to be_successful
     end
+
+    it "scopes staff to venues in their tenant" do
+      staff = create(:user, :staff, tenant: science_tenant)
+      visible_venue = create(:venue, name: "Room 101", tenant: science_tenant, department: science_tenant.name)
+      hidden_venue = create(:venue, name: "LT1", tenant: arts_tenant, department: arts_tenant.name)
+
+      log_in_as(staff)
+      get venues_url
+
+      expect(response).to be_successful
+      expect(response.body).to include(visible_venue.name)
+      expect(response.body).not_to include(hidden_venue.name)
+    end
   end
 
   describe "GET /show" do
@@ -28,6 +44,17 @@ RSpec.describe "/venues", type: :request do
       venue = Venue.create! valid_attributes
       get venue_url(venue)
       expect(response).to be_successful
+    end
+
+    it "prevents staff from opening venues in another tenant" do
+      staff = create(:user, :staff, tenant: science_tenant)
+      foreign_venue = create(:venue, tenant: arts_tenant, department: arts_tenant.name)
+
+      log_in_as(staff)
+      get venue_url(foreign_venue)
+
+      expect(response).to redirect_to(venues_path)
+      expect(flash[:alert]).to eq("You are not authorized to access this venue.")
     end
   end
 

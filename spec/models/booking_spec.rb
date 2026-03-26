@@ -54,4 +54,25 @@ RSpec.describe Booking, type: :model do
       expect(Booking.for_tenant(science_tenant)).to include(booking)
     end
   end
+
+  describe 'status broadcasts' do
+    it 'broadcasts status payload when status changes' do
+      booking = create(:booking, status: :pending)
+
+      expect(ActionCable.server).to receive(:broadcast).with(
+        "booking_status_user_#{booking.user_id}",
+        hash_including(booking_id: booking.id, status: 'approved', status_label: 'Approved')
+      )
+
+      booking.update!(status: :approved)
+    end
+
+    it 'does not broadcast when status is unchanged' do
+      booking = create(:booking, status: :pending)
+
+      expect(ActionCable.server).not_to receive(:broadcast)
+
+      booking.update!(end_time: booking.end_time + 30.minutes)
+    end
+  end
 end

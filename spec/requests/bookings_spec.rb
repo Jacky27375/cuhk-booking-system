@@ -187,4 +187,67 @@ RSpec.describe "/bookings", type: :request do
       expect(booking.reload.status).to eq("pending")
     end
   end
+
+  describe "PATCH /bookings/:id/reject" do
+    let(:science_tenant) { create(:tenant, name: "Science Faculty") }
+    let(:arts_tenant) { create(:tenant, name: "Arts Faculty") }
+    let(:staff_user) { create(:user, :staff, tenant: science_tenant) }
+
+    before do
+      log_in_as(staff_user)
+    end
+
+    it "allows staff to reject a booking in their tenant and saves reason" do
+      scoped_venue = create(:venue, department: science_tenant.name, tenant: science_tenant)
+      booking = create(:booking, venue: scoped_venue, user: user, status: :pending)
+
+      patch reject_booking_path(booking), params: { rejection_reason: "Maintenance" }
+
+      expect(response).to redirect_to(approval_dashboard_path)
+      expect(booking.reload.status).to eq("rejected")
+      expect(booking.rejection_reason).to eq("Maintenance")
+    end
+
+    it "blocks staff from rejecting bookings outside their tenant" do
+      foreign_venue = create(:venue, department: arts_tenant.name, tenant: arts_tenant)
+      booking = create(:booking, venue: foreign_venue, user: user, status: :pending)
+
+      patch reject_booking_path(booking), params: { rejection_reason: "Not allowed" }
+
+      expect(response).to redirect_to(approval_dashboard_path)
+      expect(flash[:alert]).to eq("You are not authorized to access this booking.")
+      expect(booking.reload.status).to eq("pending")
+      expect(booking.rejection_reason).to be_nil
+    end
+  end
+
+  describe "tenant and ownership hardening" do
+    let(:science_tenant) { create(:tenant, name: "Science Faculty") }
+    let(:arts_tenant) { create(:tenant, name: "Arts Faculty") }
+
+    it "prevents society members from viewing bookings owned by another user" do
+      owner = create(:user, tenant: science_tenant)
+      intruder = create(:user, tenant: science_tenant)
+      booking = create(:booking, user: owner, venue: create(:venue, tenant: science_tenant, department: science_tenant.name))
+
+      log_in_as(intruder)
+      get booking_url(booking)
+
+      expect(response).to redirect_to(my_bookings_path)
+      expect(flash[:alert]).to eq("You are not authorized to access this booking.")
+    end
+
+    it "prevents users from assigning bookings to venues outside their tenant" do
+      member = create(:user, tenant: science_tenant)
+      own_venue = create(:venue, tenant: science_tenant, department: science_tenant.name)
+      foreign_venue = create(:venue, tenant: arts_tenant, department: arts_tenant.name)
+      booking = create(:booking, user: member, venue: own_venue)
+
+      log_in_as(member)
+      patch booking_url(booking), params: { booking: { venue_id: foreign_venue.id } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(booking.reload.venue_id).to eq(own_venue.id)
+    end
+  end
 end

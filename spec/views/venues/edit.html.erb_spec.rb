@@ -4,7 +4,8 @@ RSpec.describe "venues/edit", type: :view do
   let(:venue) {
     Venue.create!(
       name: "MyString",
-      description: "MyText"
+      description: "MyText",
+      department: "Science Faculty"
     )
   }
 
