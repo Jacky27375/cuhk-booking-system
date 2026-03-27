@@ -19,6 +19,9 @@ Rails.application.routes.draw do
   resources :venues
   get "home/index"
 
+  resources :equipments
+
+  root "home#index"
   mount ActionCable.server => "/cable"
 
   root "sessions#new"

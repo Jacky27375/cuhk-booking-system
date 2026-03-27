@@ -16,6 +16,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_25_093000) do
 
   create_table "bookings", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.date "end_date"
+    t.bigint "equipment_id", null: false
+    t.integer "quantity"
+    t.date "start_date"
+    t.string "status"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["equipment_id"], name: "index_bookings_on_equipment_id"
+    t.index ["user_id"], name: "index_bookings_on_user_id"
+  end
+
+  create_table "equipment", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.integer "quantity", default: 0, null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tenant_id"], name: "index_equipment_on_tenant_id"
     t.datetime "end_time"
     t.text "rejection_reason"
     t.datetime "start_time"
@@ -56,6 +74,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_25_093000) do
     t.index ["tenant_id"], name: "index_users_on_tenant_id"
   end
 
+  add_foreign_key "bookings", "equipment"
+  add_foreign_key "bookings", "users"
+  add_foreign_key "equipment", "tenants"
   create_table "venues", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "department"
