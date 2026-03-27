@@ -6,7 +6,8 @@ development:
   adapter: async
 
 test:
-  adapter: test
+  # Use async in test to support end-to-end ActionCable behavior in JS features.
+  adapter: async
 
 production:
   adapter: solid_cable

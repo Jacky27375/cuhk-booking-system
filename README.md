@@ -66,6 +66,16 @@ bundle exec rspec
 bundle exec cucumber
 ```
 
+**Run robocop (code style linter):**
+```bash
+bundle exec robocop
+```
+
+**Run bundler audit (security vulnerability check):**
+```bash
+bundle exec bundler-audit check --update
+```
+
 ### Seed Data (Login details)
 
 If you ran `rails db:seed`, the development database includes the following accounts:

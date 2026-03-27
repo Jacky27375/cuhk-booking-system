@@ -1,0 +1,91 @@
+class VenuesController < ApplicationController
+  before_action :set_venue, only: %i[ show edit update destroy ]
+  before_action :require_admin_or_staff, only: %i[ new create edit update destroy ]
+
+  # GET /venues or /venues.json
+  def index
+    @venues = accessible_venues.order(:name)
+  end
+
+  # GET /venues/1 or /venues/1.json
+  def show
+  end
+
+  # GET /venues/new
+  def new
+    @venue = Venue.new
+  end
+
+  # GET /venues/1/edit
+  def edit
+  end
+
+  # POST /venues or /venues.json
+  def create
+    @venue = Venue.new(venue_params)
+    apply_staff_tenant_defaults
+
+    respond_to do |format|
+      if @venue.save
+        format.html { redirect_to @venue, notice: "Venue was successfully created." }
+        format.json { render :show, status: :created, location: @venue }
+      else
+        format.html { render :new, status: :unprocessable_entity }
+        format.json { render json: @venue.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # PATCH/PUT /venues/1 or /venues/1.json
+  def update
+    apply_staff_tenant_defaults
+
+    respond_to do |format|
+      if @venue.update(venue_params)
+        format.html { redirect_to @venue, notice: "Venue was successfully updated.", status: :see_other }
+        format.json { render :show, status: :ok, location: @venue }
+      else
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: @venue.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # DELETE /venues/1 or /venues/1.json
+  def destroy
+    @venue.destroy!
+
+    respond_to do |format|
+      format.html { redirect_to venues_path, notice: "Venue was successfully destroyed.", status: :see_other }
+      format.json { head :no_content }
+    end
+  end
+
+  private
+    # Use callbacks to share common setup or constraints between actions.
+    def set_venue
+      @venue = accessible_venues.find(params.expect(:id))
+    rescue ActiveRecord::RecordNotFound
+      redirect_to venues_path, alert: "You are not authorized to access this venue."
+    end
+
+    # Only allow a list of trusted parameters through.
+    def venue_params
+      permitted = [:name, :description]
+      if current_user.admin?
+        permitted += [:department, :tenant_id]
+      end
+      params.expect(venue: permitted)
+    end
+
+    def accessible_venues
+      Venue.visible_to_user(current_user)
+    end
+
+    def apply_staff_tenant_defaults
+      return if current_user.admin?
+
+      @venue.tenant = current_user.tenant
+      @venue.department = current_user.tenant&.name
+    end
+end

@@ -35,3 +35,7 @@
 
 
 /coverage
+
+# Ignore vendor/bundle, but keep the directory.
+/vendor/bundle/*
+!/vendor/bundle/

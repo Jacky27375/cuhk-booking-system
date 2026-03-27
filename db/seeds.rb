@@ -32,10 +32,37 @@ unless Rails.env.production?
   end
 
   # Create default society member
-  User.find_or_create_by!(email: "member@cuhk.edu.hk") do |u|
+  member = User.find_or_create_by!(email: "member@cuhk.edu.hk") do |u|
     u.password = "Password1!"
     u.role = :society_member
     u.society = cs_society
+  end
+
+  # Create venues
+  puts "Creating venues..."
+  venues = [
+    { name: "Lecture Sol 1", description: "Large hall for 200 people" },
+    { name: "Meeting Room A", description: "Small meeting room for 10 people" },
+    { name: "Computer Lab 1", description: "Lab with 30 computers" },
+    { name: "Conference Room B", description: "Medium conference room for 30 people" },
+    { name: "Audit Hall", description: "Large auditorium for 500 people" }
+  ]
+
+  created_venues = venues.map do |venue_attrs|
+    Venue.find_or_create_by!(name: venue_attrs[:name]) do |v|
+      v.description = venue_attrs[:description]
+    end
+  end
+
+  # Create bookings
+  puts "Creating bookings..."
+  5.times do |i|
+    Booking.find_or_create_by!(
+      venue: created_venues[i],
+      user: member,
+      start_time: Time.current + (i + 1).days,
+      end_time: Time.current + (i + 1).days + 2.hours
+    )
   end
 
   puts "Seed data created successfully."
