@@ -1,8 +1,56 @@
+<%= form_with(url: (booking.persisted? ? edit_booking_path(booking) : new_booking_path), method: :get, local: true, class: "booking-date-filter") do %>
+  <%= hidden_field_tag :venue_id, booking.venue_id || params[:venue_id] %>
+  <%= label_tag :booking_date, "Booking date", style: "display: block" %>
+  <%= date_field_tag :booking_date, @booking_date, required: true, onchange: "this.form.requestSubmit();" %>
+<% end %>
+
+<p><strong>Selected date:</strong> <%= @booking_date %></p>
+
+<div class="timetable-legend">
+  <span class="timetable-chip timetable-slot-unavailable">Unavailable</span>
+  <span class="timetable-chip timetable-slot-selected">Selected</span>
+  <span class="timetable-chip timetable-slot-available">Available</span>
+</div>
+
+<table class="TimeTable" cellspacing="0" cellpadding="0" border="1">
+  <thead>
+    <tr>
+      <td class="TimeTableTitleCell"><%= @booking_date.strftime('%d %b %Y') %></td>
+      <td class="TimeTableTitleCellOneDayOneFacilityView"><%= booking.venue&.name || 'Select a venue' %></td>
+    </tr>
+  </thead>
+  <tbody>
+    <% @timetable_slots.each do |slot| %>
+      <% hour_start = slot[:start_at] %>
+      <% hour_end = slot[:end_at] %>
+      <% hour_state = if slot[:css_class] == 'timetable-slot-selected'
+                        'TimeTableCell_Selected'
+                      elsif slot[:css_class] == 'timetable-slot-unavailable'
+                        'TimeTableCell_Full'
+                      else
+                        'TimeTableCell_Available'
+                      end %>
+      <tr>
+        <td class="TimeTableTitleCell">
+          <span><%= hour_start.strftime('%I:%M %p') %>- <%= hour_end.strftime('%I:%M %p') %></span>
+        </td>
+        <td class="<%= hour_state %>">
+          <div class="timetable-slot <%= slot[:css_class] %>" data-slot-start="<%= slot[:start_at].strftime('%Y-%m-%dT%H:%M') %>" data-slot-end="<%= slot[:end_at].strftime('%Y-%m-%dT%H:%M') %>">
+            <%= slot[:label] %>
+          </div>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<div class="timetable-note">
+  Time slots are in 1-hour increments from 08:00 to 22:00.
+</div>
+
 <%= form_with(model: booking) do |form| %>
   <% if booking.errors.any? %>
     <div style="color: red">
-      <h2><%= pluralize(booking.errors.count, "error") %> prohibited this booking from being saved:</h2>
-
       <ul>
         <% booking.errors.each do |error| %>
           <li><%= error.full_message %></li>
@@ -21,14 +69,16 @@
     </div>
   <% end %>
 
+  <%= hidden_field_tag "booking[booking_date]", @booking_date %>
+
   <div>
-    <%= form.label :start_time, style: "display: block" %>
-    <%= form.datetime_field :start_time %>
+    <%= label_tag "booking_start_slot", "Start time", style: "display: block" %>
+    <%= select_tag "booking[start_slot]", options_for_select(@time_slot_options, booking.start_time&.strftime('%H:%M')), include_blank: "Select start time", id: "booking_start_slot" %>
   </div>
 
   <div>
-    <%= form.label :end_time, style: "display: block" %>
-    <%= form.datetime_field :end_time %>
+    <%= label_tag "booking_end_slot", "End time", style: "display: block" %>
+    <%= select_tag "booking[end_slot]", options_for_select(@time_slot_options, booking.end_time&.strftime('%H:%M')), include_blank: "Select end time", id: "booking_end_slot" %>
   </div>
 
   <div>

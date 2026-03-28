@@ -51,5 +51,40 @@ RSpec.describe 'Sessions', type: :request do
       get dashboard_path
       expect(response).to have_http_status(:ok)
     end
+
+    it 'hides Booking link for society member dashboard' do
+      member_tenant = create(:tenant, name: 'University', slug: 'university')
+      member = create(:user, :society_member, tenant: member_tenant)
+
+      log_in_as(member)
+      get dashboard_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).not_to include('>Booking<')
+      expect(response.body).to include('>My Bookings<')
+    end
+
+    it 'hides My Bookings link for staff dashboard' do
+      staff_tenant = create(:tenant, name: 'Science Faculty')
+      staff = create(:user, :staff, tenant: staff_tenant)
+
+      log_in_as(staff)
+      get dashboard_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('>Booking<')
+      expect(response.body).not_to include('>My Bookings<')
+    end
+
+    it 'hides My Bookings link for admin dashboard' do
+      admin = create(:user, :admin)
+
+      log_in_as(admin)
+      get dashboard_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('>Booking<')
+      expect(response.body).not_to include('>My Bookings<')
+    end
   end
 end

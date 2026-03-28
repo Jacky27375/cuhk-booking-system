@@ -1,9 +1,9 @@
 FactoryBot.define do
   factory :booking do
-    association :user
-    venue { association(:venue, tenant: user&.tenant) }
-    start_time { 1.day.from_now }
-    end_time { 1.day.from_now + 2.hours }
+    association :user, :with_tenant
+    venue { association(:venue, tenant: user.tenant, department: user.tenant.name) }
+    start_time { Time.zone.tomorrow.change(hour: 10, min: 0) }
+    end_time { Time.zone.tomorrow.change(hour: 12, min: 0) }
     status { :pending }
   end
 end
