@@ -66,9 +66,9 @@ bundle exec rspec
 bundle exec cucumber
 ```
 
-**Run robocop (code style linter):**
+**Run rubocop_auto_corrector (automatically fix code style issues):**
 ```bash
-bundle exec robocop
+bundle exec rubocop_auto_corrector
 ```
 
 **Run bundler audit (security vulnerability check):**

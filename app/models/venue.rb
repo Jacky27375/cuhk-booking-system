@@ -25,7 +25,6 @@ class Venue < ApplicationRecord
   }
 
   scope :visible_to_tenant, lambda { |tenant|
-
     return none unless tenant
 
     scoped = where(tenant_id: tenant.id)

@@ -21,6 +21,6 @@ Rails.application.routes.draw do
 
   resources :equipments
 
-  root "home#index"
+  root "sessions#new"
   mount ActionCable.server => "/cable"
 end

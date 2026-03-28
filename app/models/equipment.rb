@@ -24,7 +24,6 @@ class Equipment < ApplicationRecord
   }
 
   def available_quantity
-
     booked_quantity = bookings.where(status: ["approved", "borrowed"]).sum(:quantity)
     quantity - booked_quantity
   end

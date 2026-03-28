@@ -5,8 +5,8 @@ class Tenant < ApplicationRecord
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
 
-  scope :university, -> { where("name LIKE '%niversity%' OR name LIKE '%NIVERSITY%'").or(where(slug: 'university')) }
-  
+  scope :university, -> { where("name LIKE '%niversity%' OR name LIKE '%NIVERSITY%'").or(where(slug: "university")) }
+
   def self.university_tenant_ids
     university.select(:id)
   end
