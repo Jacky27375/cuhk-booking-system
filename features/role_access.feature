@@ -24,3 +24,21 @@ Feature: Role-based Access Control
     Given I am logged in as "member@link.cuhk.edu.hk" with password "Password1!"
     When I visit the admin panel
     Then I should see "You are not authorized"
+
+  Scenario: Society member dashboard hides Booking link
+    Given I am logged in as "member@link.cuhk.edu.hk" with password "Password1!"
+    When I try to visit the dashboard
+    Then I should not see link "Booking"
+    And I should see link "My Bookings"
+
+  Scenario: Staff dashboard hides My Bookings link
+    Given I am logged in as "staff@link.cuhk.edu.hk" with password "Password1!"
+    When I try to visit the dashboard
+    Then I should see link "Booking"
+    And I should not see link "My Bookings"
+
+  Scenario: Admin dashboard hides My Bookings link
+    Given I am logged in as "admin@link.cuhk.edu.hk" with password "Password1!"
+    When I try to visit the dashboard
+    Then I should see link "Booking"
+    And I should not see link "My Bookings"

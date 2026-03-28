@@ -51,3 +51,11 @@ end
 When('I visit the admin panel') do
   visit admin_path
 end
+
+Then('I should see link {string}') do |text|
+  expect(page).to have_selector('a', exact_text: text)
+end
+
+Then('I should not see link {string}') do |text|
+  expect(page).not_to have_selector('a', exact_text: text)
+end

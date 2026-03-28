@@ -16,7 +16,11 @@
 
 <p><%= link_to "View Equipment", equipments_path %></p>
 <%= link_to "Venues", venues_path %>  
-<%= link_to "Booking", bookings_path %>
-<%= link_to "My Bookings", my_bookings_path %>
+<% unless current_user.society_member? %>
+  <%= link_to "Booking", bookings_path %>
+<% end %>
+<% if current_user.society_member? %>
+  <%= link_to "My Bookings", my_bookings_path %>
+<% end %>
 
 <%= button_to "Log out", logout_path, method: :delete %>
