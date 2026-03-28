@@ -9,10 +9,8 @@ class Venue < ApplicationRecord
     return all if user.admin?
 
     if user.staff?
-      # Staff can only see their exact tenant
-      where(tenant_id: user.tenant_id)
+      visible_to_tenant(user.tenant)
     else
-      # Students (society_member) can see their college + university
       visible_to_student(user)
     end
   }
@@ -21,7 +19,13 @@ class Venue < ApplicationRecord
     return none unless user
 
     tenant_ids = [user.tenant_id].compact + Tenant.university_tenant_ids.map(&:id)
-    where(tenant_id: tenant_ids.uniq)
+    
+    scoped = where(tenant_id: tenant_ids.uniq)
+    if legacy_department_fallback_enabled? && user.tenant
+      scoped.or(where(tenant_id: nil, department: user.tenant.name))
+    else
+      scoped
+    end
   }
 
   scope :visible_to_tenant, lambda { |tenant|

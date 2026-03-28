@@ -7,7 +7,8 @@ Given('there is a society {string}') do |name|
 end
 
 Given('there is a user {string} with role {string}') do |email, role|
-  create(:user, email: email, password: 'password', role: role.to_sym)
+  tenant = Tenant.first || create(:tenant, name: 'University', slug: 'university')
+  create(:user, email: email, password: 'password', role: role.to_sym, tenant: tenant)
 end
 
 Given('I am logged in as {string}') do |email|
@@ -30,7 +31,8 @@ Then('I should not see {string}') do |text|
 end
 
 Given('there is a venue {string}') do |name|
-  create(:venue, name: name, department: "Science Faculty")
+  tenant = Tenant.find_by(slug: 'university') || create(:tenant, name: 'University', slug: 'university')
+  create(:venue, name: name, department: 'University', tenant: tenant)
 end
 
 When('I visit the bookings page') do
@@ -41,4 +43,8 @@ Given('there is a booking for {string} by {string} from {string} to {string}') d
   venue = Venue.find_by(name: venue_name)
   user = User.find_by(email: user_email)
   create(:booking, venue: venue, user: user, start_time: start_time, end_time: end_time)
+end
+
+When('I select {string} from {string}') do |option, dropdown|
+  select option, from: dropdown
 end

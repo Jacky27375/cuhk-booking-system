@@ -15,13 +15,22 @@ class Booking < ApplicationRecord
 
   scope :for_tenant, lambda { |tenant|
     if column_names.include?("equipment_id")
-      left_outer_joins(:venue, :equipment).where(
-        venues: { tenant_id: tenant.id }
-      ).or(
-        left_outer_joins(:venue, :equipment).where(equipment: { tenant_id: tenant.id })
-      )
+      joins_clause = left_outer_joins(:venue, :equipment)
+      q1 = joins_clause.where(venues: { tenant_id: tenant.id })
+      q2 = if Venue.legacy_department_fallback_enabled?
+             q1.or(joins_clause.where(venues: { tenant_id: nil, department: tenant.name }))
+           else
+             q1
+           end
+      q2.or(joins_clause.where(equipment: { tenant_id: tenant.id }))
     else
-      left_outer_joins(:venue).where(venues: { tenant_id: tenant.id })
+      joins_clause = left_outer_joins(:venue)
+      q1 = joins_clause.where(venues: { tenant_id: tenant.id })
+      if Venue.legacy_department_fallback_enabled?
+        q1.or(joins_clause.where(venues: { tenant_id: nil, department: tenant.name }))
+      else
+        q1
+      end
     end
   }
 
@@ -43,13 +52,31 @@ class Booking < ApplicationRecord
     return unless user
 
     if respond_to?(:venue) && venue.present?
-      unless Venue.visible_to_user(user).exists?(id: venue_id)
+      accessible = if user.admin?
+                     true
+                   elsif user.staff?
+                     venue.accessible_by_tenant?(user.tenant)
+                   else
+                     # student can access their tenant's venues and university venues
+                     tenant_ids = [user.tenant_id].compact + Tenant.university_tenant_ids.map(&:id)
+                     if venue.tenant_id && venue.tenant_id.in?(tenant_ids)
+                       true
+                     elsif venue.tenant && venue.tenant == user.tenant
+                       true
+                     elsif Venue.legacy_department_fallback_enabled? && user.tenant && venue.tenant_id.nil? && venue.department == user.tenant.name
+                       true
+                     else
+                       false
+                     end
+                   end
+
+      unless accessible
         errors.add(:venue, "is not accessible to your college")
       end
     end
 
     if respond_to?(:equipment) && equipment.present?
-      unless Equipment.visible_to_user(user).exists?(id: equipment_id)
+      unless user.admin? || (user.tenant && equipment.tenant_id == user.tenant_id) || (Equipment.method_defined?(:visible_to_student) && Equipment.visible_to_user(user).exists?(id: equipment_id))
         errors.add(:equipment, "is not accessible to your college")
       end
     end

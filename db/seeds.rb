@@ -8,6 +8,12 @@ unless Rails.env.production?
     t.description = "Department of Computer Science and Engineering"
   end
 
+  # Create University tenant for university-wide venues
+  university_tenant = Tenant.find_or_create_by!(slug: "university") do |t|
+    t.name = "University"
+    t.description = "University-wide facilities"
+  end
+
   sc_college = Tenant.find_or_create_by!(slug: "shaw-college") do |t|
     t.name = "Shaw College"
     t.description = "Shaw College, CUHK"
@@ -41,16 +47,19 @@ unless Rails.env.production?
   # Create venues
   puts "Creating venues..."
   venues = [
-    { name: "Lecture Sol 1", description: "Large hall for 200 people" },
-    { name: "Meeting Room A", description: "Small meeting room for 10 people" },
-    { name: "Computer Lab 1", description: "Lab with 30 computers" },
-    { name: "Conference Room B", description: "Medium conference room for 30 people" },
-    { name: "Audit Hall", description: "Large auditorium for 500 people" }
+    { name: "Room G04 Pommerenke Student Centre", description: "Pommerenke Student Centre (Music Room)", department: "University", tenant: university_tenant },
+    { name: "Room G05 Pommerenke Student Centre", description: "Pommerenke Student Centre (Piano-practice Rooms)", department: "University", tenant: university_tenant },
+    { name: "Room G06 Pommerenke Student Centre", description: "Pommerenke Student Centre (Piano-practice Rooms)", department: "University", tenant: university_tenant },
+    { name: "Room G07 Pommerenke Student Centre", description: "Pommerenke Student Centre (Piano-practice Rooms)", department: "University", tenant: university_tenant },
+    { name: "Snooker Room at Pommerenke Student Centre", description: "Pommerenke Student Centre (Snooker Room)", department: "University", tenant: university_tenant },
+    { name: "Band Room at Pommerenke Student Centre", description: "Pommerenke Student Centre (Band Room)", department: "University", tenant: university_tenant }
   ]
 
   created_venues = venues.map do |venue_attrs|
     Venue.find_or_create_by!(name: venue_attrs[:name]) do |v|
       v.description = venue_attrs[:description]
+      v.department = venue_attrs[:department]
+      v.tenant = venue_attrs[:tenant]
     end
   end
 

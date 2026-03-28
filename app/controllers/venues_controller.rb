@@ -71,9 +71,9 @@ class VenuesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def venue_params
-      permitted = [:name, :description]
+      permitted = [:name, :description, :department]
       if current_user.admin?
-        permitted += [:department, :tenant_id]
+        permitted += [:tenant_id]
       end
       params.expect(venue: permitted)
     end
@@ -86,6 +86,5 @@ class VenuesController < ApplicationController
       return if current_user.admin?
 
       @venue.tenant = current_user.tenant
-      @venue.department = current_user.tenant&.name
     end
 end

@@ -21,9 +21,10 @@
     <%= form.textarea :description %>
   </div>
 
+  <% departments = ["University", "Chung Chi College", "New Asia College", "United College", "Shaw College", "Morningside College", "S.H. Ho College", "CW Chu College", "Wu Yee Sun College", "Lee Woo Sing College"] %>
   <div>
     <%= form.label :department, style: "display: block" %>
-    <%= form.text_field :department %>
+    <%= form.select :department, departments, { selected: venue.department.presence || "University" } %>
   </div>
 
   <div>
