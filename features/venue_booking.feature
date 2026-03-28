@@ -4,7 +4,7 @@ Feature: Venue Booking System
   So that I can organize events efficiently
 
   Background:
-    Given there is a tenant "CUHK"
+    Given there is a tenant "University"
     And there is a society "Computer Science Society"
     And there is a user "admin@example.com" with role "admin"
     And there is a user "staff@example.com" with role "staff"
@@ -16,6 +16,7 @@ Feature: Venue Booking System
     And I click "New Venue"
     And I fill in "Name" with "Lecture Hall A"
     And I fill in "Description" with "A large lecture hall"
+    And I select "University" from "Department"
     And I click "Create Venue"
     Then I should see "Venue was successfully created."
     And I should see "Lecture Hall A"
@@ -25,6 +26,8 @@ Feature: Venue Booking System
     When I visit the venues page
     And I click "New Venue"
     And I fill in "Name" with "Conference Room B"
+    And I fill in "Description" with "A medium-sized conference room"
+    And I select "University" from "Department"
     And I click "Create Venue"
     Then I should see "Venue was successfully created."
 
