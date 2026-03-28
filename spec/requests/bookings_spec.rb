@@ -79,6 +79,19 @@ RSpec.describe "/bookings", type: :request do
         }.to change(Booking, :count).by(0)
       end
 
+      it "shows direct validation message without verbose error header" do
+        post bookings_url, params: {
+          booking: {
+            venue_id: venue.id,
+            start_time: Time.zone.parse("2026-04-10 10:00:00"),
+            end_time: Time.zone.parse("2026-04-10 09:00:00")
+          }
+        }
+
+        expect(response.body).to include("End time must be after start time")
+        expect(response.body).not_to include("error prohibited this booking from being saved")
+      end
+
       it "renders a response with 422 status (i.e. to display the 'new' template)" do
         post bookings_url, params: { booking: invalid_attributes }
         expect(response).to have_http_status(:unprocessable_content)

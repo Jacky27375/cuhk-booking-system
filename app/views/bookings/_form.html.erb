@@ -32,7 +32,7 @@
                       end %>
       <tr>
         <td class="TimeTableTitleCell">
-          <span><%= hour_start.strftime('%I:%M %p') %>-<br> <%= hour_end.strftime('%I:%M %p') %></span>
+          <span><%= hour_start.strftime('%I:%M %p') %>- <%= hour_end.strftime('%I:%M %p') %></span>
         </td>
         <td class="<%= hour_state %>">
           <div class="timetable-slot <%= slot[:css_class] %>" data-slot-start="<%= slot[:start_at].strftime('%Y-%m-%dT%H:%M') %>" data-slot-end="<%= slot[:end_at].strftime('%Y-%m-%dT%H:%M') %>">
@@ -51,8 +51,6 @@
 <%= form_with(model: booking) do |form| %>
   <% if booking.errors.any? %>
     <div style="color: red">
-      <h2><%= pluralize(booking.errors.count, "error") %> prohibited this booking from being saved:</h2>
-
       <ul>
         <% booking.errors.each do |error| %>
           <li><%= error.full_message %></li>

@@ -23,3 +23,7 @@ end
 Then('the slot {string} should be marked selected') do |label|
   expect(page).to have_css('.timetable-slot.timetable-slot-selected', text: label)
 end
+
+Then('the slot {string} should not be marked selected') do |label|
+  expect(page).not_to have_css('.timetable-slot.timetable-slot-selected', text: label)
+end

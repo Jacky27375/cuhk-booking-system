@@ -25,6 +25,7 @@ Feature: Booking timetable and conflict prevention
     And I select "08:00" from "Start time"
     And I select "08:00" from "End time"
     And I click "Create Booking"
+    And I should not see "error prohibited this booking from being saved"
     Then I should see "must be after start time"
 
   Scenario: Booking with non hourly increments is rejected
@@ -42,7 +43,10 @@ Feature: Booking timetable and conflict prevention
     And I select "10:00" from "Start time"
     And I select "12:00" from "End time"
     And I click "Create Booking"
+    And I should not see "error prohibited this booking from being saved"
     Then I should see "conflicts with an existing booking"
+    And the slot "10:00 - 11:00" should be marked unavailable
+    And the slot "10:00 - 11:00" should not be marked selected
 
   Scenario: Selected slot is highlighted on edit page
     Given there is a booking for "Lecture Hall A" by "member@example.com" from "2026-04-10 12:00:00" to "2026-04-10 13:00:00"

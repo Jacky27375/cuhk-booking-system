@@ -238,13 +238,13 @@ class BookingsController < ApplicationController
           booking.id != @booking.id && overlap?(slot_start, slot_end, booking.start_time, booking.end_time)
         end
 
-        css_class = if selected
-                      "timetable-slot-selected"
-                    elsif unavailable
+        css_class = if unavailable
                       "timetable-slot-unavailable"
-                    else
+        elsif selected
+                "timetable-slot-selected"
+        else
                       "timetable-slot-available"
-                    end
+        end
 
         slots << {
           label: "#{slot_start.strftime('%H:%M')} - #{slot_end.strftime('%H:%M')}",
