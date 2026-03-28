@@ -46,8 +46,8 @@ Feature: Venue Booking System
     When I visit the venues page
     And I click "Lecture Hall A"
     And I click "Book Venue"
-    And I fill in "Start time" with "2026-03-20 10:00:00"
-    And I fill in "End time" with "2026-03-20 12:00:00"
+    And I select "10:00" from "Start time"
+    And I select "12:00" from "End time"
     And I click "Create Booking"
     Then I should see "Booking was successfully created."
 

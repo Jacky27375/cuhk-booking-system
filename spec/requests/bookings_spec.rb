@@ -1,15 +1,20 @@
 require 'rails_helper'
 
 RSpec.describe "/bookings", type: :request do
-  let(:user) { FactoryBot.create(:user) }
-  let(:venue) { FactoryBot.create(:venue) }
+  let(:tenant) { create(:tenant, name: "University", slug: "university") }
+  let(:user) { FactoryBot.create(:user, tenant: tenant) }
+  let(:venue) { FactoryBot.create(:venue, tenant: tenant, department: tenant.name) }
 
   let(:valid_attributes) {
-    { venue_id: venue.id, start_time: 1.day.from_now, end_time: 1.day.from_now + 2.hours }
+    {
+      venue_id: venue.id,
+      start_time: Time.zone.parse("2026-04-10 10:00:00"),
+      end_time: Time.zone.parse("2026-04-10 12:00:00")
+    }
   }
 
   let(:invalid_attributes) {
-    { start_time: nil }
+    { venue_id: venue.id, start_time: nil, end_time: valid_attributes[:end_time] }
   }
 
   before do
@@ -84,7 +89,10 @@ RSpec.describe "/bookings", type: :request do
   describe "PATCH /update" do
     context "with valid parameters" do
       let(:new_attributes) {
-        { start_time: 2.days.from_now }
+        {
+          start_time: Time.zone.parse("2026-04-10 13:00:00"),
+          end_time: Time.zone.parse("2026-04-10 14:00:00")
+        }
       }
 
       it "updates the requested booking" do

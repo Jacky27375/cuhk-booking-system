@@ -8,3 +8,86 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+.booking-date-filter {
+	margin-bottom: 1rem;
+}
+
+.timetable-legend {
+	display: flex;
+	gap: 0.75rem;
+	margin: 0.75rem 0;
+}
+
+.timetable-chip {
+	display: inline-block;
+	padding: 0.25rem 0.5rem;
+	border-radius: 0.25rem;
+	font-size: 0.9rem;
+}
+
+.TimeTable {
+	border-collapse: collapse;
+	width: 100%;
+	max-width: 760px;
+	margin: 0.75rem 0 1rem;
+	font-size: 0.95rem;
+}
+
+.TimeTable td {
+	border: 1px solid #444;
+	vertical-align: middle;
+}
+
+.TimeTableTitleCell {
+	width: 140px;
+	padding: 0.6rem;
+	font-weight: 700;
+	background: #f2f2f2;
+}
+
+.TimeTableTitleCellOneDayOneFacilityView {
+	padding: 0.6rem;
+	font-weight: 700;
+	background: #e9eefb;
+}
+
+.TimeTableCell_Available {
+	background: #fde047;
+	padding: 0.2rem 0.4rem;
+}
+
+.TimeTableCell_Full {
+	background: #f87171;
+	padding: 0.2rem 0.4rem;
+}
+
+.TimeTableCell_Selected {
+	background: #4ade80;
+	padding: 0.2rem 0.4rem;
+}
+
+.timetable-slot {
+	font-size: 0.85rem;
+	line-height: 1.35;
+	padding: 0.15rem 0.25rem;
+	border-radius: 0.2rem;
+}
+
+.timetable-slot-unavailable {
+	background: #f87171;
+}
+
+.timetable-slot-selected {
+	background: #4ade80;
+}
+
+.timetable-slot-available {
+	background: #fde047;
+}
+
+.timetable-note {
+	margin: 0 0 1rem;
+	font-size: 0.9rem;
+	color: #444;
+}

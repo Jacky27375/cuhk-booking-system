@@ -2,20 +2,31 @@ require 'rails_helper'
 
 RSpec.describe Booking, type: :model do
   pending "add some examples to (or delete) #{__FILE__}"
+
+  let(:tenant) { create(:tenant, name: "University", slug: "university") }
+  let(:user) { create(:user, tenant: tenant) }
+  let(:venue) { create(:venue, tenant: tenant, department: tenant.name) }
+
   describe 'validations' do
     it 'is valid with valid attributes' do
-      booking = build(:booking)
+      booking = build(
+        :booking,
+        user: user,
+        venue: venue,
+        start_time: Time.zone.parse("2026-04-10 10:00:00"),
+        end_time: Time.zone.parse("2026-04-10 12:00:00")
+      )
       expect(booking).to be_valid
     end
 
     it 'is invalid without a start_time' do
-      booking = build(:booking, start_time: nil)
+      booking = build(:booking, user: user, venue: venue, start_time: nil, end_time: Time.zone.parse("2026-04-10 12:00:00"))
       expect(booking).not_to be_valid
       expect(booking.errors[:start_time]).to include("can't be blank")
     end
 
     it 'is invalid without an end_time' do
-      booking = build(:booking, end_time: nil)
+      booking = build(:booking, user: user, venue: venue, start_time: Time.zone.parse("2026-04-10 10:00:00"), end_time: nil)
       expect(booking).not_to be_valid
       expect(booking.errors[:end_time]).to include("can't be blank")
     end

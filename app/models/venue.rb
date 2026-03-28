@@ -19,7 +19,7 @@ class Venue < ApplicationRecord
     return none unless user
 
     tenant_ids = [user.tenant_id].compact + Tenant.university_tenant_ids.map(&:id)
-    
+
     scoped = where(tenant_id: tenant_ids.uniq)
     if legacy_department_fallback_enabled? && user.tenant
       scoped.or(where(tenant_id: nil, department: user.tenant.name))
