@@ -26,4 +26,23 @@ RSpec.describe Venue, type: :model do
       expect { venue.destroy }.to change { Booking.count }.by(-1)
     end
   end
+
+  describe '.visible_to_student' do
+    let!(:uni_tenant) { create(:tenant, name: 'University', slug: 'university') }
+    let!(:shaw_tenant) { create(:tenant, name: 'Shaw College', slug: 'shaw') }
+    let!(:na_tenant) { create(:tenant, name: 'New Asia College', slug: 'new-asia') }
+    
+    let!(:uni_venue) { create(:venue, name: 'Music Room G04', tenant: uni_tenant) }
+    let!(:shaw_venue) { create(:venue, name: 'Lecture Theatre', tenant: shaw_tenant) }
+    let!(:na_venue) { create(:venue, name: 'Yali Lounge', tenant: na_tenant) }
+    
+    let(:shaw_student) { create(:user, role: :society_member, tenant: shaw_tenant) }
+
+    it 'returns venues for the users college and university shared venues only' do
+      venues = Venue.visible_to_student(shaw_student)
+      expect(venues).to include(shaw_venue)
+      expect(venues).to include(uni_venue)
+      expect(venues).not_to include(na_venue)
+    end
+  end
 end

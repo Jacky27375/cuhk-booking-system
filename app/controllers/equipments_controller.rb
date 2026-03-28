@@ -47,9 +47,9 @@ class EquipmentsController < ApplicationController
   end
 
   def tenant_equipments
-    return Equipment.none unless current_user&.tenant
+    return Equipment.none unless current_user
 
-    current_user.tenant.equipment
+    Equipment.visible_to_user(current_user)
   end
 
   def require_staff_or_admin
