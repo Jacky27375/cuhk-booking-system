@@ -47,4 +47,3 @@ Then('I cannot access bookings for {string}') do |venue_name|
   visit '/approval_dashboard'
   expect(page).not_to have_content(venue_name)
 end
-

@@ -7,4 +7,3 @@ FactoryBot.define do
     status { :pending }
   end
 end
-

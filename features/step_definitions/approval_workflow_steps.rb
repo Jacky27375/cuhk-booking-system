@@ -159,5 +159,3 @@ end
 Then("I should not see the booking for {string}") do |venue_name|
   expect(page).not_to have_content(venue_name)
 end
-
-

@@ -56,4 +56,3 @@ end
 Then('I should not see link {string}') do |text|
   expect(page).not_to have_selector('a', exact_text: text)
 end
-

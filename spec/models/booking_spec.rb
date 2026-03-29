@@ -88,4 +88,3 @@ RSpec.describe Booking, type: :model do
     end
   end
 end
-
