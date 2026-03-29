@@ -3,11 +3,8 @@ Given('the following users exist:') do |table|
     role_name = hash['role']
     role_name = 'society_member' if role_name == 'student'
     role = role_name.to_sym
-    tenant = nil
 
-    if role == :staff
-      tenant = Tenant.find_by(name: "Science Faculty") || create(:tenant, name: "Science Faculty")
-    end
+    tenant = Tenant.find_by(name: "Science Faculty") || create(:tenant, name: "Science Faculty")
 
     create(:user, email: hash['email'], password: hash['password'], role: role, tenant: tenant)
   end
@@ -59,3 +56,4 @@ end
 Then('I should not see link {string}') do |text|
   expect(page).not_to have_selector('a', exact_text: text)
 end
+

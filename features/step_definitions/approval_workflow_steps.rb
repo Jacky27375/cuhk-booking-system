@@ -1,6 +1,7 @@
 Given("the following venues exist:") do |table|
   table.hashes.each do |hash|
-    tenant = Tenant.find_by(name: hash["department"]) || create(:tenant, name: hash["department"])
+    tenant_name = hash["tenant"] || hash["department"]
+    tenant = Tenant.find_by(name: tenant_name) || create(:tenant, name: tenant_name)
     create(:venue, name: hash["name"], department: hash["department"], tenant: tenant)
   end
 end
@@ -85,7 +86,7 @@ end
 Given("there is a pending booking for {string} which belongs to {string}") do |venue_name, department|
   tenant = Tenant.find_by(name: department) || create(:tenant, name: department)
   venue = create(:venue, name: venue_name, department: department, tenant: tenant)
-  user = User.find_by(role: :society_member) || create(:user)
+  user = create(:user, tenant: tenant)
   create(
     :booking,
     venue: venue,
@@ -158,3 +159,5 @@ end
 Then("I should not see the booking for {string}") do |venue_name|
   expect(page).not_to have_content(venue_name)
 end
+
+

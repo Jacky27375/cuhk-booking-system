@@ -159,8 +159,8 @@ RSpec.describe "/bookings", type: :request do
     it "shows only pending bookings in the staff tenant" do
       scoped_venue = create(:venue, name: "Room 101", department: science_tenant.name, tenant: science_tenant)
       foreign_venue = create(:venue, name: "LT1", department: arts_tenant.name, tenant: arts_tenant)
-      create(:booking, venue: scoped_venue, user: user, status: :pending)
-      create(:booking, venue: foreign_venue, user: user, status: :pending)
+      create(:booking, venue: scoped_venue, user: create(:user, tenant: science_tenant), status: :pending)
+      create(:booking, venue: foreign_venue, user: create(:user, tenant: arts_tenant), status: :pending)
 
       get approval_dashboard_path
 
@@ -171,7 +171,7 @@ RSpec.describe "/bookings", type: :request do
 
     it "keeps legacy venues visible when department matches tenant name" do
       legacy_venue = create(:venue, name: "Legacy Room", department: science_tenant.name, tenant: nil)
-      create(:booking, venue: legacy_venue, user: user, status: :pending)
+      create(:booking, venue: legacy_venue, user: create(:user, tenant: science_tenant), status: :pending)
 
       get approval_dashboard_path
 
@@ -190,7 +190,7 @@ RSpec.describe "/bookings", type: :request do
 
     it "allows staff to approve a booking in their tenant" do
       scoped_venue = create(:venue, department: science_tenant.name, tenant: science_tenant)
-      booking = create(:booking, venue: scoped_venue, user: user, status: :pending)
+      booking = create(:booking, venue: scoped_venue, user: create(:user, tenant: science_tenant), status: :pending)
 
       patch approve_booking_path(booking)
 
@@ -200,7 +200,7 @@ RSpec.describe "/bookings", type: :request do
 
     it "rejects approval for bookings outside staff tenant" do
       foreign_venue = create(:venue, department: arts_tenant.name, tenant: arts_tenant)
-      booking = create(:booking, venue: foreign_venue, user: user, status: :pending)
+      booking = create(:booking, venue: foreign_venue, user: create(:user, tenant: arts_tenant), status: :pending)
 
       patch approve_booking_path(booking)
 
@@ -220,7 +220,7 @@ RSpec.describe "/bookings", type: :request do
 
     it "allows staff to reject a booking in their tenant and saves reason" do
       scoped_venue = create(:venue, department: science_tenant.name, tenant: science_tenant)
-      booking = create(:booking, venue: scoped_venue, user: user, status: :pending)
+      booking = create(:booking, venue: scoped_venue, user: create(:user, tenant: science_tenant), status: :pending)
 
       patch reject_booking_path(booking), params: { rejection_reason: "Maintenance" }
 
@@ -231,7 +231,7 @@ RSpec.describe "/bookings", type: :request do
 
     it "blocks staff from rejecting bookings outside their tenant" do
       foreign_venue = create(:venue, department: arts_tenant.name, tenant: arts_tenant)
-      booking = create(:booking, venue: foreign_venue, user: user, status: :pending)
+      booking = create(:booking, venue: foreign_venue, user: create(:user, tenant: arts_tenant), status: :pending)
 
       patch reject_booking_path(booking), params: { rejection_reason: "Not allowed" }
 
@@ -272,3 +272,4 @@ RSpec.describe "/bookings", type: :request do
     end
   end
 end
+

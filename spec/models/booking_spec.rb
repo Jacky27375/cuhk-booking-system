@@ -84,7 +84,8 @@ RSpec.describe Booking, type: :model do
 
       expect(ActionCable.server).not_to receive(:broadcast)
 
-      booking.update!(end_time: booking.end_time + 30.minutes)
+      booking.update!(end_time: booking.end_time + 1.hour)
     end
   end
 end
+
