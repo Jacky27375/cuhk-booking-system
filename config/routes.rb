@@ -11,6 +11,7 @@ Rails.application.routes.draw do
     member do
       patch :approve
       patch :reject
+      patch :mark_returned
     end
     collection do
       get :my
@@ -19,7 +20,12 @@ Rails.application.routes.draw do
   resources :venues
   get "home/index"
 
-  resources :equipments
+  resources :equipments do
+    member do
+      get :borrow_form
+      post :borrow
+    end
+  end
 
   root "sessions#new"
   mount ActionCable.server => "/cable"

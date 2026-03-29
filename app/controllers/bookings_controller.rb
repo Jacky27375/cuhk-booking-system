@@ -2,7 +2,7 @@ class BookingsController < ApplicationController
   TIMETABLE_START_HOUR = 8
   TIMETABLE_END_HOUR = 22
 
-  before_action :set_booking, only: %i[ show edit update destroy approve reject ]
+  before_action :set_booking, only: %i[ show edit update destroy approve reject mark_returned ]
   before_action :require_admin_or_staff, only: %i[ index approve reject ]
 
   # GET /bookings or /bookings.json
@@ -12,7 +12,7 @@ class BookingsController < ApplicationController
 
   # GET /bookings/my
   def my
-    @bookings = current_user.bookings.includes(:venue).order(start_time: :desc)
+    @bookings = current_user.bookings.includes(:venue, :equipment).order(created_at: :desc)
   end
 
   # GET /bookings/1 or /bookings/1.json
@@ -99,6 +99,11 @@ class BookingsController < ApplicationController
     redirect_to approval_dashboard_path, notice: "Booking rejected."
   end
 
+  def mark_returned
+    @booking.update!(status: :returned)
+    redirect_to my_bookings_path, notice: "Equipment returned successfully."
+  end
+
   # DELETE /bookings/1 or /bookings/1.json
   def destroy
     @booking.destroy!
@@ -151,11 +156,11 @@ class BookingsController < ApplicationController
 
     def booking_scope
       if current_user.admin?
-        Booking.includes(:venue, :user)
+        Booking.includes(:venue, :equipment, :user)
       elsif current_user.staff?
-        Booking.for_tenant(current_user.tenant).includes(:venue, :user)
+        Booking.for_tenant(current_user.tenant).includes(:venue, :equipment, :user)
       else
-        current_user.bookings.includes(:venue, :user)
+        current_user.bookings.includes(:venue, :equipment, :user)
       end
     end
 

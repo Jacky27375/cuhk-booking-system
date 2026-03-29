@@ -19,9 +19,10 @@
         <tr>
           <td><%= equipment.name %></td>
           <td><%= equipment.quantity %></td>
-          <td><%= equipment.available_quantity %></td>
+          <td>available: <%= equipment.available_quantity %></td>
           <td>
             <%= link_to "View", equipment_path(equipment) %>
+            | <%= link_to "Borrow", borrow_form_equipment_path(equipment) %>
             <% if current_user.admin? || current_user.staff? %>
               | <%= link_to "Edit", edit_equipment_path(equipment) %>
               | <%= button_to "Delete", equipment_path(equipment), method: :delete, form: { style: "display:inline" }, data: { turbo_confirm: "Delete this equipment?" } %>

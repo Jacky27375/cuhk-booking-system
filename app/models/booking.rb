@@ -10,7 +10,9 @@ class Booking < ApplicationRecord
   validate :venue_booking_time_rules
   validate :no_time_conflict
 
-  enum :status, { pending: 0, approved: 1, rejected: 2 }
+  enum :status, { pending: 0, approved: 1, rejected: 2, borrowed: 3, returned: 4 }
+
+  validate :equipment_quantity_available, if: -> { equipment_id.present? && quantity.present? }
 
   after_initialize :set_default_status, if: :new_record?
   after_update_commit :broadcast_status_change, if: :saved_change_to_status?
@@ -122,6 +124,14 @@ class Booking < ApplicationRecord
     end
 
     errors.add(:base, "conflicts with an existing booking") if conflicts.exists?
+  end
+
+  def equipment_quantity_available
+    return unless equipment
+
+    if quantity > equipment.available_quantity
+      errors.add(:base, "Not enough units available")
+    end
   end
 
   def broadcast_status_change

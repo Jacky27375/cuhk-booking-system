@@ -7,21 +7,31 @@
     <table>
       <thead>
         <tr>
-          <th>Venue</th>
+          <th>Resource</th>
           <th>Date</th>
-          <th>Start</th>
-          <th>End</th>
+          <th>Details</th>
           <th>Status</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         <% @bookings.each do |booking| %>
-          <tr>
-            <td><%= booking.venue.name %></td>
-            <td><%= booking.start_time.to_date %></td>
-            <td><%= booking.start_time.strftime("%H:%M") %></td>
-            <td><%= booking.end_time.strftime("%H:%M") %></td>
+          <tr id="booking_<%= booking.id %>">
+            <% if booking.venue.present? %>
+              <td><%= booking.venue.name %></td>
+              <td><%= booking.start_time.to_date %></td>
+              <td><%= booking.start_time.strftime("%H:%M") %> - <%= booking.end_time.strftime("%H:%M") %></td>
+            <% elsif booking.equipment.present? %>
+              <td><%= booking.equipment.name %></td>
+              <td><%= booking.start_date %> to <%= booking.end_date %></td>
+              <td>Qty: <%= booking.quantity %></td>
+            <% end %>
             <td data-booking-id="<%= booking.id %>" data-status="<%= booking.status %>"><%= booking.status.titleize %></td>
+            <td>
+              <% if booking.equipment.present? && booking.approved? %>
+                <%= button_to "Mark as Returned", mark_returned_booking_path(booking), method: :patch, data: { turbo: false } %>
+              <% end %>
+            </td>
           </tr>
         <% end %>
       </tbody>

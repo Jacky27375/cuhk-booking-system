@@ -40,6 +40,28 @@ class EquipmentsController < ApplicationController
     redirect_to equipments_path, notice: "Equipment deleted successfully."
   end
 
+  def borrow_form
+    @equipment = tenant_equipments.find(params[:id])
+    @booking = Booking.new
+  end
+
+  def borrow
+    @equipment = tenant_equipments.find(params[:id])
+    @booking = Booking.new(
+      equipment: @equipment,
+      user: current_user,
+      quantity: params[:booking][:quantity],
+      start_date: params[:booking][:start_date],
+      end_date: params[:booking][:end_date]
+    )
+
+    if @booking.save
+      redirect_to equipment_path(@equipment), notice: "Equipment booking submitted"
+    else
+      render :borrow_form, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def set_equipment
