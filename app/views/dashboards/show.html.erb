@@ -7,9 +7,11 @@
 <% if current_user.admin? %>
   <p>You have <strong>Admin</strong> privileges.</p>
   <%= link_to "Admin Panel", admin_path %>
+  <%= link_to "Analytics Dashboard", analytics_path %>
 <% elsif current_user.staff? %>
   <p>You are logged in as <strong>Staff</strong>.</p>
   <%= link_to "Approval Dashboard", approval_dashboard_path %>
+  <%= link_to "Analytics Dashboard", analytics_path %>
 <% else %>
   <p>You are a <strong>Society Member</strong>.</p>
 <% end %>

@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   get "dashboard", to: "dashboards#show"
   get "approval_dashboard", to: "dashboards#approvals"
   get "admin",     to: "admin#show"
+  get "analytics", to: "analytics#show"
 
   resources :bookings do
     member do

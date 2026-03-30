@@ -1,0 +1,131 @@
+<h1>Analytics Dashboard</h1>
+
+<p><%= link_to "← Back to Dashboard", dashboard_path %></p>
+
+<%# ===== Summary Stats Cards ===== %>
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; max-width: 1200px; margin: 0 auto 2rem;">
+  <div style="background: #4e73df; color: #fff; padding: 1.2rem; border-radius: 8px; text-align: center;">
+    <div style="font-size: 2rem; font-weight: bold;"><%= @total_bookings %></div>
+    <div>Total Bookings</div>
+  </div>
+  <div style="background: #f6c23e; color: #fff; padding: 1.2rem; border-radius: 8px; text-align: center;">
+    <div style="font-size: 2rem; font-weight: bold;"><%= @pending_count %></div>
+    <div>Pending</div>
+  </div>
+  <div style="background: #1cc88a; color: #fff; padding: 1.2rem; border-radius: 8px; text-align: center;">
+    <div style="font-size: 2rem; font-weight: bold;"><%= @approved_count %></div>
+    <div>Approved</div>
+  </div>
+  <div style="background: #36b9cc; color: #fff; padding: 1.2rem; border-radius: 8px; text-align: center;">
+    <div style="font-size: 2rem; font-weight: bold;"><%= @venues_count %></div>
+    <div>Venues</div>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 1200px; margin: 0 auto;">
+
+  <%# Venue Booking Counts - Bar Chart %>
+  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+    <h2>Bookings per Venue</h2>
+    <% if @venue_booking_counts.any? %>
+      <div data-controller="chart"
+           data-chart-type-value="bar"
+           data-chart-labels-value="<%= @venue_booking_counts.keys.to_json %>"
+           data-chart-data-value="<%= @venue_booking_counts.values.to_json %>"
+           data-chart-label-value="Bookings">
+        <canvas data-chart-target="canvas"></canvas>
+      </div>
+    <% else %>
+      <p>No venue bookings yet.</p>
+    <% end %>
+  </div>
+
+  <%# Venue Duration (Hours) - Horizontal Bar Chart %>
+  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+    <h2>Total Booked Hours per Venue</h2>
+    <% if @venue_duration_hours.any? %>
+      <div data-controller="chart"
+           data-chart-type-value="bar"
+           data-chart-labels-value="<%= @venue_duration_hours.keys.to_json %>"
+           data-chart-data-value="<%= @venue_duration_hours.values.map { |v| v.round(1) }.to_json %>"
+           data-chart-label-value="Hours"
+           data-chart-suffix-value="h"
+           data-chart-colors-value='["#6f42c1"]'>
+        <canvas data-chart-target="canvas"></canvas>
+      </div>
+    <% else %>
+      <p>No venue booking duration data yet.</p>
+    <% end %>
+  </div>
+
+  <%# Venue Occupancy Rate - Bar Chart %>
+  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+    <h2>Venue Occupancy Rate (Last 30 Days)</h2>
+    <% if @venue_occupancy_pct.any? %>
+      <div data-controller="chart"
+           data-chart-type-value="bar"
+           data-chart-labels-value="<%= @venue_occupancy_pct.keys.to_json %>"
+           data-chart-data-value="<%= @venue_occupancy_pct.values.to_json %>"
+           data-chart-label-value="Occupancy"
+           data-chart-suffix-value="%"
+           data-chart-step-size-value="10"
+           data-chart-colors-value='["#e74a3b"]'>
+        <canvas data-chart-target="canvas"></canvas>
+      </div>
+    <% else %>
+      <p>No occupancy data yet.</p>
+    <% end %>
+  </div>
+
+  <%# Booking Status Distribution - Doughnut Chart %>
+  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+    <h2>Booking Status Distribution</h2>
+    <% if @status_counts.any? %>
+      <div data-controller="chart"
+           data-chart-type-value="doughnut"
+           data-chart-labels-value="<%= @status_counts.keys.to_json %>"
+           data-chart-data-value="<%= @status_counts.values.to_json %>"
+           data-chart-label-value="Status"
+           data-chart-colors-value='["#f6c23e","#1cc88a","#e74a3b","#36b9cc","#858796"]'>
+        <canvas data-chart-target="canvas"></canvas>
+      </div>
+    <% else %>
+      <p>No bookings yet.</p>
+    <% end %>
+  </div>
+
+  <%# Daily Bookings Trend - Line Chart %>
+  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+    <h2>Daily Bookings (Last 30 Days)</h2>
+    <% if @daily_bookings.any? %>
+      <div data-controller="chart"
+           data-chart-type-value="line"
+           data-chart-labels-value="<%= @daily_bookings.keys.map(&:to_s).to_json %>"
+           data-chart-data-value="<%= @daily_bookings.values.to_json %>"
+           data-chart-label-value="Bookings"
+           data-chart-colors-value='["#4e73df"]'>
+        <canvas data-chart-target="canvas"></canvas>
+      </div>
+    <% else %>
+      <p>No bookings in the last 30 days.</p>
+    <% end %>
+  </div>
+
+  <%# Peak Hours - Bar Chart %>
+  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+    <h2>Peak Booking Hours</h2>
+    <% if @peak_hours.any? %>
+      <div data-controller="chart"
+           data-chart-type-value="bar"
+           data-chart-labels-value="<%= @peak_hours.keys.map { |h| format('%02d:00', h) }.to_json %>"
+           data-chart-data-value="<%= @peak_hours.values.to_json %>"
+           data-chart-label-value="Bookings"
+           data-chart-colors-value='["#1cc88a"]'>
+        <canvas data-chart-target="canvas"></canvas>
+      </div>
+    <% else %>
+      <p>No venue bookings with time data.</p>
+    <% end %>
+  </div>
+
+</div>
