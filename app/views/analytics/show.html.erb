@@ -2,6 +2,21 @@
 
 <p><%= link_to "← Back to Dashboard", dashboard_path %></p>
 
+<%# ===== Date Range Filter (Day 4) ===== %>
+<div style="max-width: 1200px; margin: 0 auto 1.5rem; padding: 1rem; background: #f8f9fc; border: 1px solid #ddd; border-radius: 8px;">
+  <%= form_tag analytics_path, method: :get, style: "display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;" do %>
+    <label>From:
+      <%= date_field_tag :start_date, @start_date, style: "padding: 0.3rem;" %>
+    </label>
+    <label>To:
+      <%= date_field_tag :end_date, @end_date, style: "padding: 0.3rem;" %>
+    </label>
+    <%= submit_tag "Filter", style: "padding: 0.4rem 1.2rem; background: #4e73df; color: #fff; border: none; border-radius: 4px; cursor: pointer;" %>
+    <%= link_to "Reset", analytics_path, style: "color: #4e73df;" %>
+  <% end %>
+  <small style="color: #666;">Showing data from <strong><%= @start_date %></strong> to <strong><%= @end_date %></strong></small>
+</div>
+
 <%# ===== Summary Stats Cards ===== %>
 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; max-width: 1200px; margin: 0 auto 2rem;">
   <div style="background: #4e73df; color: #fff; padding: 1.2rem; border-radius: 8px; text-align: center;">
@@ -60,7 +75,7 @@
 
   <%# Venue Occupancy Rate - Bar Chart %>
   <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
-    <h2>Venue Occupancy Rate (Last 30 Days)</h2>
+    <h2>Venue Occupancy Rate</h2>
     <% if @venue_occupancy_pct.any? %>
       <div data-controller="chart"
            data-chart-type-value="bar"
@@ -96,7 +111,7 @@
 
   <%# Daily Bookings Trend - Line Chart %>
   <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
-    <h2>Daily Bookings (Last 30 Days)</h2>
+    <h2>Daily Bookings Trend</h2>
     <% if @daily_bookings.any? %>
       <div data-controller="chart"
            data-chart-type-value="line"
@@ -128,4 +143,67 @@
     <% end %>
   </div>
 
+  <%# Day 3: Weekly Bookings Trend - Bar Chart %>
+  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+    <h2>Weekly Booking Trend</h2>
+    <% if @weekly_bookings.any? %>
+      <div data-controller="chart"
+           data-chart-type-value="bar"
+           data-chart-labels-value="<%= @weekly_bookings.keys.map { |w| "Week #{w}" }.to_json %>"
+           data-chart-data-value="<%= @weekly_bookings.values.to_json %>"
+           data-chart-label-value="Bookings"
+           data-chart-colors-value='["#fd7e14"]'>
+        <canvas data-chart-target="canvas"></canvas>
+      </div>
+    <% else %>
+      <p>No weekly data available.</p>
+    <% end %>
+  </div>
+
+  <%# Day 3: Day-of-Week Distribution - Bar Chart %>
+  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+    <h2>Bookings by Day of Week</h2>
+    <% if @day_of_week.values.sum > 0 %>
+      <div data-controller="chart"
+           data-chart-type-value="bar"
+           data-chart-labels-value="<%= @day_of_week.keys.to_json %>"
+           data-chart-data-value="<%= @day_of_week.values.to_json %>"
+           data-chart-label-value="Bookings"
+           data-chart-colors-value='["#20c997"]'>
+        <canvas data-chart-target="canvas"></canvas>
+      </div>
+    <% else %>
+      <p>No day-of-week data available.</p>
+    <% end %>
+  </div>
+
 </div>
+
+<%# Day 3: Peak Hours by Venue Heatmap Table %>
+<% if @heatmap_venues.any? %>
+<div style="max-width: 1200px; margin: 2rem auto 0; background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px; overflow-x: auto;">
+  <h2>Peak Hours by Venue</h2>
+  <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 0.85rem;">
+    <thead>
+      <tr>
+        <th style="padding: 0.4rem; border: 1px solid #ddd; background: #f8f9fc;">Venue</th>
+        <% @heatmap_hours.each do |h| %>
+          <th style="padding: 0.4rem; border: 1px solid #ddd; background: #f8f9fc;"><%= format('%02d:00', h) %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% max_val = @heatmap_data.flatten.max || 1 %>
+      <% @heatmap_venues.each_with_index do |venue, i| %>
+        <tr>
+          <td style="padding: 0.4rem; border: 1px solid #ddd; font-weight: bold; text-align: left; white-space: nowrap;"><%= venue %></td>
+          <% @heatmap_data[i].each do |count| %>
+            <% intensity = max_val > 0 ? (count.to_f / max_val) : 0 %>
+            <td style="padding: 0.4rem; border: 1px solid #ddd; background: rgba(78,115,223,<%= (intensity * 0.8 + 0.05).round(2) %>); color: <%= intensity > 0.5 ? '#fff' : '#333' %>;"><%= count %></td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+<% end %>
