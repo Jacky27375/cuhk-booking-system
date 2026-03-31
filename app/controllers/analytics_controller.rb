@@ -40,16 +40,8 @@ class AnalyticsController < ApplicationController
   private
 
   def parse_date_range
-    @start_date = if params[:start_date].present?
-                    Date.parse(params[:start_date])
-                  else
-                    30.days.ago.to_date
-                  end
-    @end_date = if params[:end_date].present?
-                  Date.parse(params[:end_date])
-                else
-                  Date.current
-                end
+    @start_date = params[:start_date].present? ? Date.parse(params[:start_date]) : 30.days.ago.to_date
+    @end_date = params[:end_date].present? ? Date.parse(params[:end_date]) : Date.current
     # Prevent reversed ranges
     @start_date, @end_date = @end_date, @start_date if @start_date > @end_date
   rescue ArgumentError
