@@ -10,7 +10,7 @@ class AnalyticsController < ApplicationController
     base_scope = Booking.where(created_at: @start_date.beginning_of_day..@end_date.end_of_day)
     venue_bookings = base_scope.where.not(venue_id: nil).joins(:venue)
 
-    # --- Day 1 charts ---
+    # Core charts
     @venue_booking_counts = venue_bookings.group("venues.name").count
     @status_counts = base_scope.group(:status).count.transform_keys { |k| k.to_s.titleize }
 
@@ -26,13 +26,16 @@ class AnalyticsController < ApplicationController
                             .sort_by { |hour, _| hour }
                             .to_h
 
-    # --- Day 2: duration & occupancy ---
+    # Duration and occupancy
     compute_venue_duration_stats(venue_bookings)
 
-    # --- Day 3: weekly breakdown + day-of-week + peak hours per venue ---
+    # Time trend and peak-hour breakdown
     compute_weekly_breakdown(base_scope)
     compute_day_of_week_distribution(base_scope)
     compute_peak_hours_by_venue(venue_bookings)
+
+    # Equipment utilization
+    compute_equipment_stats(base_scope)
 
     compute_summary_stats(base_scope)
   end
@@ -105,5 +108,19 @@ class AnalyticsController < ApplicationController
     @pending_count  = base_scope.pending.count
     @approved_count = base_scope.approved.count
     @venues_count   = Venue.count
+    @equipment_count = Equipment.count
+  end
+
+  def compute_equipment_stats(base_scope)
+    equip_bookings = base_scope.where.not(equipment_id: nil).joins(:equipment)
+
+    @equipment_borrow_counts = equip_bookings.group("equipment.name").count
+                                             .sort_by { |_, v| -v }.to_h
+
+    @equipment_quantity_borrowed = equip_bookings.group("equipment.name").sum(:quantity)
+                                                .sort_by { |_, v| -v }.to_h
+
+    @equipment_status_counts = equip_bookings.group(:status).count
+                                             .transform_keys { |k| k.to_s.titleize }
   end
 end

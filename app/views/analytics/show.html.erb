@@ -2,7 +2,7 @@
 
 <p><%= link_to "← Back to Dashboard", dashboard_path %></p>
 
-<%# ===== Date Range Filter (Day 4) ===== %>
+<%# ===== Date Range Filter ===== %>
 <div style="max-width: 1200px; margin: 0 auto 1.5rem; padding: 1rem; background: #f8f9fc; border: 1px solid #ddd; border-radius: 8px;">
   <%= form_tag analytics_path, method: :get, style: "display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;" do %>
     <label>From:
@@ -18,7 +18,7 @@
 </div>
 
 <%# ===== Summary Stats Cards ===== %>
-<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; max-width: 1200px; margin: 0 auto 2rem;">
+<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; max-width: 1200px; margin: 0 auto 2rem;">
   <div style="background: #4e73df; color: #fff; padding: 1.2rem; border-radius: 8px; text-align: center;">
     <div style="font-size: 2rem; font-weight: bold;"><%= @total_bookings %></div>
     <div>Total Bookings</div>
@@ -34,6 +34,10 @@
   <div style="background: #36b9cc; color: #fff; padding: 1.2rem; border-radius: 8px; text-align: center;">
     <div style="font-size: 2rem; font-weight: bold;"><%= @venues_count %></div>
     <div>Venues</div>
+  </div>
+  <div style="background: #858796; color: #fff; padding: 1.2rem; border-radius: 8px; text-align: center;">
+    <div style="font-size: 2rem; font-weight: bold;"><%= @equipment_count %></div>
+    <div>Equipment</div>
   </div>
 </div>
 
@@ -143,7 +147,7 @@
     <% end %>
   </div>
 
-  <%# Day 3: Weekly Bookings Trend - Bar Chart %>
+  <%# Weekly Bookings Trend - Bar Chart %>
   <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
     <h2>Weekly Booking Trend</h2>
     <% if @weekly_bookings.any? %>
@@ -160,7 +164,7 @@
     <% end %>
   </div>
 
-  <%# Day 3: Day-of-Week Distribution - Bar Chart %>
+  <%# Day-of-Week Distribution - Bar Chart %>
   <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
     <h2>Bookings by Day of Week</h2>
     <% if @day_of_week.values.sum > 0 %>
@@ -177,9 +181,60 @@
     <% end %>
   </div>
 
+  <%# Equipment Borrow Counts - Bar Chart %>
+  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+    <h2>Equipment Borrow Count</h2>
+    <% if @equipment_borrow_counts.any? %>
+      <div data-controller="chart"
+           data-chart-type-value="bar"
+           data-chart-labels-value="<%= @equipment_borrow_counts.keys.to_json %>"
+           data-chart-data-value="<%= @equipment_borrow_counts.values.to_json %>"
+           data-chart-label-value="Times Borrowed"
+           data-chart-colors-value='["#6610f2"]'>
+        <canvas data-chart-target="canvas"></canvas>
+      </div>
+    <% else %>
+      <p>No equipment borrowing data yet.</p>
+    <% end %>
+  </div>
+
+  <%# Equipment Quantity Borrowed - Bar Chart %>
+  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+    <h2>Total Units Borrowed per Equipment</h2>
+    <% if @equipment_quantity_borrowed.any? %>
+      <div data-controller="chart"
+           data-chart-type-value="bar"
+           data-chart-labels-value="<%= @equipment_quantity_borrowed.keys.to_json %>"
+           data-chart-data-value="<%= @equipment_quantity_borrowed.values.to_json %>"
+           data-chart-label-value="Units"
+           data-chart-colors-value='["#e83e8c"]'>
+        <canvas data-chart-target="canvas"></canvas>
+      </div>
+    <% else %>
+      <p>No equipment quantity data yet.</p>
+    <% end %>
+  </div>
+
+  <%# Equipment Booking Status - Doughnut Chart %>
+  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+    <h2>Equipment Booking Status</h2>
+    <% if @equipment_status_counts.any? %>
+      <div data-controller="chart"
+           data-chart-type-value="doughnut"
+           data-chart-labels-value="<%= @equipment_status_counts.keys.to_json %>"
+           data-chart-data-value="<%= @equipment_status_counts.values.to_json %>"
+           data-chart-label-value="Status"
+           data-chart-colors-value='["#f6c23e","#1cc88a","#e74a3b","#36b9cc","#858796"]'>
+        <canvas data-chart-target="canvas"></canvas>
+      </div>
+    <% else %>
+      <p>No equipment booking data yet.</p>
+    <% end %>
+  </div>
+
 </div>
 
-<%# Day 3: Peak Hours by Venue Heatmap Table %>
+<%# Peak Hours by Venue Heatmap Table %>
 <% if @heatmap_venues.any? %>
 <div style="max-width: 1200px; margin: 2rem auto 0; background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px; overflow-x: auto;">
   <h2>Peak Hours by Venue</h2>
