@@ -141,6 +141,7 @@ RSpec.describe "analytics/show", type: :view do
       render
       expect(rendered).to include("No venue bookings yet.")
       expect(rendered).to include("No equipment borrowing data yet.")
+      expect(rendered).to have_selector(".analytics-empty-state")
     end
 
     it "does not render the heatmap table" do

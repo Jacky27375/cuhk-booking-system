@@ -1,10 +1,12 @@
+<% content_for(:title) { "Analytics Dashboard — CUHK Booking System" } %>
+
 <h1>Analytics Dashboard</h1>
 
 <p><%= link_to "← Back to Dashboard", dashboard_path %></p>
 
 <%# ===== Date Range Filter ===== %>
-<div style="max-width: 1200px; margin: 0 auto 1.5rem; padding: 1rem; background: #f8f9fc; border: 1px solid #ddd; border-radius: 8px;">
-  <%= form_tag analytics_path, method: :get, style: "display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;" do %>
+<div class="analytics-filter">
+  <%= form_tag analytics_path, method: :get do %>
     <label>From:
       <%= date_field_tag :start_date, @start_date, style: "padding: 0.3rem;" %>
     </label>
@@ -18,33 +20,33 @@
 </div>
 
 <%# ===== Summary Stats Cards ===== %>
-<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; max-width: 1200px; margin: 0 auto 2rem;">
-  <div style="background: #4e73df; color: #fff; padding: 1.2rem; border-radius: 8px; text-align: center;">
-    <div style="font-size: 2rem; font-weight: bold;"><%= @total_bookings %></div>
+<div class="analytics-cards">
+  <div class="analytics-card" style="background: #4e73df;">
+    <div class="analytics-card-value"><%= @total_bookings %></div>
     <div>Total Bookings</div>
   </div>
-  <div style="background: #f6c23e; color: #fff; padding: 1.2rem; border-radius: 8px; text-align: center;">
-    <div style="font-size: 2rem; font-weight: bold;"><%= @pending_count %></div>
+  <div class="analytics-card" style="background: #f6c23e;">
+    <div class="analytics-card-value"><%= @pending_count %></div>
     <div>Pending</div>
   </div>
-  <div style="background: #1cc88a; color: #fff; padding: 1.2rem; border-radius: 8px; text-align: center;">
-    <div style="font-size: 2rem; font-weight: bold;"><%= @approved_count %></div>
+  <div class="analytics-card" style="background: #1cc88a;">
+    <div class="analytics-card-value"><%= @approved_count %></div>
     <div>Approved</div>
   </div>
-  <div style="background: #36b9cc; color: #fff; padding: 1.2rem; border-radius: 8px; text-align: center;">
-    <div style="font-size: 2rem; font-weight: bold;"><%= @venues_count %></div>
+  <div class="analytics-card" style="background: #36b9cc;">
+    <div class="analytics-card-value"><%= @venues_count %></div>
     <div>Venues</div>
   </div>
-  <div style="background: #858796; color: #fff; padding: 1.2rem; border-radius: 8px; text-align: center;">
-    <div style="font-size: 2rem; font-weight: bold;"><%= @equipment_count %></div>
+  <div class="analytics-card" style="background: #858796;">
+    <div class="analytics-card-value"><%= @equipment_count %></div>
     <div>Equipment</div>
   </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 1200px; margin: 0 auto;">
+<div class="analytics-grid">
 
   <%# Venue Booking Counts - Bar Chart %>
-  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+  <div class="analytics-panel">
     <h2>Bookings per Venue</h2>
     <% if @venue_booking_counts.any? %>
       <div data-controller="chart"
@@ -55,12 +57,12 @@
         <canvas data-chart-target="canvas"></canvas>
       </div>
     <% else %>
-      <p>No venue bookings yet.</p>
+      <div class="analytics-empty-state"><p>No venue bookings yet.</p></div>
     <% end %>
   </div>
 
   <%# Venue Duration (Hours) - Horizontal Bar Chart %>
-  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+  <div class="analytics-panel">
     <h2>Total Booked Hours per Venue</h2>
     <% if @venue_duration_hours.any? %>
       <div data-controller="chart"
@@ -73,12 +75,12 @@
         <canvas data-chart-target="canvas"></canvas>
       </div>
     <% else %>
-      <p>No venue booking duration data yet.</p>
+      <div class="analytics-empty-state"><p>No venue booking duration data yet.</p></div>
     <% end %>
   </div>
 
   <%# Venue Occupancy Rate - Bar Chart %>
-  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+  <div class="analytics-panel">
     <h2>Venue Occupancy Rate</h2>
     <% if @venue_occupancy_pct.any? %>
       <div data-controller="chart"
@@ -92,12 +94,12 @@
         <canvas data-chart-target="canvas"></canvas>
       </div>
     <% else %>
-      <p>No occupancy data yet.</p>
+      <div class="analytics-empty-state"><p>No occupancy data yet.</p></div>
     <% end %>
   </div>
 
   <%# Booking Status Distribution - Doughnut Chart %>
-  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+  <div class="analytics-panel">
     <h2>Booking Status Distribution</h2>
     <% if @status_counts.any? %>
       <div data-controller="chart"
@@ -109,12 +111,12 @@
         <canvas data-chart-target="canvas"></canvas>
       </div>
     <% else %>
-      <p>No bookings yet.</p>
+      <div class="analytics-empty-state"><p>No bookings yet.</p></div>
     <% end %>
   </div>
 
   <%# Daily Bookings Trend - Line Chart %>
-  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+  <div class="analytics-panel">
     <h2>Daily Bookings Trend</h2>
     <% if @daily_bookings.any? %>
       <div data-controller="chart"
@@ -126,12 +128,12 @@
         <canvas data-chart-target="canvas"></canvas>
       </div>
     <% else %>
-      <p>No bookings in the last 30 days.</p>
+      <div class="analytics-empty-state"><p>No bookings in the selected period.</p></div>
     <% end %>
   </div>
 
   <%# Peak Hours - Bar Chart %>
-  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+  <div class="analytics-panel">
     <h2>Peak Booking Hours</h2>
     <% if @peak_hours.any? %>
       <div data-controller="chart"
@@ -143,12 +145,12 @@
         <canvas data-chart-target="canvas"></canvas>
       </div>
     <% else %>
-      <p>No venue bookings with time data.</p>
+      <div class="analytics-empty-state"><p>No venue bookings with time data.</p></div>
     <% end %>
   </div>
 
   <%# Weekly Bookings Trend - Bar Chart %>
-  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+  <div class="analytics-panel">
     <h2>Weekly Booking Trend</h2>
     <% if @weekly_bookings.any? %>
       <div data-controller="chart"
@@ -160,12 +162,12 @@
         <canvas data-chart-target="canvas"></canvas>
       </div>
     <% else %>
-      <p>No weekly data available.</p>
+      <div class="analytics-empty-state"><p>No weekly data available.</p></div>
     <% end %>
   </div>
 
   <%# Day-of-Week Distribution - Bar Chart %>
-  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+  <div class="analytics-panel">
     <h2>Bookings by Day of Week</h2>
     <% if @day_of_week.values.sum > 0 %>
       <div data-controller="chart"
@@ -177,12 +179,12 @@
         <canvas data-chart-target="canvas"></canvas>
       </div>
     <% else %>
-      <p>No day-of-week data available.</p>
+      <div class="analytics-empty-state"><p>No day-of-week data available.</p></div>
     <% end %>
   </div>
 
   <%# Equipment Borrow Counts - Bar Chart %>
-  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+  <div class="analytics-panel">
     <h2>Equipment Borrow Count</h2>
     <% if @equipment_borrow_counts.any? %>
       <div data-controller="chart"
@@ -194,12 +196,12 @@
         <canvas data-chart-target="canvas"></canvas>
       </div>
     <% else %>
-      <p>No equipment borrowing data yet.</p>
+      <div class="analytics-empty-state"><p>No equipment borrowing data yet.</p></div>
     <% end %>
   </div>
 
   <%# Equipment Quantity Borrowed - Bar Chart %>
-  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+  <div class="analytics-panel">
     <h2>Total Units Borrowed per Equipment</h2>
     <% if @equipment_quantity_borrowed.any? %>
       <div data-controller="chart"
@@ -211,12 +213,12 @@
         <canvas data-chart-target="canvas"></canvas>
       </div>
     <% else %>
-      <p>No equipment quantity data yet.</p>
+      <div class="analytics-empty-state"><p>No equipment quantity data yet.</p></div>
     <% end %>
   </div>
 
   <%# Equipment Booking Status - Doughnut Chart %>
-  <div style="background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px;">
+  <div class="analytics-panel">
     <h2>Equipment Booking Status</h2>
     <% if @equipment_status_counts.any? %>
       <div data-controller="chart"
@@ -228,7 +230,7 @@
         <canvas data-chart-target="canvas"></canvas>
       </div>
     <% else %>
-      <p>No equipment booking data yet.</p>
+      <div class="analytics-empty-state"><p>No equipment booking data yet.</p></div>
     <% end %>
   </div>
 
@@ -236,14 +238,14 @@
 
 <%# Peak Hours by Venue Heatmap Table %>
 <% if @heatmap_venues.any? %>
-<div style="max-width: 1200px; margin: 2rem auto 0; background: #fff; padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px; overflow-x: auto;">
+<div class="analytics-heatmap">
   <h2>Peak Hours by Venue</h2>
-  <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 0.85rem;">
+  <table>
     <thead>
       <tr>
-        <th style="padding: 0.4rem; border: 1px solid #ddd; background: #f8f9fc;">Venue</th>
+        <th>Venue</th>
         <% @heatmap_hours.each do |h| %>
-          <th style="padding: 0.4rem; border: 1px solid #ddd; background: #f8f9fc;"><%= format('%02d:00', h) %></th>
+          <th><%= format('%02d:00', h) %></th>
         <% end %>
       </tr>
     </thead>
@@ -251,10 +253,10 @@
       <% max_val = @heatmap_data.flatten.max || 1 %>
       <% @heatmap_venues.each_with_index do |venue, i| %>
         <tr>
-          <td style="padding: 0.4rem; border: 1px solid #ddd; font-weight: bold; text-align: left; white-space: nowrap;"><%= venue %></td>
+          <td style="font-weight: bold; text-align: left; white-space: nowrap;"><%= venue %></td>
           <% @heatmap_data[i].each do |count| %>
             <% intensity = max_val > 0 ? (count.to_f / max_val) : 0 %>
-            <td style="padding: 0.4rem; border: 1px solid #ddd; background: rgba(78,115,223,<%= (intensity * 0.8 + 0.05).round(2) %>); color: <%= intensity > 0.5 ? '#fff' : '#333' %>;"><%= count %></td>
+            <td style="background: rgba(78,115,223,<%= (intensity * 0.8 + 0.05).round(2) %>); color: <%= intensity > 0.5 ? '#fff' : '#333' %>;"><%= count %></td>
           <% end %>
         </tr>
       <% end %>
