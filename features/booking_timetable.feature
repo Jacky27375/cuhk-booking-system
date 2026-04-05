@@ -24,7 +24,7 @@ Feature: Booking timetable and conflict prevention
     When I open the booking page for "Lecture Hall A" on "2026-04-10"
     And I select "08:00" from "Start time"
     And I select "08:00" from "End time"
-    And I click "Create Booking"
+    And I click "Review Booking"
     And I should not see "error prohibited this booking from being saved"
     Then I should see "must be after start time"
 
@@ -42,7 +42,7 @@ Feature: Booking timetable and conflict prevention
     When I open the booking page for "Lecture Hall A" on "2026-04-10"
     And I select "10:00" from "Start time"
     And I select "12:00" from "End time"
-    And I click "Create Booking"
+    And I click "Review Booking"
     And I should not see "error prohibited this booking from being saved"
     Then I should see "conflicts with an existing booking"
     And the slot "10:00 - 11:00" should be marked unavailable

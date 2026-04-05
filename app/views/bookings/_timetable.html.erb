@@ -1,0 +1,39 @@
+<p><strong>Selected date:</strong> <%= @booking_date %></p>
+
+<div class="timetable-legend">
+  <span class="timetable-chip timetable-slot-unavailable">Unavailable</span>
+  <span class="timetable-chip timetable-slot-selected">Selected</span>
+  <span class="timetable-chip timetable-slot-available">Available</span>
+</div>
+
+<table class="TimeTable" cellspacing="0" cellpadding="0" border="1">
+  <thead>
+    <tr>
+      <td class="TimeTableTitleCell"><%= @booking_date.strftime('%d %b %Y') %></td>
+      <td class="TimeTableTitleCellOneDayOneFacilityView"><%= booking.venue&.name || 'Select a venue' %></td>
+    </tr>
+  </thead>
+  <tbody>
+    <% @timetable_slots.each do |slot| %>
+      <% hour_start = slot[:start_at] %>
+      <% hour_end = slot[:end_at] %>
+      <% hour_state = if slot[:css_class] == 'timetable-slot-selected'
+                        'TimeTableCell_Selected'
+                      elsif slot[:css_class] == 'timetable-slot-unavailable'
+                        'TimeTableCell_Full'
+                      else
+                        'TimeTableCell_Available'
+                      end %>
+      <tr>
+        <td class="TimeTableTitleCell">
+          <span><%= hour_start.strftime('%I:%M %p') %>- <%= hour_end.strftime('%I:%M %p') %></span>
+        </td>
+        <td class="<%= hour_state %>">
+          <div class="timetable-slot <%= slot[:css_class] %>" data-slot-start="<%= slot[:start_at].strftime('%Y-%m-%dT%H:%M') %>" data-slot-end="<%= slot[:end_at].strftime('%Y-%m-%dT%H:%M') %>">
+            <%= slot[:label] %>
+          </div>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

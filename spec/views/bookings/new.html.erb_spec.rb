@@ -19,7 +19,7 @@ RSpec.describe "bookings/new", type: :view do
       assert_select "input[name=?]", "booking_date"
     end
 
-    assert_select "form[action=?][method=?]", bookings_path, "post" do
+    assert_select "form[action=?][method=?]", confirm_bookings_path, "post" do
       assert_select "select[name=?]", "booking[venue_id]"
       assert_select "select[name=?]", "booking[start_slot]"
       assert_select "select[name=?]", "booking[end_slot]"

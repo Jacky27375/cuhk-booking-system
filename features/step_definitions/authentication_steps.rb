@@ -26,6 +26,11 @@ Then('I should see {string}') do |text|
   expect(page).to have_content(text)
 end
 
+Then('I should see {string} only once') do |text|
+  occurrences = page.text.scan(Regexp.new(Regexp.escape(text))).size
+  expect(occurrences).to eq(1)
+end
+
 Given('I am logged in as {string} with password {string}') do |email, password|
   visit login_path
   fill_in 'Email', with: email

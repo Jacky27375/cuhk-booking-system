@@ -4,51 +4,9 @@
   <%= date_field_tag :booking_date, @booking_date, required: true, onchange: "this.form.requestSubmit();" %>
 <% end %>
 
-<p><strong>Selected date:</strong> <%= @booking_date %></p>
+<%= render "timetable", booking: booking %>
 
-<div class="timetable-legend">
-  <span class="timetable-chip timetable-slot-unavailable">Unavailable</span>
-  <span class="timetable-chip timetable-slot-selected">Selected</span>
-  <span class="timetable-chip timetable-slot-available">Available</span>
-</div>
-
-<table class="TimeTable" cellspacing="0" cellpadding="0" border="1">
-  <thead>
-    <tr>
-      <td class="TimeTableTitleCell"><%= @booking_date.strftime('%d %b %Y') %></td>
-      <td class="TimeTableTitleCellOneDayOneFacilityView"><%= booking.venue&.name || 'Select a venue' %></td>
-    </tr>
-  </thead>
-  <tbody>
-    <% @timetable_slots.each do |slot| %>
-      <% hour_start = slot[:start_at] %>
-      <% hour_end = slot[:end_at] %>
-      <% hour_state = if slot[:css_class] == 'timetable-slot-selected'
-                        'TimeTableCell_Selected'
-                      elsif slot[:css_class] == 'timetable-slot-unavailable'
-                        'TimeTableCell_Full'
-                      else
-                        'TimeTableCell_Available'
-                      end %>
-      <tr>
-        <td class="TimeTableTitleCell">
-          <span><%= hour_start.strftime('%I:%M %p') %>- <%= hour_end.strftime('%I:%M %p') %></span>
-        </td>
-        <td class="<%= hour_state %>">
-          <div class="timetable-slot <%= slot[:css_class] %>" data-slot-start="<%= slot[:start_at].strftime('%Y-%m-%dT%H:%M') %>" data-slot-end="<%= slot[:end_at].strftime('%Y-%m-%dT%H:%M') %>">
-            <%= slot[:label] %>
-          </div>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<div class="timetable-note">
-  Time slots are in 1-hour increments from 08:00 to 22:00.
-</div>
-
-<%= form_with(model: booking) do |form| %>
+<%= form_with(model: booking, url: (booking.persisted? ? booking_path(booking) : confirm_bookings_path), method: (booking.persisted? ? :patch : :post), data: { turbo: false }) do |form| %>
   <% if booking.errors.any? %>
     <div style="color: red">
       <ul>
@@ -82,6 +40,6 @@
   </div>
 
   <div>
-    <%= form.submit %>
+    <%= form.submit(booking.persisted? ? "Update Booking" : "Review Booking", class: "button-primary") %>
   </div>
 <% end %>

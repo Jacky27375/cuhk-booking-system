@@ -26,6 +26,17 @@ class BookingsController < ApplicationController
     if params[:venue_id].present? && venue_accessible?(params[:venue_id])
       @booking.venue_id = params[:venue_id]
     end
+
+    selected_date = booking_date_param
+    start_slot = params.dig(:booking, :start_slot)
+    end_slot = params.dig(:booking, :end_slot)
+    if selected_date.present? && start_slot.present?
+      @booking.start_time = combine_date_and_slot(selected_date, start_slot)
+    end
+    if selected_date.present? && end_slot.present?
+      @booking.end_time = combine_date_and_slot(selected_date, end_slot)
+    end
+
     prepare_timetable_context
   end
 
@@ -33,6 +44,27 @@ class BookingsController < ApplicationController
   def edit
     @venues = accessible_venues.order(:name)
     prepare_timetable_context
+  end
+
+  # POST /bookings/confirm
+  def confirm
+    @booking = Booking.new(extracted_booking_attributes)
+    @booking.user = current_user
+    @venues = accessible_venues.order(:name)
+
+    unless venue_accessible?(@booking.venue_id)
+      @booking.errors.add(:venue, "is not accessible for your account")
+      prepare_timetable_context
+      render :new, status: :unprocessable_entity
+      return
+    end
+
+    prepare_timetable_context
+    if @booking.valid?
+      render :confirm
+    else
+      render :new, status: :unprocessable_entity
+    end
   end
 
   # POST /bookings or /bookings.json

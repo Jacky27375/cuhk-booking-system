@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       patch :mark_returned
     end
     collection do
+      post :confirm
       get :my
     end
   end

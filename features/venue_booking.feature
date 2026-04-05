@@ -48,8 +48,13 @@ Feature: Venue Booking System
     And I click "Book Venue"
     And I select "10:00" from "Start time"
     And I select "12:00" from "End time"
-    And I click "Create Booking"
+    And I click "Review Booking"
+    Then I should see "Confirm booking details"
+    And I should see "Lecture Hall A"
+    And I should see "Time period: 10:00 - 12:00"
+    When I click "Submit Booking"
     Then I should see "Booking was successfully created."
+    And I should see "Booking was successfully created." only once
 
   Scenario: Admin cannot book a venue
     Given there is a venue "Lecture Hall A"

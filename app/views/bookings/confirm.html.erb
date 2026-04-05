@@ -1,0 +1,31 @@
+<% content_for :title, "Confirm booking" %>
+
+<h1>Confirm booking details</h1>
+
+<div class="confirmation-card">
+  <h2>Venue details</h2>
+  <p><strong>Name:</strong> <%= @booking.venue&.name %></p>
+  <% if @booking.venue&.department.present? %>
+    <p><strong>Department:</strong> <%= @booking.venue.department %></p>
+  <% end %>
+  <% if @booking.venue&.description.present? %>
+    <p><strong>Description:</strong> <%= @booking.venue.description %></p>
+  <% end %>
+
+  <h2>Booking details</h2>
+  <p><strong>Date:</strong> <%= @booking.start_time.to_date %></p>
+  <p><strong>Time period:</strong> <%= @booking.start_time.strftime('%H:%M') %> - <%= @booking.end_time.strftime('%H:%M') %></p>
+</div>
+
+<%= render "timetable", booking: @booking %>
+
+<%= form_with(model: @booking, url: bookings_path, method: :post, data: { turbo: false }) do |form| %>
+  <%= form.hidden_field :venue_id %>
+  <%= form.hidden_field :start_time %>
+  <%= form.hidden_field :end_time %>
+
+  <div class="confirmation-actions">
+    <%= link_to "Back to edit", new_booking_path(venue_id: @booking.venue_id, booking_date: @booking.start_time.to_date, booking: { start_slot: @booking.start_time.strftime('%H:%M'), end_slot: @booking.end_time.strftime('%H:%M') }), class: "button-secondary" %>
+    <%= form.submit "Submit Booking", class: "button-primary" %>
+  </div>
+<% end %>
