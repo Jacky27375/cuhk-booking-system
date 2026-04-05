@@ -1,4 +1,6 @@
 class Equipment < ApplicationRecord
+  INVENTORY_HOLDING_STATUSES = %w[pending approved borrowed].freeze
+
   belongs_to :tenant
   has_many :bookings, dependent: :destroy
   has_many :equipment_bookings, class_name: "EquipmentBooking", dependent: :destroy
@@ -24,8 +26,10 @@ class Equipment < ApplicationRecord
     where(tenant_id: tenant_ids.uniq)
   }
 
-  def available_quantity
-    booked_quantity = bookings.where(status: ["pending", "approved", "borrowed"]).sum(:quantity)
-    quantity - booked_quantity
+  def available_quantity(excluding_booking_id: nil)
+    scope = bookings.where(status: INVENTORY_HOLDING_STATUSES)
+    scope = scope.where.not(id: excluding_booking_id) if excluding_booking_id.present?
+
+    quantity - scope.sum(:quantity)
   end
 end
