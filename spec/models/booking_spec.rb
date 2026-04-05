@@ -42,6 +42,20 @@ RSpec.describe Booking, type: :model do
     end
   end
 
+  describe 'booking subclasses' do
+    it 'builds venue bookings by default from the booking factory' do
+      booking = build(:booking, user: user, venue: venue)
+
+      expect(booking).to be_a(VenueBooking)
+    end
+
+    it 'renders booking partials consistently for STI subclasses' do
+      booking = build(:booking, user: user, venue: venue)
+
+      expect(booking.to_partial_path).to eq('bookings/booking')
+    end
+  end
+
   describe '.for_tenant' do
     let(:science_tenant) { create(:tenant, name: 'Science Faculty') }
     let(:arts_tenant) { create(:tenant, name: 'Arts Faculty') }

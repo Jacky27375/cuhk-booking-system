@@ -42,12 +42,12 @@ class EquipmentsController < ApplicationController
 
   def borrow_form
     @equipment = tenant_equipments.find(params[:id])
-    @booking = Booking.new
+    @booking = EquipmentBooking.new
   end
 
   def borrow
     @equipment = tenant_equipments.find(params[:id])
-    @booking = Booking.new(
+    @booking = EquipmentBooking.new(
       equipment: @equipment,
       user: current_user,
       quantity: params[:booking][:quantity],

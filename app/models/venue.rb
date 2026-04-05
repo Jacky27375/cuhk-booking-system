@@ -2,6 +2,7 @@ class Venue < ApplicationRecord
   belongs_to :tenant, optional: true
 
   has_many :bookings, dependent: :destroy
+  has_many :venue_bookings, class_name: "VenueBooking", dependent: :destroy
   validates :name, :department, presence: true
 
   scope :visible_to_user, lambda { |user|

@@ -1,45 +1,50 @@
-<%= form_with(url: (booking.persisted? ? edit_booking_path(booking) : new_booking_path), method: :get, local: true, class: "booking-date-filter") do %>
-  <%= hidden_field_tag :venue_id, booking.venue_id || params[:venue_id] %>
-  <%= label_tag :booking_date, "Booking date", style: "display: block" %>
-  <%= date_field_tag :booking_date, @booking_date, required: true, onchange: "this.form.requestSubmit();" %>
-<% end %>
-
-<%= render "timetable", booking: booking %>
-
-<%= form_with(model: booking, url: (booking.persisted? ? booking_path(booking) : confirm_bookings_path), method: (booking.persisted? ? :patch : :post), data: { turbo: false }) do |form| %>
-  <% if booking.errors.any? %>
-    <div style="color: red">
-      <ul>
-        <% booking.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
+<%= turbo_frame_tag booking_planner_frame_id, class: "booking-planner" do %>
+  <%= form_with(url: booking_date_filter_url(booking), method: :get, local: true, class: "booking-date-filter", data: { turbo_frame: booking_planner_frame_id }) do %>
+    <%= hidden_field_tag :venue_id, booking.venue_id || params[:venue_id] %>
+    <div class="booking-field">
+      <%= label_tag :booking_date, "Booking date", class: "booking-label" %>
+      <%= date_field_tag :booking_date, @booking_date, required: true, onchange: "this.form.requestSubmit();" %>
     </div>
   <% end %>
 
-  <% if booking.venue_id %>
-    <%= form.hidden_field :venue_id %>
-    <div>Venue: <%= booking.venue&.name %></div>
-  <% else %>
-    <div>
-      <%= form.label :venue_id, style: "display: block" %>
-      <%= form.collection_select :venue_id, (@venues || Venue.none), :id, :name %>
+  <%= render "timetable", booking: booking %>
+
+  <%= form_with(model: booking, url: booking_form_url(booking), method: booking_form_method(booking), data: { turbo: false }, class: "booking-form") do |form| %>
+    <% if booking.errors.any? %>
+      <div class="booking-errors">
+        <ul class="booking-error-list">
+          <% booking.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="booking-field booking-resource-summary">
+      <% if booking.venue_id %>
+        <%= form.hidden_field :venue_id %>
+        <span class="booking-label">Venue</span>
+        <span><%= booking.venue&.name %></span>
+      <% else %>
+        <%= form.label :venue_id, class: "booking-label" %>
+        <%= form.collection_select :venue_id, (@venues || Venue.none), :id, :name %>
+      <% end %>
+    </div>
+
+    <%= hidden_field_tag "booking[booking_date]", @booking_date %>
+
+    <div class="booking-field">
+      <%= label_tag "booking_start_slot", "Start time", class: "booking-label" %>
+      <%= select_tag "booking[start_slot]", options_for_select(@time_slot_options, booking.start_time&.strftime('%H:%M')), include_blank: "Select start time", id: "booking_start_slot" %>
+    </div>
+
+    <div class="booking-field">
+      <%= label_tag "booking_end_slot", "End time", class: "booking-label" %>
+      <%= select_tag "booking[end_slot]", options_for_select(@time_slot_options, booking.end_time&.strftime('%H:%M')), include_blank: "Select end time", id: "booking_end_slot" %>
+    </div>
+
+    <div class="booking-actions">
+      <%= form.submit booking_submit_label(booking), class: "button-primary" %>
     </div>
   <% end %>
-
-  <%= hidden_field_tag "booking[booking_date]", @booking_date %>
-
-  <div>
-    <%= label_tag "booking_start_slot", "Start time", style: "display: block" %>
-    <%= select_tag "booking[start_slot]", options_for_select(@time_slot_options, booking.start_time&.strftime('%H:%M')), include_blank: "Select start time", id: "booking_start_slot" %>
-  </div>
-
-  <div>
-    <%= label_tag "booking_end_slot", "End time", style: "display: block" %>
-    <%= select_tag "booking[end_slot]", options_for_select(@time_slot_options, booking.end_time&.strftime('%H:%M')), include_blank: "Select end time", id: "booking_end_slot" %>
-  </div>
-
-  <div>
-    <%= form.submit(booking.persisted? ? "Update Booking" : "Review Booking", class: "button-primary") %>
-  </div>
 <% end %>

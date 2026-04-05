@@ -9,8 +9,61 @@
  * Consider organizing styles into separate files for maintainability.
  */
 
+.booking-planner {
+	display: grid;
+	gap: 1rem;
+	max-width: 760px;
+}
+
 .booking-date-filter {
 	margin-bottom: 1rem;
+	padding: 0.85rem 1rem;
+	border: 1px solid #d8dce6;
+	border-radius: 8px;
+	background: #f8f9fc;
+}
+
+.booking-form {
+	display: grid;
+	gap: 1rem;
+	padding: 1rem;
+	border: 1px solid #d8dce6;
+	border-radius: 8px;
+	background: #fff;
+}
+
+.booking-field {
+	display: grid;
+	gap: 0.35rem;
+}
+
+.booking-label {
+	font-weight: 700;
+}
+
+.booking-errors {
+	padding: 0.75rem 1rem;
+	border-radius: 8px;
+	background: #fff1f2;
+	border: 1px solid #fda4af;
+	color: #9f1239;
+}
+
+.booking-error-list {
+	margin: 0;
+	padding-left: 1.2rem;
+}
+
+.booking-resource-summary {
+	padding: 0.75rem 1rem;
+	border-radius: 8px;
+	background: #f8f9fc;
+	border: 1px solid #d8dce6;
+}
+
+.booking-actions {
+	display: flex;
+	justify-content: flex-start;
 }
 
 .timetable-legend {

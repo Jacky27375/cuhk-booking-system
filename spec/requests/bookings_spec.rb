@@ -29,7 +29,7 @@ RSpec.describe "/bookings", type: :request do
     end
 
     it "renders a successful response" do
-      Booking.create! valid_attributes.merge(user: user)
+      VenueBooking.create! valid_attributes.merge(user: user)
       get bookings_url
       expect(response).to be_successful
     end
@@ -37,7 +37,7 @@ RSpec.describe "/bookings", type: :request do
 
   describe "GET /show" do
     it "renders a successful response" do
-      booking = Booking.create! valid_attributes.merge(user: user)
+      booking = VenueBooking.create! valid_attributes.merge(user: user)
       get booking_url(booking)
       expect(response).to be_successful
     end
@@ -52,7 +52,7 @@ RSpec.describe "/bookings", type: :request do
 
   describe "GET /edit" do
     it "renders a successful response" do
-      booking = Booking.create! valid_attributes.merge(user: user)
+      booking = VenueBooking.create! valid_attributes.merge(user: user)
       get edit_booking_url(booking)
       expect(response).to be_successful
     end
@@ -109,14 +109,14 @@ RSpec.describe "/bookings", type: :request do
       }
 
       it "updates the requested booking" do
-        booking = Booking.create! valid_attributes.merge(user: user)
+        booking = VenueBooking.create! valid_attributes.merge(user: user)
         patch booking_url(booking), params: { booking: new_attributes }
         booking.reload
         expect(booking.start_time).to be_within(1.second).of(new_attributes[:start_time])
       end
 
       it "redirects to the booking" do
-        booking = Booking.create! valid_attributes.merge(user: user)
+        booking = VenueBooking.create! valid_attributes.merge(user: user)
         patch booking_url(booking), params: { booking: new_attributes }
         booking.reload
         expect(response).to redirect_to(booking_url(booking))
@@ -125,8 +125,14 @@ RSpec.describe "/bookings", type: :request do
 
     context "with invalid parameters" do
       it "renders a response with 422 status (i.e. to display the 'edit' template)" do
-        booking = Booking.create! valid_attributes.merge(user: user)
-        patch booking_url(booking), params: { booking: invalid_attributes }
+        booking = VenueBooking.create! valid_attributes.merge(user: user)
+        patch booking_url(booking), params: {
+          booking: {
+            venue_id: venue.id,
+            start_time: "",
+            end_time: ""
+          }
+        }
         expect(response).to have_http_status(:unprocessable_content)
       end
     end
@@ -134,14 +140,14 @@ RSpec.describe "/bookings", type: :request do
 
   describe "DELETE /destroy" do
     it "destroys the requested booking" do
-      booking = Booking.create! valid_attributes.merge(user: user)
+      booking = VenueBooking.create! valid_attributes.merge(user: user)
       expect {
         delete booking_url(booking)
       }.to change(Booking, :count).by(-1)
     end
 
     it "redirects to the bookings list" do
-      booking = Booking.create! valid_attributes.merge(user: user)
+      booking = VenueBooking.create! valid_attributes.merge(user: user)
       delete booking_url(booking)
       expect(response).to redirect_to(bookings_url)
     end

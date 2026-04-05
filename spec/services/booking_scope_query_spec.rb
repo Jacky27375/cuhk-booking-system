@@ -16,9 +16,8 @@ RSpec.describe BookingScopeQuery do
   it 'includes equipment bookings for the matching tenant' do
     equipment = create(:equipment, tenant: science_tenant)
     booking = create(
-      :booking,
+      :equipment_booking,
       equipment: equipment,
-      venue: nil,
       user: create(:user, :society_member, tenant: science_tenant),
       quantity: 1,
       start_date: Date.current,

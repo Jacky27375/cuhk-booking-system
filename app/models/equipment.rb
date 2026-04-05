@@ -1,6 +1,7 @@
 class Equipment < ApplicationRecord
   belongs_to :tenant
   has_many :bookings, dependent: :destroy
+  has_many :equipment_bookings, class_name: "EquipmentBooking", dependent: :destroy
 
   validates :name, presence: true
   validates :quantity, presence: true, numericality: { greater_than_or_equal_to: 0 }

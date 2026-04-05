@@ -21,7 +21,7 @@ class BookingsController < ApplicationController
 
   # GET /bookings/new
   def new
-    @booking = Booking.new
+    @booking = VenueBooking.new
     @venues = accessible_venues.order(:name)
     if params[:venue_id].present? && venue_accessible?(params[:venue_id])
       @booking.venue_id = params[:venue_id]
@@ -48,7 +48,7 @@ class BookingsController < ApplicationController
 
   # POST /bookings/confirm
   def confirm
-    @booking = Booking.new(extracted_booking_attributes)
+    @booking = VenueBooking.new(extracted_booking_attributes)
     @booking.user = current_user
     @venues = accessible_venues.order(:name)
 
@@ -69,7 +69,7 @@ class BookingsController < ApplicationController
 
   # POST /bookings or /bookings.json
   def create
-    @booking = Booking.new(extracted_booking_attributes)
+    @booking = VenueBooking.new(extracted_booking_attributes)
     @booking.user = current_user
     @venues = accessible_venues.order(:name)
 

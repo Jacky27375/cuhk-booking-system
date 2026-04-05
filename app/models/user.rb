@@ -2,6 +2,8 @@ class User < ApplicationRecord
   has_secure_password
 
   has_many :bookings, dependent: :destroy
+  has_many :venue_bookings, class_name: "VenueBooking", dependent: :destroy
+  has_many :equipment_bookings, class_name: "EquipmentBooking", dependent: :destroy
 
   enum :role, { society_member: 0, staff: 1, admin: 2 }
 

@@ -66,7 +66,7 @@ unless Rails.env.production?
   # Create bookings
   puts "Creating bookings..."
   5.times do |i|
-    Booking.find_or_create_by!(
+    VenueBooking.find_or_create_by!(
       venue: created_venues[i],
       user: member,
       start_time: Time.current + (i + 1).days,

@@ -86,10 +86,9 @@ RSpec.describe "Analytics", type: :request do
 
       context "with equipment data" do
         before do
-          create(:booking, user: member, equipment: equipment, venue: nil,
-                           start_time: nil, end_time: nil,
-                           start_date: Date.current, end_date: 3.days.from_now.to_date,
-                           quantity: 2)
+          create(:equipment_booking, user: member, equipment: equipment,
+                                     start_date: Date.current, end_date: 3.days.from_now.to_date,
+                                     quantity: 2)
         end
 
         it "shows equipment borrow count chart" do
@@ -160,17 +159,17 @@ RSpec.describe "Analytics", type: :request do
       end
 
       it "filters equipment metrics within the specified range" do
-        create(:booking, user: member, equipment: equipment,
-                         start_date: Date.parse("2026-01-10"),
-                         end_date: Date.parse("2026-01-12"),
-                         quantity: 3,
-                         created_at: Time.zone.parse("2026-01-10"))
+        create(:equipment_booking, user: member, equipment: equipment,
+                                   start_date: Date.parse("2026-01-10"),
+                                   end_date: Date.parse("2026-01-12"),
+                                   quantity: 3,
+                                   created_at: Time.zone.parse("2026-01-10"))
 
-        create(:booking, user: member, equipment: equipment,
-                         start_date: Date.parse("2026-03-10"),
-                         end_date: Date.parse("2026-03-12"),
-                         quantity: 2,
-                         created_at: Time.zone.parse("2026-03-10"))
+        create(:equipment_booking, user: member, equipment: equipment,
+                                   start_date: Date.parse("2026-03-10"),
+                                   end_date: Date.parse("2026-03-12"),
+                                   quantity: 2,
+                                   created_at: Time.zone.parse("2026-03-10"))
 
         get analytics_path, params: { start_date: "2026-03-01", end_date: "2026-03-31" }
 

@@ -15,21 +15,12 @@
   </thead>
   <tbody>
     <% @timetable_slots.each do |slot| %>
-      <% hour_start = slot[:start_at] %>
-      <% hour_end = slot[:end_at] %>
-      <% hour_state = if slot[:css_class] == 'timetable-slot-selected'
-                        'TimeTableCell_Selected'
-                      elsif slot[:css_class] == 'timetable-slot-unavailable'
-                        'TimeTableCell_Full'
-                      else
-                        'TimeTableCell_Available'
-                      end %>
       <tr>
         <td class="TimeTableTitleCell">
-          <span><%= hour_start.strftime('%I:%M %p') %>- <%= hour_end.strftime('%I:%M %p') %></span>
+          <span><%= slot[:start_at].strftime('%I:%M %p') %>- <%= slot[:end_at].strftime('%I:%M %p') %></span>
         </td>
-        <td class="<%= hour_state %>">
-          <div class="timetable-slot <%= slot[:css_class] %>" data-slot-start="<%= slot[:start_at].strftime('%Y-%m-%dT%H:%M') %>" data-slot-end="<%= slot[:end_at].strftime('%Y-%m-%dT%H:%M') %>">
+        <td class="<%= booking_timetable_cell_class(slot) %>">
+          <div class="<%= booking_timetable_slot_class(slot) %>" data-slot-start="<%= slot[:start_at].strftime('%Y-%m-%dT%H:%M') %>" data-slot-end="<%= slot[:end_at].strftime('%Y-%m-%dT%H:%M') %>">
             <%= slot[:label] %>
           </div>
         </td>
