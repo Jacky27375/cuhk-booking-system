@@ -1,0 +1,186 @@
+name: CD - Azure VM
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [main]
+    types: [completed]
+
+env:
+  APP_ROOT: /opt/cuhk-booking-system
+  RELEASE_ARCHIVE: /tmp/cuhk-booking-system-release.tgz
+  REMOTE_ENV_FILE: /tmp/cuhk-booking-system.env.production
+  AZURE_VM_USER: azureuser
+  APP_HOST: csci3100.tylerl.cyou
+  POSTGRES_HOST: db
+  POSTGRES_PORT: 5432
+  POSTGRES_USER: postgres
+  POSTGRES_DB: cuhk_booking_system_production
+  POSTGRES_CACHE_DB: cuhk_booking_system_production_cache
+  POSTGRES_QUEUE_DB: cuhk_booking_system_production_queue
+  POSTGRES_CABLE_DB: cuhk_booking_system_production_cable
+
+concurrency:
+  group: deploy-azure-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Configure SSH
+        env:
+          AZURE_VM_HOST: ${{ secrets.AZURE_VM_HOST }}
+          AZURE_VM_SSH_KEY: ${{ secrets.AZURE_VM_SSH_KEY }}
+        run: |
+          : "${AZURE_VM_HOST:?Set AZURE_VM_HOST in repository secrets.}"
+          : "${AZURE_VM_SSH_KEY:?Set AZURE_VM_SSH_KEY in repository secrets.}"
+
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$AZURE_VM_SSH_KEY" > ~/.ssh/azure.pem
+          chmod 600 ~/.ssh/azure.pem
+          ssh-keyscan -H "$AZURE_VM_HOST" >> ~/.ssh/known_hosts
+
+      - name: Create release archive
+        run: |
+          tar \
+            --exclude=.git \
+            --exclude=log \
+            --exclude=tmp \
+            --exclude=coverage \
+            --exclude=node_modules \
+            -czf "$RELEASE_ARCHIVE" .
+
+      - name: Create production environment file
+        env:
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+          SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        run: |
+          : "${RAILS_MASTER_KEY:?Set RAILS_MASTER_KEY in repository secrets.}"
+          : "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in repository secrets.}"
+
+          {
+            printf '%s\n' "RAILS_ENV=production"
+            printf '%s\n' "RAILS_LOG_TO_STDOUT=true"
+            printf '%s\n' "SOLID_QUEUE_IN_PUMA=true"
+            printf '%s\n' "APP_HOST=$APP_HOST"
+            printf '%s\n' "RAILS_MASTER_KEY=$RAILS_MASTER_KEY"
+            printf '%s\n' "SECRET_KEY_BASE=$SECRET_KEY_BASE"
+            printf '%s\n' "POSTGRES_HOST=$POSTGRES_HOST"
+            printf '%s\n' "POSTGRES_PORT=$POSTGRES_PORT"
+            printf '%s\n' "POSTGRES_USER=$POSTGRES_USER"
+            printf '%s\n' "POSTGRES_PASSWORD=$POSTGRES_PASSWORD"
+            printf '%s\n' "POSTGRES_DB=$POSTGRES_DB"
+            printf '%s\n' "POSTGRES_CACHE_DB=$POSTGRES_CACHE_DB"
+            printf '%s\n' "POSTGRES_QUEUE_DB=$POSTGRES_QUEUE_DB"
+            printf '%s\n' "POSTGRES_CABLE_DB=$POSTGRES_CABLE_DB"
+          } > "$REMOTE_ENV_FILE"
+
+          chmod 600 "$REMOTE_ENV_FILE"
+
+      - name: Upload release assets
+        env:
+          AZURE_VM_HOST: ${{ secrets.AZURE_VM_HOST }}
+        run: |
+          scp -i ~/.ssh/azure.pem "$RELEASE_ARCHIVE" "$REMOTE_ENV_FILE" "$AZURE_VM_USER@$AZURE_VM_HOST:/tmp/"
+
+      - name: Deploy release on VM
+        env:
+          AZURE_VM_HOST: ${{ secrets.AZURE_VM_HOST }}
+          DEPLOY_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          ssh -i ~/.ssh/azure.pem "$AZURE_VM_USER@$AZURE_VM_HOST" \
+            "APP_ROOT='$APP_ROOT' RELEASE_ARCHIVE='$RELEASE_ARCHIVE' REMOTE_ENV_FILE='$REMOTE_ENV_FILE' DEPLOY_SHA='$DEPLOY_SHA' bash -s" <<'REMOTE'
+          set -euo pipefail
+
+          releases_dir="$APP_ROOT/releases"
+          shared_dir="$APP_ROOT/shared"
+          release_dir="$releases_dir/$DEPLOY_SHA"
+          current_link="$APP_ROOT/current"
+          previous_release=""
+
+          if [ -L "$current_link" ]; then
+            previous_release="$(readlink -f "$current_link")"
+          fi
+
+          if ! command -v docker >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install --no-install-recommends -y docker.io curl ca-certificates
+          fi
+
+          if ! sudo docker compose version >/dev/null 2>&1 && ! command -v docker-compose >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install --no-install-recommends -y docker-compose-plugin || sudo apt-get install --no-install-recommends -y docker-compose
+          fi
+          sudo systemctl enable --now docker
+
+          sudo mkdir -p "$releases_dir" "$shared_dir"
+          sudo chown -R "$USER:$USER" "$APP_ROOT"
+
+          mkdir -p "$release_dir"
+          tar -xzf "$RELEASE_ARCHIVE" -C "$release_dir"
+          install -m 600 "$REMOTE_ENV_FILE" "$shared_dir/.env.production"
+
+          compose_cmd=(sudo docker compose)
+          if ! sudo docker compose version >/dev/null 2>&1; then
+            compose_cmd=(sudo docker-compose)
+          fi
+
+          deploy_release() {
+            local target_dir="$1"
+            cd "$target_dir"
+            "${compose_cmd[@]}" \
+              --project-name cuhk-booking \
+              -f deploy/docker-compose.azure.yml \
+              --env-file "$shared_dir/.env.production" \
+              up -d --build --remove-orphans
+          }
+
+          rollback() {
+            if [ -n "$previous_release" ] && [ -d "$previous_release" ]; then
+              ln -sfn "$previous_release" "$current_link"
+              deploy_release "$previous_release"
+            fi
+          }
+
+          ln -sfn "$release_dir" "$current_link"
+
+          if ! deploy_release "$release_dir"; then
+            rollback
+            exit 1
+          fi
+
+          healthy=0
+          for _ in $(seq 1 20); do
+            if curl --fail --silent --show-error http://127.0.0.1:3000/up >/dev/null; then
+              healthy=1
+              break
+            fi
+            sleep 3
+          done
+
+          if [ "$healthy" -ne 1 ]; then
+            rollback
+            exit 1
+          fi
+
+          find "$releases_dir" -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' \
+            | sort -rn \
+            | awk 'NR > 5 { print $2 }' \
+            | xargs -r rm -rf
+          rm -f "$RELEASE_ARCHIVE" "$REMOTE_ENV_FILE"
+          REMOTE
