@@ -93,27 +93,7 @@ Production URL: [https://csci3100.tylerl.cyou](https://csci3100.tylerl.cyou)
 CI remains in `.github/workflows/ci.yml`, and CD is configured in `.github/workflows/deploy-azure.yml`.
 The deploy workflow runs automatically after `CI` succeeds on `main`, and can also be triggered manually from GitHub Actions.
 
-### 1. One-time Azure VM preparation
-
-Connect with your key:
-```bash
-ssh -i azure.pem azureuser@<azure-vm-public-ip-or-dns>
-```
-
-Ensure Caddy is configured to proxy to the app:
-```caddy
-csci3100.tylerl.cyou {
-    reverse_proxy 127.0.0.1:3000
-}
-```
-
-If needed, reload Caddy:
-```bash
-sudo caddy validate --config /etc/caddy/Caddyfile
-sudo systemctl reload caddy
-```
-
-### 2. Add required GitHub repository secrets
+### 1. Add required GitHub repository secrets
 
 | Secret | Value |
 | --- | --- |
@@ -121,9 +101,9 @@ sudo systemctl reload caddy
 | `AZURE_VM_SSH_KEY` | Full private key content from `azure.pem` |
 | `RAILS_MASTER_KEY` | Content of `config/master.key` |
 | `POSTGRES_PASSWORD` | Password for the production Postgres container |
-| `SECRET_KEY_BASE` | Optional but recommended (`openssl rand -hex 64`) |
+| `SECRET_KEY_BASE` | Required (`openssl rand -hex 64`) |
 
-### 3. Deploy
+### 2. Deploy
 
 1. Merge/push to `main` (deploy runs after CI passes), or run **CD - Azure VM** manually in GitHub Actions.
 2. The workflow uploads the repository to `/opt/cuhk-booking-system`, builds containers on the VM, and starts them with `deploy/docker-compose.azure.yml`.
