@@ -71,6 +71,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
           : "${RAILS_MASTER_KEY:?Set RAILS_MASTER_KEY in repository secrets.}"
+          : "${SECRET_KEY_BASE:?Set SECRET_KEY_BASE in repository secrets.}"
           : "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in repository secrets.}"
 
           {
@@ -150,6 +151,22 @@ jobs:
               up -d --build --remove-orphans
           }
 
+          log_diagnostics() {
+            local target_dir="$1"
+            "${compose_cmd[@]}" \
+              --project-name cuhk-booking \
+              --project-directory "$target_dir" \
+              -f "$target_dir/deploy/docker-compose.azure.yml" \
+              --env-file "$shared_dir/.env.production" \
+              ps || true
+            "${compose_cmd[@]}" \
+              --project-name cuhk-booking \
+              --project-directory "$target_dir" \
+              -f "$target_dir/deploy/docker-compose.azure.yml" \
+              --env-file "$shared_dir/.env.production" \
+              logs --no-color --tail=200 web db || true
+          }
+
           rollback() {
             if [ -n "$previous_release" ] && [ -d "$previous_release" ]; then
               ln -sfn "$previous_release" "$current_link"
@@ -160,12 +177,13 @@ jobs:
           ln -sfn "$release_dir" "$current_link"
 
           if ! deploy_release "$release_dir"; then
+            log_diagnostics "$release_dir"
             rollback
             exit 1
           fi
 
           healthy=0
-          for _ in $(seq 1 20); do
+          for _ in $(seq 1 60); do
             if curl --fail --silent --show-error http://127.0.0.1:3000/up >/dev/null; then
               healthy=1
               break
@@ -174,6 +192,7 @@ jobs:
           done
 
           if [ "$healthy" -ne 1 ]; then
+            log_diagnostics "$release_dir"
             rollback
             exit 1
           fi
