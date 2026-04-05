@@ -142,10 +142,10 @@ jobs:
 
           deploy_release() {
             local target_dir="$1"
-            cd "$target_dir"
             "${compose_cmd[@]}" \
               --project-name cuhk-booking \
-              -f deploy/docker-compose.azure.yml \
+              --project-directory "$target_dir" \
+              -f "$target_dir/deploy/docker-compose.azure.yml" \
               --env-file "$shared_dir/.env.production" \
               up -d --build --remove-orphans
           }
