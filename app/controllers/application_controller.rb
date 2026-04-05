@@ -26,13 +26,13 @@ class ApplicationController < ActionController::Base
   end
 
   def require_admin_or_staff
-    unless current_user&.admin? || current_user&.staff?
+    unless AuthorizationPolicy.admin_or_staff?(current_user)
       redirect_to root_path, alert: "You are not authorized to perform this action."
     end
   end
 
   def require_admin
-    unless current_user&.admin?
+    unless AuthorizationPolicy.admin?(current_user)
       redirect_to root_path, alert: "You are not authorized to perform this action."
     end
   end
