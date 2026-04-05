@@ -121,6 +121,8 @@ class BookingsController < ApplicationController
     BookingMailer.with(booking: @booking).approved.deliver_now
 
     redirect_to approval_dashboard_path, notice: "Booking approved."
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to approval_dashboard_path, alert: booking_transition_error_message(e, "Booking could not be approved.")
   end
 
   def reject
@@ -129,11 +131,15 @@ class BookingsController < ApplicationController
     BookingMailer.with(booking: @booking, reason: reason).rejected.deliver_now
 
     redirect_to approval_dashboard_path, notice: "Booking rejected."
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to approval_dashboard_path, alert: booking_transition_error_message(e, "Booking could not be rejected.")
   end
 
   def mark_returned
-    @booking.update!(status: :returned)
+    @booking.mark_returned!
     redirect_to my_bookings_path, notice: "Equipment returned successfully."
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to my_bookings_path, alert: booking_transition_error_message(e, "Booking could not be marked as returned.")
   end
 
   # DELETE /bookings/1 or /bookings/1.json
@@ -307,5 +313,9 @@ class BookingsController < ApplicationController
       end
 
       options
+    end
+
+    def booking_transition_error_message(error, fallback_message)
+      error.record.errors.full_messages.to_sentence.presence || fallback_message
     end
 end

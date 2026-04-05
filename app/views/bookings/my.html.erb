@@ -28,7 +28,7 @@
             <% end %>
             <td data-booking-id="<%= booking.id %>" data-status="<%= booking.status %>"><%= booking.status.titleize %></td>
             <td>
-              <% if booking.equipment.present? && booking.approved? %>
+              <% if booking.returnable? %>
                 <%= button_to "Mark as Returned", mark_returned_booking_path(booking), method: :patch, data: { turbo: false } %>
               <% end %>
             </td>

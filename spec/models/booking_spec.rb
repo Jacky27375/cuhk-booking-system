@@ -79,6 +79,44 @@ RSpec.describe Booking, type: :model do
     end
   end
 
+  describe 'status transitions' do
+    it 'allows approval only from pending status' do
+      booking = create(:booking, status: :rejected)
+
+      expect { booking.approve! }.to raise_error(ActiveRecord::RecordInvalid)
+      expect(booking.reload.status).to eq('rejected')
+    end
+
+    it 'allows rejection only from pending status' do
+      booking = create(:booking, status: :approved)
+
+      expect { booking.reject!('Maintenance') }.to raise_error(ActiveRecord::RecordInvalid)
+      expect(booking.reload.status).to eq('approved')
+    end
+
+    it 'allows approved equipment bookings to be marked as returned' do
+      booking = create(:equipment_booking, status: :approved)
+
+      booking.mark_returned!
+
+      expect(booking.reload.status).to eq('returned')
+    end
+
+    it 'does not allow venue bookings to be marked as returned' do
+      booking = create(:booking, status: :approved)
+
+      expect { booking.mark_returned! }.to raise_error(ActiveRecord::RecordInvalid)
+      expect(booking.reload.status).to eq('approved')
+    end
+
+    it 'does not allow pending equipment bookings to be marked as returned' do
+      booking = create(:equipment_booking, status: :pending)
+
+      expect { booking.mark_returned! }.to raise_error(ActiveRecord::RecordInvalid)
+      expect(booking.reload.status).to eq('pending')
+    end
+  end
+
   describe 'status broadcasts' do
     it 'broadcasts status payload when status changes' do
       booking = create(:booking, status: :pending)
