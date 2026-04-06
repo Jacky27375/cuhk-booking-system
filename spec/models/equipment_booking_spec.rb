@@ -11,8 +11,8 @@ RSpec.describe EquipmentBooking, type: :model do
       user: user,
       equipment: equipment,
       quantity: 1,
-      start_date: Date.parse('2026-04-10'),
-      end_date: Date.parse('2026-04-12')
+      start_date: Date.parse(5.days.from_now.strftime('%Y-%m-%d')),
+      end_date: Date.parse(6.days.from_now.strftime('%Y-%m-%d'))
     )
 
     expect(booking).to be_valid

@@ -45,8 +45,9 @@ Feature: Venue Booking System
     When I visit the venues page
     And I click "Lecture Hall A"
     And I click "Book Venue"
-    And I select "10:00" from "Start time"
-    And I select "12:00" from "End time"
+    And I fill in "booking_date" with a date 5 days in the future
+    And I select "10:00" from "booking_start_slot"
+    And I select "12:00" from "booking_end_slot"
     And I click "Review Booking"
     Then I should see "Confirm booking details"
     And I should see "Lecture Hall A"
@@ -71,9 +72,62 @@ Feature: Venue Booking System
 
   Scenario: Admin can see booking requests
     Given there is a venue "Lecture Hall A"
-    And there is a booking for "Lecture Hall A" by "member@example.com" from "2026-03-20 10:00:00" to "2026-03-20 12:00:00"
+    And there is a booking for "Lecture Hall A" by "member@example.com" from today at "10:00" to today at "12:00"
     And I am logged in as "admin@example.com"
     When I visit the bookings page
     Then I should see "Lecture Hall A"
     And I should see "member@example.com"
-    And I should see "2026-03-20 10:00:00"
+
+  # Constraint: Venues can only be booked at least 5 days in advance
+  Scenario: Member can book a venue exactly 5 days in advance
+    Given there is a venue "Lecture Hall A"
+    And I am logged in as "member@example.com"
+    When I visit the venues page
+    And I click "Lecture Hall A"
+    And I click "Book Venue"
+    And I fill in "booking_date" with a date 5 days in the future
+    And I select "10:00" from "booking_start_slot"
+    And I select "12:00" from "booking_end_slot"
+    And I click "Review Booking"
+    Then I should see "Confirm booking details"
+    When I click "Submit Booking"
+    Then I should see "Booking was successfully created."
+
+  Scenario: Member cannot book a venue less than 5 days in advance
+    Given there is a venue "Lecture Hall A"
+    And I am logged in as "member@example.com"
+    When I visit the venues page
+    And I click "Lecture Hall A"
+    And I click "Book Venue"
+    And I fill in "booking_date" with a date 4 days in the future
+    And I select "10:00" from "booking_start_slot"
+    And I select "12:00" from "booking_end_slot"
+    And I click "Review Booking"
+    Then I should see "Venue must be booked at least 5 days in advance"
+
+  # Constraint: Venues can be booked for at most 4 hours
+  Scenario: Member can book a venue for up to 4 hours
+    Given there is a venue "Lecture Hall A"
+    And I am logged in as "member@example.com"
+    When I visit the venues page
+    And I click "Lecture Hall A"
+    And I click "Book Venue"
+    And I fill in "booking_date" with a date 5 days in the future
+    And I select "10:00" from "booking_start_slot"
+    And I select "14:00" from "booking_end_slot"
+    And I click "Review Booking"
+    Then I should see "Confirm booking details"
+    When I click "Submit Booking"
+    Then I should see "Booking was successfully created."
+
+  Scenario: Member cannot book a venue for more than 4 hours
+    Given there is a venue "Lecture Hall A"
+    And I am logged in as "member@example.com"
+    When I visit the venues page
+    And I click "Lecture Hall A"
+    And I click "Book Venue"
+    And I fill in "booking_date" with a date 5 days in the future
+    And I select "10:00" from "booking_start_slot"
+    And I select "15:00" from "booking_end_slot"
+    And I click "Review Booking"
+    Then I should see "Booking duration cannot exceed 4 hours"

@@ -20,8 +20,8 @@ RSpec.describe BookingScopeQuery do
       equipment: equipment,
       user: create(:user, :society_member, tenant: science_tenant),
       quantity: 1,
-      start_date: Date.current,
-      end_date: Date.current + 1.day,
+      start_date: Date.current + 5.days,
+      end_date: Date.current + 6.day,
       status: :borrowed
     )
 

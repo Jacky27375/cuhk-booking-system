@@ -8,8 +8,8 @@ RSpec.describe "/bookings", type: :request do
   let(:valid_attributes) {
     {
       venue_id: venue.id,
-      start_time: Time.zone.parse("2026-04-10 10:00:00"),
-      end_time: Time.zone.parse("2026-04-10 12:00:00")
+      start_time: Time.zone.parse(5.days.from_now.strftime('%Y-%m-%d') + ' 10:00:00'),
+      end_time: Time.zone.parse(5.days.from_now.strftime('%Y-%m-%d') + ' 12:00:00')
     }
   }
 
@@ -183,8 +183,8 @@ RSpec.describe "/bookings", type: :request do
         post bookings_url, params: {
           booking: {
             venue_id: venue.id,
-            start_time: Time.zone.parse("2026-04-10 10:00:00"),
-            end_time: Time.zone.parse("2026-04-10 09:00:00")
+            start_time: Time.zone.parse(5.days.from_now.strftime('%Y-%m-%d') + ' 10:00:00'),
+            end_time: Time.zone.parse(5.days.from_now.strftime('%Y-%m-%d') + ' 09:00:00')
           }
         }
 
@@ -203,8 +203,8 @@ RSpec.describe "/bookings", type: :request do
     context "with valid parameters" do
       let(:new_attributes) {
         {
-          start_time: Time.zone.parse("2026-04-10 13:00:00"),
-          end_time: Time.zone.parse("2026-04-10 14:00:00")
+          start_time: Time.zone.parse(5.days.from_now.strftime('%Y-%m-%d') + ' 13:00:00'),
+          end_time: Time.zone.parse(5.days.from_now.strftime('%Y-%m-%d') + ' 14:00:00')
         }
       }
 
@@ -309,8 +309,8 @@ RSpec.describe "/bookings", type: :request do
     end
 
     it "sorts approval rows by venue name ascending and descending" do
-      zulu_start = 3.days.from_now.change(min: 0, sec: 0)
-      alpha_start = 1.day.from_now.change(min: 0, sec: 0)
+      zulu_start = 7.days.from_now.change(min: 0, sec: 0)
+      alpha_start = 5.day.from_now.change(min: 0, sec: 0)
       create(:booking, venue: create(:venue, name: "Zulu Room", department: science_tenant.name, tenant: science_tenant), user: create(:user, tenant: science_tenant), status: :pending, start_time: zulu_start, end_time: zulu_start + 1.hour)
       create(:booking, venue: create(:venue, name: "Alpha Room", department: science_tenant.name, tenant: science_tenant), user: create(:user, tenant: science_tenant), status: :pending, start_time: alpha_start, end_time: alpha_start + 1.hour)
 

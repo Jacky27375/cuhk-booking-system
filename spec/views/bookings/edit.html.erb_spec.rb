@@ -9,8 +9,8 @@ RSpec.describe "bookings/edit", type: :view do
       :booking,
       user: user,
       venue: venue,
-      start_time: Time.zone.parse("2026-04-10 10:00:00"),
-      end_time: Time.zone.parse("2026-04-10 11:00:00")
+      start_time: Time.zone.parse(5.days.from_now.strftime('%Y-%m-%d') + ' 10:00:00'),
+      end_time: Time.zone.parse(5.days.from_now.strftime('%Y-%m-%d') + ' 11:00:00')
     )
   end
 

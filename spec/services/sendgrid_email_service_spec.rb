@@ -8,8 +8,8 @@ RSpec.describe SendgridEmailService do
     VenueBooking.create!(
       user: user,
       venue: venue,
-      start_time: 2.days.from_now.change(hour: 10, min: 0),
-      end_time: 2.days.from_now.change(hour: 12, min: 0)
+      start_time: 5.days.from_now.change(hour: 10, min: 0),
+      end_time: 5.days.from_now.change(hour: 12, min: 0)
     )
   end
 
@@ -19,8 +19,8 @@ RSpec.describe SendgridEmailService do
       user: user,
       equipment: equipment,
       quantity: 2,
-      start_date: 1.day.from_now.to_date,
-      end_date: 3.days.from_now.to_date
+      start_date: 5.day.from_now.to_date,
+      end_date: 7.days.from_now.to_date
     )
   end
 

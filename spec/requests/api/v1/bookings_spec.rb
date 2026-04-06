@@ -12,8 +12,8 @@ RSpec.describe "/api/v1/bookings", type: :request do
       VenueBooking.create!(
         user: user,
         venue: venue,
-        start_time: 2.days.from_now.change(hour: 10, min: 0),
-        end_time: 2.days.from_now.change(hour: 12, min: 0)
+        start_time: 5.days.from_now.change(hour: 10, min: 0),
+        end_time: 5.days.from_now.change(hour: 12, min: 0)
       )
     end
 
@@ -68,8 +68,8 @@ RSpec.describe "/api/v1/bookings", type: :request do
       VenueBooking.create!(
         user: user,
         venue: venue,
-        start_time: 2.days.from_now.change(hour: 10, min: 0),
-        end_time: 2.days.from_now.change(hour: 12, min: 0)
+        start_time: 5.days.from_now.change(hour: 10, min: 0),
+        end_time: 5.days.from_now.change(hour: 12, min: 0)
       )
     end
 
@@ -91,8 +91,8 @@ RSpec.describe "/api/v1/bookings", type: :request do
       other_booking = VenueBooking.create!(
         user: other_user,
         venue: create(:venue, tenant: other_user.tenant, department: other_user.tenant.name),
-        start_time: 3.days.from_now.change(hour: 10, min: 0),
-        end_time: 3.days.from_now.change(hour: 12, min: 0)
+        start_time: 6.days.from_now.change(hour: 10, min: 0),
+        end_time: 6.days.from_now.change(hour: 12, min: 0)
       )
       get "/api/v1/bookings/#{other_booking.id}", headers: headers
       expect(response).to have_http_status(:not_found)
@@ -105,8 +105,8 @@ RSpec.describe "/api/v1/bookings", type: :request do
         {
           booking_type: "venue",
           venue_id: venue.id,
-          start_time: 3.days.from_now.change(hour: 10, min: 0).iso8601,
-          end_time: 3.days.from_now.change(hour: 12, min: 0).iso8601
+          start_time: 6.days.from_now.change(hour: 10, min: 0).iso8601,
+          end_time: 6.days.from_now.change(hour: 12, min: 0).iso8601
         }
       end
 
@@ -138,8 +138,8 @@ RSpec.describe "/api/v1/bookings", type: :request do
           booking_type: "equipment",
           equipment_id: equipment.id,
           quantity: 2,
-          start_date: 1.day.from_now.to_date.iso8601,
-          end_date: 3.days.from_now.to_date.iso8601
+          start_date: 6.day.from_now.to_date.iso8601,
+          end_date: 8.days.from_now.to_date.iso8601
         }
       end
 
