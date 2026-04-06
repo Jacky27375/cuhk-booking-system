@@ -4,14 +4,36 @@
 
 <h1>Venues</h1>
 
-<div id="venues">
-  <% @venues.each do |venue| %>
-    <%= render venue %>
-    <p>
-      <%= link_to venue.name, venue %>
-    </p>
-  <% end %>
-</div>
+<% if @venues.any? %>
+  <table id="venues-table">
+    <thead>
+      <tr>
+        <th><%= sortable_header_link("Name", "name", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+        <th><%= sortable_header_link("Description", "description", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+        <th><%= sortable_header_link("Department", "department", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @venues.each do |venue| %>
+        <tr>
+          <td><%= link_to venue.name, venue_path(venue) %></td>
+          <td><%= venue.description %></td>
+          <td><%= venue.department %></td>
+          <td>
+            <%= link_to "Show", venue_path(venue) %>
+            <% if current_user&.admin? || current_user&.staff? %>
+              | <%= link_to "Edit", edit_venue_path(venue) %>
+              | <%= button_to "Destroy", venue_path(venue), method: :delete, form: { style: "display:inline" } %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No venues found.</p>
+<% end %>
 
 <% if current_user&.admin? || current_user&.staff? %>
   <%= link_to "New Venue", new_venue_path %>

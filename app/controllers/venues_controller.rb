@@ -4,7 +4,7 @@ class VenuesController < ApplicationController
 
   # GET /venues or /venues.json
   def index
-    @venues = accessible_venues.order(:name)
+    @venues = sort_venues(accessible_venues)
   end
 
   # GET /venues/1 or /venues/1.json
@@ -86,5 +86,24 @@ class VenuesController < ApplicationController
       return if current_user.admin?
 
       @venue.tenant = current_user.tenant
+    end
+
+    def sort_venues(scope)
+      allowed = {
+        "name" => "venues.name",
+        "description" => "venues.description",
+        "department" => "venues.department"
+      }
+
+      @sort_column = params[:sort]
+      @sort_direction = params[:direction]
+
+      unless allowed.key?(@sort_column) && %w[asc desc].include?(@sort_direction)
+        @sort_column = nil
+        @sort_direction = nil
+        return scope.order(name: :asc)
+      end
+
+      scope.order(Arel.sql("#{allowed[@sort_column]} #{@sort_direction}"))
     end
 end

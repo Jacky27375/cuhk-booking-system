@@ -4,7 +4,7 @@ class EquipmentsController < ApplicationController
   before_action :ensure_tenant_present_for_manage!, only: [:new, :create]
 
   def index
-    @equipments = tenant_equipments.order(:name)
+    @equipments = sort_equipments(tenant_equipments)
   end
 
   def show
@@ -104,5 +104,28 @@ class EquipmentsController < ApplicationController
     else
       params.require(:equipment).permit(:name, :quantity)
     end
+  end
+
+  def sort_equipments(scope)
+    @sort_column = params[:sort]
+    @sort_direction = params[:direction]
+
+    allowed = {
+      "name" => "equipment.name",
+      "quantity" => "equipment.quantity"
+    }
+
+    if @sort_column == "available_quantity" && %w[asc desc].include?(@sort_direction)
+      sorted = scope.to_a.sort_by(&:available_quantity)
+      return @sort_direction == "desc" ? sorted.reverse : sorted
+    end
+
+    unless allowed.key?(@sort_column) && %w[asc desc].include?(@sort_direction)
+      @sort_column = nil
+      @sort_direction = nil
+      return scope.order(:name)
+    end
+
+    scope.order(Arel.sql("#{allowed[@sort_column]} #{@sort_direction}"))
   end
 end

@@ -4,18 +4,38 @@
 
 <h1>Bookings</h1>
 
-<div id="bookings">
-  <% @bookings.each do |booking| %>
-    <%= render booking %>
-    <p>
-      <%= link_to "Show this booking", booking %>
-    </p>
-  <% end %>
-</div>
+<% if @bookings.any? %>
+  <table id="bookings-table">
+    <thead>
+      <tr>
+        <th><%= sortable_header_link("Resource", "resource", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+        <th><%= sortable_header_link("User", "user", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+        <th><%= sortable_header_link("Start", "start_time", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+        <th><%= sortable_header_link("End", "end_time", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+        <th><%= sortable_header_link("Status", "status", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @bookings.each do |booking| %>
+        <tr>
+          <td><%= booking.venue&.name || booking.equipment&.name %></td>
+          <td><%= booking.user.email %></td>
+          <td><%= booking.start_time || booking.start_date %></td>
+          <td><%= booking.end_time || booking.end_date %></td>
+          <td><%= booking.status.titleize %></td>
+          <td><%= link_to "Show", booking_path(booking) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No bookings found.</p>
+<% end %>
 
-  <% if respond_to?(:current_user) && current_user&.society_member? %>
-    <%= link_to "New booking", new_booking_path %>
-  <% end %>
+<% if respond_to?(:current_user) && current_user&.society_member? %>
+  <%= link_to "New booking", new_booking_path %>
+<% end %>
 
 
 <%= link_to "Back to Dashboard", dashboard_path %>

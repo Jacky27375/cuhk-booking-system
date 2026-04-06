@@ -25,6 +25,17 @@ RSpec.describe "/venues", type: :request do
       expect(response).to be_successful
     end
 
+    it "allows admin to see venues from all tenants" do
+      create(:venue, name: "Science Room", tenant: science_tenant, department: science_tenant.name)
+      create(:venue, name: "Arts Room", tenant: arts_tenant, department: arts_tenant.name)
+
+      get venues_url
+
+      expect(response).to be_successful
+      expect(response.body).to include("Science Room")
+      expect(response.body).to include("Arts Room")
+    end
+
     it "scopes staff to venues in their tenant" do
       staff = create(:user, :staff, tenant: science_tenant)
       visible_venue = create(:venue, name: "Room 101", tenant: science_tenant, department: science_tenant.name)
@@ -36,6 +47,20 @@ RSpec.describe "/venues", type: :request do
       expect(response).to be_successful
       expect(response.body).to include(visible_venue.name)
       expect(response.body).not_to include(hidden_venue.name)
+    end
+
+    it "sorts by name ascending then descending and falls back to default" do
+      create(:venue, name: "Zulu Room", tenant: science_tenant, department: science_tenant.name)
+      create(:venue, name: "Alpha Room", tenant: science_tenant, department: science_tenant.name)
+
+      get venues_url, params: { sort: "name", direction: "asc" }
+      expect(response.body.index("Alpha Room")).to be < response.body.index("Zulu Room")
+
+      get venues_url, params: { sort: "name", direction: "desc" }
+      expect(response.body.index("Zulu Room")).to be < response.body.index("Alpha Room")
+
+      get venues_url
+      expect(response.body.index("Alpha Room")).to be < response.body.index("Zulu Room")
     end
   end
 

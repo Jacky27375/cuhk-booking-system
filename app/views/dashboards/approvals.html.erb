@@ -3,14 +3,14 @@
 <% if @bookings.empty? %>
   <p>No pending bookings.</p>
 <% else %>
-  <table>
+  <table id="approvals-table">
     <thead>
       <tr>
-        <th>Venue</th>
-        <th>Department</th>
-        <th>User</th>
-        <th>Date</th>
-        <th>Status</th>
+        <th><%= sortable_header_link("Venue", "venue", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+        <th><%= sortable_header_link("Department", "department", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+        <th><%= sortable_header_link("User", "user", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+        <th><%= sortable_header_link("Date", "date", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+        <th><%= sortable_header_link("Status", "status", current_sort: @sort_column, current_direction: @sort_direction) %></th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -24,11 +24,7 @@
           <td><%= booking.status.titleize %></td>
           <td>
             <%= button_to "Approve", approve_booking_path(booking), method: :patch %>
-            <%= form_with url: reject_booking_path(booking), method: :patch, local: true do |f| %>
-              <%= f.label :rejection_reason, "Reason" %>
-              <%= f.text_field :rejection_reason %>
-              <%= f.submit "Reject" %>
-            <% end %>
+            <%= button_to "Reject", reject_booking_path(booking), method: :patch %>
           </td>
         </tr>
       <% end %>

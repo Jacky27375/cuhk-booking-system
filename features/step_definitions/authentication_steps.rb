@@ -6,7 +6,11 @@ Given('the following users exist:') do |table|
 
     tenant = Tenant.find_by(name: "Science Faculty") || create(:tenant, name: "Science Faculty")
 
-    create(:user, email: hash['email'], password: hash['password'], role: role, tenant: tenant)
+    user = User.find_or_initialize_by(email: hash['email'])
+    user.password = hash['password']
+    user.role = role
+    user.tenant = tenant
+    user.save!
   end
 end
 
@@ -52,6 +56,22 @@ end
 
 When('I visit the admin panel') do
   visit admin_path
+end
+
+When('I visit my bookings page') do
+  visit my_bookings_path
+end
+
+When('I try to edit the booking for {string} on {string}') do |venue_name, date|
+  booking = Booking.joins(:venue)
+                   .where(venues: { name: venue_name })
+                   .where(start_time: Time.zone.parse(date).all_day)
+                   .first!
+  visit edit_booking_path(booking)
+end
+
+Then('the first row in table {string} should contain {string}') do |table_id, text|
+  expect(page).to have_css("##{table_id} tbody tr:first-child", text: text)
 end
 
 Then('I should see link {string}') do |text|

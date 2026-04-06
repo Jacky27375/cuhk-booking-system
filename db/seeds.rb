@@ -73,7 +73,7 @@ unless Rails.env.production?
   ]
 
   # Build a readable department list from venues, then create one tenant per department.
-  
+
   department_tenants = {}
 
   departments.each do |department_name|

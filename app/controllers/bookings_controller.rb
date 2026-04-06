@@ -2,12 +2,14 @@ class BookingsController < ApplicationController
   TIMETABLE_START_HOUR = 8
   TIMETABLE_END_HOUR = 22
 
+  before_action :require_student_for_edit!, only: %i[ edit update ]
+  before_action :require_student_for_my!, only: :my
   before_action :set_booking, only: %i[ show edit update destroy approve reject mark_returned ]
   before_action :require_admin_or_staff, only: %i[ index approve reject ]
 
   # GET /bookings or /bookings.json
   def index
-    @bookings = booking_scope.order(start_time: :desc)
+    @bookings = sort_bookings(booking_scope)
   end
 
   # GET /bookings/my
@@ -317,5 +319,39 @@ class BookingsController < ApplicationController
 
     def booking_transition_error_message(error, fallback_message)
       error.record.errors.full_messages.to_sentence.presence || fallback_message
+    end
+
+    def require_student_for_edit!
+      return if current_user.society_member?
+
+      redirect_to bookings_path, alert: "Staff and admin cannot edit bookings."
+    end
+
+    def require_student_for_my!
+      return if current_user.society_member?
+
+      redirect_to dashboard_path, alert: "Only students can access My Bookings."
+    end
+
+    def sort_bookings(scope)
+      allowed = {
+        "resource" => "COALESCE(venues.name, equipment.name)",
+        "user" => "users.email",
+        "start_time" => "bookings.start_time",
+        "end_time" => "bookings.end_time",
+        "status" => "bookings.status"
+      }
+
+      @sort_column = params[:sort]
+      @sort_direction = params[:direction]
+
+      unless allowed.key?(@sort_column) && %w[asc desc].include?(@sort_direction)
+        @sort_column = nil
+        @sort_direction = nil
+        return scope.order(start_time: :desc)
+      end
+
+      scope.left_joins(:venue, :equipment, :user)
+           .order(Arel.sql("#{allowed[@sort_column]} #{@sort_direction}"))
     end
 end

@@ -19,11 +19,11 @@ RSpec.describe "venues/index", type: :view do
 
   it "renders a list of venues" do
     render
-    assert_select "div>strong", text: "Name:", count: 2
-    assert_select "div>strong", text: "Description:", count: 2
-    assert_select "div", text: /Venue 1/
-    assert_select "div", text: /Venue 2/
-    assert_select "div", text: /Desc 1/
-    assert_select "div", text: /Desc 2/
+    assert_select "table#venues-table"
+    assert_select "table#venues-table tbody tr", count: 2
+    expect(rendered).to include("Venue 1")
+    expect(rendered).to include("Venue 2")
+    expect(rendered).to include("Desc 1")
+    expect(rendered).to include("Desc 2")
   end
 end

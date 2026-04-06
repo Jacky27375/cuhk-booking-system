@@ -17,13 +17,38 @@ RSpec.describe 'Equipments', type: :request do
       expect(response).to redirect_to(login_path)
     end
 
-    it 'shows only current tenant equipment for authenticated users' do
+    it 'shows only current tenant equipment for staff users' do
       log_in_as(staff_user)
       get equipments_path
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Projector')
       expect(response.body).not_to include('Speaker')
+    end
+
+    it 'shows equipment from all tenants for admin users' do
+      log_in_as(admin_user)
+      get equipments_path
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Projector')
+      expect(response.body).to include('Speaker')
+    end
+
+    it 'sorts by name asc and desc and falls back to default ordering' do
+      create(:equipment, tenant: tenant_a, name: 'AAA Camera', quantity: 1)
+      create(:equipment, tenant: tenant_a, name: 'ZZZ Camera', quantity: 1)
+
+      log_in_as(staff_user)
+
+      get equipments_path, params: { sort: 'name', direction: 'asc' }
+      expect(response.body.index('AAA Camera')).to be < response.body.index('ZZZ Camera')
+
+      get equipments_path, params: { sort: 'name', direction: 'desc' }
+      expect(response.body.index('ZZZ Camera')).to be < response.body.index('AAA Camera')
+
+      get equipments_path
+      expect(response.body.index('AAA Camera')).to be < response.body.index('ZZZ Camera')
     end
   end
 

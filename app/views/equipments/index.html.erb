@@ -5,12 +5,12 @@
 <% end %>
 
 <% if @equipments.any? %>
-  <table>
+  <table id="equipments-table">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Total Quantity</th>
-        <th>Available Quantity</th>
+        <th><%= sortable_header_link("Name", "name", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+        <th><%= sortable_header_link("Total Quantity", "quantity", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+        <th><%= sortable_header_link("Available Quantity", "available_quantity", current_sort: @sort_column, current_direction: @sort_direction) %></th>
         <th>Actions</th>
       </tr>
     </thead>

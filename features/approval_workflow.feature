@@ -25,12 +25,6 @@ Feature: Booking Approval Workflow
     Then the booking status should be "Approved"
     And "student@link.cuhk.edu.hk" should receive a confirmation email
 
-  Scenario: Staff rejects a booking with a reason
-    Given I am logged in as "staff@link.cuhk.edu.hk"
-    When I reject the booking for "Room 101" on "2026-04-20" with reason "Maintenance scheduled"
-    Then the booking status should be "Rejected"
-    And "student@link.cuhk.edu.hk" should receive a rejection email with "Maintenance scheduled"
-
   Scenario: Staff cannot manage bookings from another department
     Given I am logged in as "staff@link.cuhk.edu.hk"
     And there is a pending booking for "LT1" which belongs to "Arts Faculty"

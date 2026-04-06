@@ -33,6 +33,84 @@ RSpec.describe "/bookings", type: :request do
       get bookings_url
       expect(response).to be_successful
     end
+
+    it "shows bookings from all tenants for admin" do
+      science_tenant = create(:tenant, name: "Science Faculty")
+      arts_tenant = create(:tenant, name: "Arts Faculty")
+      science_member = create(:user, tenant: science_tenant)
+      arts_member = create(:user, tenant: arts_tenant)
+      science_venue = create(:venue, name: "Science Hall", department: science_tenant.name, tenant: science_tenant)
+      arts_venue = create(:venue, name: "Arts Hall", department: arts_tenant.name, tenant: arts_tenant)
+      create(:booking, venue: science_venue, user: science_member, status: :pending)
+      create(:booking, venue: arts_venue, user: arts_member, status: :pending)
+
+      get bookings_url
+
+      expect(response).to be_successful
+      expect(response.body).to include("Science Hall")
+      expect(response.body).to include("Arts Hall")
+    end
+
+    it "shows only bookings in staff tenant for staff" do
+      science_tenant = create(:tenant, name: "Science Faculty")
+      arts_tenant = create(:tenant, name: "Arts Faculty")
+      staff = create(:user, :staff, tenant: science_tenant)
+      science_member = create(:user, tenant: science_tenant)
+      arts_member = create(:user, tenant: arts_tenant)
+      science_venue = create(:venue, name: "Science Hall", department: science_tenant.name, tenant: science_tenant)
+      arts_venue = create(:venue, name: "Arts Hall", department: arts_tenant.name, tenant: arts_tenant)
+      create(:booking, venue: science_venue, user: science_member, status: :pending)
+      create(:booking, venue: arts_venue, user: arts_member, status: :pending)
+
+      log_in_as(staff)
+      get bookings_url
+
+      expect(response).to be_successful
+      expect(response.body).to include("Science Hall")
+      expect(response.body).not_to include("Arts Hall")
+    end
+
+    it "sorts bookings by resource asc and desc" do
+      science_tenant = create(:tenant, name: "Science Faculty")
+      science_member = create(:user, tenant: science_tenant)
+      alpha_venue = create(:venue, name: "Alpha Hall", department: science_tenant.name, tenant: science_tenant)
+      zulu_venue = create(:venue, name: "Zulu Hall", department: science_tenant.name, tenant: science_tenant)
+      create(:booking, venue: zulu_venue, user: science_member, status: :pending)
+      create(:booking, venue: alpha_venue, user: science_member, status: :pending)
+
+      get bookings_url, params: { sort: "resource", direction: "asc" }
+      expect(response.body.index("Alpha Hall")).to be < response.body.index("Zulu Hall")
+
+      get bookings_url, params: { sort: "resource", direction: "desc" }
+      expect(response.body.index("Zulu Hall")).to be < response.body.index("Alpha Hall")
+    end
+  end
+
+  describe "GET /my" do
+    it "allows society members to access my bookings" do
+      get my_bookings_path
+      expect(response).to be_successful
+    end
+
+    it "blocks staff from accessing my bookings" do
+      staff = create(:user, :staff, tenant: tenant)
+      log_in_as(staff)
+
+      get my_bookings_path
+
+      expect(response).to redirect_to(dashboard_path)
+      expect(flash[:alert]).to eq("Only students can access My Bookings.")
+    end
+
+    it "blocks admin from accessing my bookings" do
+      admin = create(:user, :admin)
+      log_in_as(admin)
+
+      get my_bookings_path
+
+      expect(response).to redirect_to(dashboard_path)
+      expect(flash[:alert]).to eq("Only students can access My Bookings.")
+    end
   end
 
   describe "GET /show" do
@@ -55,6 +133,28 @@ RSpec.describe "/bookings", type: :request do
       booking = VenueBooking.create! valid_attributes.merge(user: user)
       get edit_booking_url(booking)
       expect(response).to be_successful
+    end
+
+    it "prevents staff from editing bookings" do
+      booking = VenueBooking.create! valid_attributes.merge(user: user)
+      staff = create(:user, :staff, tenant: tenant)
+      log_in_as(staff)
+
+      get edit_booking_url(booking)
+
+      expect(response).to redirect_to(bookings_path)
+      expect(flash[:alert]).to eq("Staff and admin cannot edit bookings.")
+    end
+
+    it "prevents admin from editing bookings" do
+      booking = VenueBooking.create! valid_attributes.merge(user: user)
+      admin = create(:user, :admin)
+      log_in_as(admin)
+
+      get edit_booking_url(booking)
+
+      expect(response).to redirect_to(bookings_path)
+      expect(flash[:alert]).to eq("Staff and admin cannot edit bookings.")
     end
   end
 
@@ -136,6 +236,30 @@ RSpec.describe "/bookings", type: :request do
         expect(response).to have_http_status(:unprocessable_content)
       end
     end
+
+    context "when current user is staff or admin" do
+      it "prevents staff from updating bookings" do
+        booking = VenueBooking.create! valid_attributes.merge(user: user)
+        staff = create(:user, :staff, tenant: tenant)
+        log_in_as(staff)
+
+        patch booking_url(booking), params: { booking: { start_time: Time.zone.parse("2026-04-10 15:00:00") } }
+
+        expect(response).to redirect_to(bookings_path)
+        expect(flash[:alert]).to eq("Staff and admin cannot edit bookings.")
+      end
+
+      it "prevents admin from updating bookings" do
+        booking = VenueBooking.create! valid_attributes.merge(user: user)
+        admin = create(:user, :admin)
+        log_in_as(admin)
+
+        patch booking_url(booking), params: { booking: { start_time: Time.zone.parse("2026-04-10 15:00:00") } }
+
+        expect(response).to redirect_to(bookings_path)
+        expect(flash[:alert]).to eq("Staff and admin cannot edit bookings.")
+      end
+    end
   end
 
   describe "DELETE /destroy" do
@@ -182,6 +306,22 @@ RSpec.describe "/bookings", type: :request do
       get approval_dashboard_path
 
       expect(response.body).to include("Legacy Room")
+    end
+
+    it "sorts approval rows by venue name ascending and descending" do
+      zulu_start = 3.days.from_now.change(min: 0, sec: 0)
+      alpha_start = 1.day.from_now.change(min: 0, sec: 0)
+      create(:booking, venue: create(:venue, name: "Zulu Room", department: science_tenant.name, tenant: science_tenant), user: create(:user, tenant: science_tenant), status: :pending, start_time: zulu_start, end_time: zulu_start + 1.hour)
+      create(:booking, venue: create(:venue, name: "Alpha Room", department: science_tenant.name, tenant: science_tenant), user: create(:user, tenant: science_tenant), status: :pending, start_time: alpha_start, end_time: alpha_start + 1.hour)
+
+      get approval_dashboard_path, params: { sort: "venue", direction: "asc" }
+      expect(response.body.index("Alpha Room")).to be < response.body.index("Zulu Room")
+
+      get approval_dashboard_path, params: { sort: "venue", direction: "desc" }
+      expect(response.body.index("Zulu Room")).to be < response.body.index("Alpha Room")
+
+      get approval_dashboard_path
+      expect(response.body.index("Zulu Room")).to be < response.body.index("Alpha Room")
     end
   end
 
