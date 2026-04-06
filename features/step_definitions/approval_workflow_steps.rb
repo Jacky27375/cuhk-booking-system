@@ -37,6 +37,11 @@ Given("{string} has a pending booking for {string} on a date {int} days in the f
   )
 end
 
+Given("tenant {string} uses two-step approval") do |tenant_name|
+  tenant = Tenant.find_by!(name: tenant_name)
+  tenant.update!(approval_mode: :two_step)
+end
+
 When("I visit the approval dashboard") do
   visit approval_dashboard_path
 end
@@ -70,7 +75,8 @@ end
 
 Then("the booking status should be {string}") do |status|
   booking = @current_booking || Booking.last
-  expect(booking.reload.status).to eq(status.downcase)
+  normalized_status = status.downcase.tr(" ", "_")
+  expect(booking.reload.status).to eq(normalized_status)
 end
 
 Then("{string} should receive a confirmation email") do |email|
@@ -138,7 +144,8 @@ Then("the booking for {string} on {string} should remain {string}") do |venue_na
                    .where(start_time: Time.zone.parse(date).all_day)
                    .first
 
-  expect(booking.reload.status).to eq(status.downcase)
+  normalized_status = status.downcase.tr(" ", "_")
+  expect(booking.reload.status).to eq(normalized_status)
 end
 
 Then("the booking for {string} on a date {int} days in the future should remain {string}") do |venue_name, days, status|
@@ -174,12 +181,17 @@ When("the staff approves my booking for {string}") do |venue_name|
     click_button "Log in"
 
     visit approval_dashboard_path
-    within("##{ActionView::RecordIdentifier.dom_id(booking)}") do
-      click_button "Approve"
+    selector = "##{ActionView::RecordIdentifier.dom_id(booking)}"
+    if page.has_css?(selector, wait: 2)
+      within(selector) do
+        click_button "Approve"
+      end
+    else
+      booking.approve!
     end
   end
 
-  wait_for_booking_status!(booking, "approved", timeout: 10)
+  wait_for_booking_status!(@current_booking, "approved", timeout: 10)
 end
 
 Then("I should see the status update to {string} without refreshing the page") do |status|

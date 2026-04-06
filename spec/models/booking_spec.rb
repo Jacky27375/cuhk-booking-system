@@ -80,18 +80,58 @@ RSpec.describe Booking, type: :model do
   end
 
   describe 'status transitions' do
-    it 'allows approval only from pending status' do
+    it 'allows approval from under_review status' do
+      booking = create(:booking, status: :under_review)
+
+      booking.approve!
+
+      expect(booking.reload.status).to eq('approved')
+    end
+
+    it 'blocks approval from rejected status' do
       booking = create(:booking, status: :rejected)
 
       expect { booking.approve! }.to raise_error(ActiveRecord::RecordInvalid)
       expect(booking.reload.status).to eq('rejected')
     end
 
-    it 'allows rejection only from pending status' do
+    it 'allows transition to under_review from pending status' do
+      booking = create(:booking, status: :pending)
+
+      booking.start_review!
+
+      expect(booking.reload.status).to eq('under_review')
+    end
+
+    it 'allows rejection from under_review status' do
+      booking = create(:booking, status: :under_review)
+
+      booking.reject!('Capacity issue')
+
+      expect(booking.reload.status).to eq('rejected')
+      expect(booking.rejection_reason).to eq('Capacity issue')
+    end
+
+    it 'blocks rejection from approved status' do
       booking = create(:booking, status: :approved)
 
       expect { booking.reject!('Maintenance') }.to raise_error(ActiveRecord::RecordInvalid)
       expect(booking.reload.status).to eq('approved')
+    end
+
+    it 'allows cancellation from pending status' do
+      booking = create(:booking, status: :pending)
+
+      booking.cancel!
+
+      expect(booking.reload.status).to eq('cancelled')
+    end
+
+    it 'blocks cancellation from returned status' do
+      booking = create(:equipment_booking, status: :returned)
+
+      expect { booking.cancel! }.to raise_error(ActiveRecord::RecordInvalid)
+      expect(booking.reload.status).to eq('returned')
     end
 
     it 'allows approved equipment bookings to be marked as returned' do
@@ -114,6 +154,26 @@ RSpec.describe Booking, type: :model do
 
       expect { booking.mark_returned! }.to raise_error(ActiveRecord::RecordInvalid)
       expect(booking.reload.status).to eq('pending')
+    end
+  end
+
+  describe '#cancelable_by_owner?' do
+    it 'returns true for pending future venue bookings' do
+      booking = build(:booking,
+                      status: :pending,
+                      start_time: 7.days.from_now.change(hour: 10, min: 0),
+                      end_time: 7.days.from_now.change(hour: 12, min: 0))
+
+      expect(booking.cancelable_by_owner?).to be(true)
+    end
+
+    it 'returns false for past venue bookings' do
+      booking = build(:booking,
+                      status: :pending,
+                      start_time: 2.days.ago.change(hour: 10, min: 0),
+                      end_time: 2.days.ago.change(hour: 12, min: 0))
+
+      expect(booking.cancelable_by_owner?).to be(false)
     end
   end
 

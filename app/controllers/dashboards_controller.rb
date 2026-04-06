@@ -5,10 +5,12 @@ class DashboardsController < ApplicationController
   end
 
   def approvals
-    @bookings = Booking.includes(:venue, :user).pending
+    @bookings = Booking.awaiting_approval
+                       .where.not(venue_id: nil)
+                       .includes(:venue, :user, approval_steps: :actor)
 
     if current_user.staff?
-      @bookings = @bookings.for_tenant(current_user.tenant)
+      @bookings = @bookings.joins(:venue).merge(Venue.visible_to_tenant(current_user.tenant))
     end
 
     @bookings = sort_approval_bookings(@bookings)

@@ -44,4 +44,26 @@ RSpec.describe BookingConflictChecker do
 
     expect(described_class.new(booking).conflict_exists?).to be(false)
   end
+
+  it 'ignores cancelled overlapping bookings' do
+    base_day = 7.days.from_now.to_date
+    create(
+      :booking,
+      user: user,
+      venue: venue,
+      status: :cancelled,
+      start_time: Time.zone.parse("#{base_day} 10:00:00"),
+      end_time: Time.zone.parse("#{base_day} 12:00:00")
+    )
+
+    booking = build(
+      :booking,
+      user: user,
+      venue: venue,
+      start_time: Time.zone.parse("#{base_day} 11:00:00"),
+      end_time: Time.zone.parse("#{base_day} 13:00:00")
+    )
+
+    expect(described_class.new(booking).conflict_exists?).to be(false)
+  end
 end

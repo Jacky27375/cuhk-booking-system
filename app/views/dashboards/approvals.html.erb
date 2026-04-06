@@ -1,7 +1,7 @@
 <h1>Approval Dashboard</h1>
 
 <% if @bookings.empty? %>
-  <p>No pending bookings.</p>
+  <p>No bookings awaiting approval.</p>
 <% else %>
   <table id="approvals-table" class="resource-grid-table">
     <thead>
@@ -11,6 +11,7 @@
         <th><%= sortable_header_link("User", "user", current_sort: @sort_column, current_direction: @sort_direction) %></th>
         <th><%= sortable_header_link("Date", "date", current_sort: @sort_column, current_direction: @sort_direction) %></th>
         <th><%= sortable_header_link("Status", "status", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+        <th>Last Action</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -21,9 +22,22 @@
           <td><%= booking.venue.department %></td>
           <td><%= booking.user.email %></td>
           <td><%= booking.start_time.to_date %></td>
-          <td><%= booking.status.titleize %></td>
           <td>
-            <%= button_to "Approve", approve_booking_path(booking), method: :patch %>
+            <%= booking.status.titleize %>
+            <% if booking.under_review? && booking.user&.tenant&.two_step? %>
+              (Step 1/2)
+            <% end %>
+          </td>
+          <td>
+            <% latest_step = booking.approval_steps.max_by(&:created_at) %>
+            <% if latest_step.present? %>
+              <%= "#{latest_step.action.humanize} by #{latest_step.actor.email}" %>
+            <% else %>
+              -
+            <% end %>
+          </td>
+          <td>
+            <%= button_to(booking.under_review? ? "Approve (Final)" : "Approve", approve_booking_path(booking), method: :patch) %>
             <%= form_with url: reject_booking_path(booking), method: :patch, local: true, class: "inline-reject-form" do |f| %>
               <%= f.text_field :rejection_reason, placeholder: "Reason", size: 20 %>
               <%= f.submit "Reject" %>

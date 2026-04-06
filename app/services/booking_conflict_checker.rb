@@ -18,7 +18,7 @@ class BookingConflictChecker
 
     return scope unless Booking.defined_enums.key?("status")
 
-    rejected_status = Booking.statuses["rejected"]
-    rejected_status ? scope.where.not(status: rejected_status) : scope
+    non_blocking_statuses = Booking.non_blocking_venue_status_values
+    non_blocking_statuses.any? ? scope.where.not(status: non_blocking_statuses) : scope
   end
 end
