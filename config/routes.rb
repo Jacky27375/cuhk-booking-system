@@ -31,6 +31,14 @@ Rails.application.routes.draw do
     end
   end
 
+  namespace :api do
+    namespace :v1 do
+      resources :venues, only: [:index, :show]
+      resources :bookings, only: [:index, :show, :create]
+      resources :equipment, only: [:index, :show]
+    end
+  end
+
   root "sessions#new"
   mount ActionCable.server => "/cable"
 end
