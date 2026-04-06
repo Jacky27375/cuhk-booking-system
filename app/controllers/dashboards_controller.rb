@@ -17,23 +17,36 @@ class DashboardsController < ApplicationController
   private
 
   def sort_approval_bookings(scope)
-    allowed = {
-      "venue" => "venues.name",
-      "department" => "venues.department",
-      "user" => "users.email",
-      "date" => "bookings.start_time",
-      "status" => "bookings.status"
-    }
+    allowed = %w[venue department user date status]
 
     @sort_column = params[:sort]
     @sort_direction = params[:direction]
 
-    unless allowed.key?(@sort_column) && %w[asc desc].include?(@sort_direction)
+    unless allowed.include?(@sort_column) && %w[asc desc].include?(@sort_direction)
       @sort_column = nil
       @sort_direction = nil
       return scope.order(start_time: :desc)
     end
 
-    scope.left_joins(:venue, :user).order(Arel.sql("#{allowed[@sort_column]} #{@sort_direction}"))
+    direction = @sort_direction == "asc" ? :asc : :desc
+    bookings = Booking.arel_table
+    venues = Venue.arel_table
+    users = User.arel_table
+
+    order_expr = case @sort_column
+    when "venue"
+      venues[:name]
+    when "department"
+      venues[:department]
+    when "user"
+      users[:email]
+    when "date"
+      bookings[:start_time]
+    when "status"
+      bookings[:status]
+    end
+
+    scope.left_joins(:venue, :user)
+         .order(direction == :asc ? order_expr.asc : order_expr.desc)
   end
 end

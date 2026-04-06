@@ -334,24 +334,37 @@ class BookingsController < ApplicationController
     end
 
     def sort_bookings(scope)
-      allowed = {
-        "resource" => "COALESCE(venues.name, equipment.name)",
-        "user" => "users.email",
-        "start_time" => "bookings.start_time",
-        "end_time" => "bookings.end_time",
-        "status" => "bookings.status"
-      }
+      allowed = %w[resource user start_time end_time status]
 
       @sort_column = params[:sort]
       @sort_direction = params[:direction]
 
-      unless allowed.key?(@sort_column) && %w[asc desc].include?(@sort_direction)
+      unless allowed.include?(@sort_column) && %w[asc desc].include?(@sort_direction)
         @sort_column = nil
         @sort_direction = nil
         return scope.order(start_time: :desc)
       end
 
+      direction = @sort_direction == "asc" ? :asc : :desc
+      bookings = Booking.arel_table
+      venues = Venue.arel_table
+      equipments = Equipment.arel_table
+      users = User.arel_table
+
+      order_expr = case @sort_column
+      when "resource"
+        Arel::Nodes::NamedFunction.new("COALESCE", [venues[:name], equipments[:name]])
+      when "user"
+        users[:email]
+      when "start_time"
+        bookings[:start_time]
+      when "end_time"
+        bookings[:end_time]
+      when "status"
+        bookings[:status]
+      end
+
       scope.left_joins(:venue, :equipment, :user)
-           .order(Arel.sql("#{allowed[@sort_column]} #{@sort_direction}"))
+           .order(direction == :asc ? order_expr.asc : order_expr.desc)
     end
 end

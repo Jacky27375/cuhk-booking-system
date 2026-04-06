@@ -110,22 +110,23 @@ class EquipmentsController < ApplicationController
     @sort_column = params[:sort]
     @sort_direction = params[:direction]
 
-    allowed = {
-      "name" => "equipment.name",
-      "quantity" => "equipment.quantity"
-    }
+    allowed = %w[name quantity]
 
     if @sort_column == "available_quantity" && %w[asc desc].include?(@sort_direction)
       sorted = scope.to_a.sort_by(&:available_quantity)
       return @sort_direction == "desc" ? sorted.reverse : sorted
     end
 
-    unless allowed.key?(@sort_column) && %w[asc desc].include?(@sort_direction)
+    unless allowed.include?(@sort_column) && %w[asc desc].include?(@sort_direction)
       @sort_column = nil
       @sort_direction = nil
       return scope.order(:name)
     end
 
-    scope.order(Arel.sql("#{allowed[@sort_column]} #{@sort_direction}"))
+    direction = @sort_direction == "asc" ? :asc : :desc
+    equipments = Equipment.arel_table
+    order_expr = @sort_column == "name" ? equipments[:name] : equipments[:quantity]
+
+    scope.order(direction == :asc ? order_expr.asc : order_expr.desc)
   end
 end

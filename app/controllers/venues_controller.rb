@@ -89,21 +89,28 @@ class VenuesController < ApplicationController
     end
 
     def sort_venues(scope)
-      allowed = {
-        "name" => "venues.name",
-        "description" => "venues.description",
-        "department" => "venues.department"
-      }
+      allowed = %w[name description department]
 
       @sort_column = params[:sort]
       @sort_direction = params[:direction]
 
-      unless allowed.key?(@sort_column) && %w[asc desc].include?(@sort_direction)
+      unless allowed.include?(@sort_column) && %w[asc desc].include?(@sort_direction)
         @sort_column = nil
         @sort_direction = nil
         return scope.order(name: :asc)
       end
 
-      scope.order(Arel.sql("#{allowed[@sort_column]} #{@sort_direction}"))
+      direction = @sort_direction == "asc" ? :asc : :desc
+      venues = Venue.arel_table
+      order_expr = case @sort_column
+      when "name"
+        venues[:name]
+      when "description"
+        venues[:description]
+      when "department"
+        venues[:department]
+      end
+
+      scope.order(direction == :asc ? order_expr.asc : order_expr.desc)
     end
 end
