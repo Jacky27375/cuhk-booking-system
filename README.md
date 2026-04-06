@@ -38,7 +38,7 @@ You need the following installed to run this project:
 
 4. **Start the server**
    ```bash
-   rails server
+   bundle exec rails server
    ```
    The app will be available at [http://localhost:3000](http://localhost:3000).
 
@@ -82,20 +82,20 @@ If you ran `rails db:seed`, the development database includes the following acco
 
 | Role | Email | Password |
 |------|-------|----------|
-| **Admin** | `admin@cuhk.edu.hk` | `Password1!` |
-| **Staff** | `staff@cuhk.edu.hk` | `Password1!` |
-| **Society Member** | `member@cuhk.edu.hk` | `Password1!` |
+| **Admin** | `admin@link.cuhk.edu.hk` | `Password1!` |
+| **Staff** | `staff@link.cuhk.edu.hk` | `Password1!` |
+| **Society Member** | `member@link.cuhk.edu.hk` | `Password1!` |
 
 Additional cross-tenant test accounts are also created by seeds:
 
 | Role | Tenant | Email | Password |
 |------|--------|-------|----------|
-| **Staff** | Shaw College | `staff.shaw@cuhk.edu.hk` | `Password1!` |
-| **Staff** | New Asia College | `staff.newasia@cuhk.edu.hk` | `Password1!` |
-| **Staff** | Wu Yee Sun College | `staff.wys@cuhk.edu.hk` | `Password1!` |
-| **Society Member** | Shaw College | `member.shaw@cuhk.edu.hk` | `Password1!` |
-| **Society Member** | New Asia College | `member.newasia@cuhk.edu.hk` | `Password1!` |
-| **Society Member** | Wu Yee Sun College | `member.wys@cuhk.edu.hk` | `Password1!` |
+| **Staff** | Shaw College | `staff.shaw@link.cuhk.edu.hk` | `Password1!` |
+| **Staff** | New Asia College | `staff.newasia@link.cuhk.edu.hk` | `Password1!` |
+| **Staff** | Wu Yee Sun College | `staff.wys@link.cuhk.edu.hk` | `Password1!` |
+| **Society Member** | Shaw College | `member.shaw@link.cuhk.edu.hk` | `Password1!` |
+| **Society Member** | New Asia College | `member.newasia@link.cuhk.edu.hk` | `Password1!` |
+| **Society Member** | Wu Yee Sun College | `member.wys@link.cuhk.edu.hk` | `Password1!` |
 
 ## Deployment (Azure VM)
 

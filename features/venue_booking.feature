@@ -5,12 +5,12 @@ Feature: Venue Booking System
 
   Background:
     Given there is a tenant "University"
-    And there is a user "admin@example.com" with role "admin"
-    And there is a user "staff@example.com" with role "staff"
-    And there is a user "member@example.com" with role "society_member"
+    And there is a user "admin@link.cuhk.edu.hk" with role "admin"
+    And there is a user "staff@link.cuhk.edu.hk" with role "staff"
+    And there is a user "member@link.cuhk.edu.hk" with role "society_member"
 
   Scenario: Admin can create a new venue
-    Given I am logged in as "admin@example.com"
+    Given I am logged in as "admin@link.cuhk.edu.hk"
     When I visit the venues page
     And I click "New Venue"
     And I fill in "Name" with "Lecture Hall A"
@@ -21,7 +21,7 @@ Feature: Venue Booking System
     And I should see "Lecture Hall A"
 
   Scenario: Staff can create a new venue
-    Given I am logged in as "staff@example.com"
+    Given I am logged in as "staff@link.cuhk.edu.hk"
     When I visit the venues page
     And I click "New Venue"
     And I fill in "Name" with "Conference Room B"
@@ -32,7 +32,7 @@ Feature: Venue Booking System
 
   Scenario: Member can view list of venues
     Given there is a venue "Lecture Hall A"
-    And I am logged in as "member@example.com"
+    And I am logged in as "member@link.cuhk.edu.hk"
     When I visit the venues page
     Then I should see "Lecture Hall A"
     And I should not see "New Venue"
@@ -41,7 +41,7 @@ Feature: Venue Booking System
 
   Scenario: Member can book a venue
     Given there is a venue "Lecture Hall A"
-    And I am logged in as "member@example.com"
+    And I am logged in as "member@link.cuhk.edu.hk"
     When I visit the venues page
     And I click "Lecture Hall A"
     And I click "Book Venue"
@@ -58,14 +58,14 @@ Feature: Venue Booking System
 
   Scenario: Admin cannot book a venue
     Given there is a venue "Lecture Hall A"
-    And I am logged in as "admin@example.com"
+    And I am logged in as "admin@link.cuhk.edu.hk"
     When I visit the venues page
     And I click "Lecture Hall A"
     Then I should not see "Book Venue"
 
   Scenario: Staff cannot book a venue
     Given there is a venue "Lecture Hall A"
-    And I am logged in as "staff@example.com"
+    And I am logged in as "staff@link.cuhk.edu.hk"
     When I visit the venues page
     And I click "Lecture Hall A"
     Then I should not see "Book Venue"
@@ -73,15 +73,15 @@ Feature: Venue Booking System
   Scenario: Admin can see booking requests
     Given there is a venue "Lecture Hall A"
     And there is a booking for "Lecture Hall A" by "member@example.com" from today at "10:00" to today at "12:00"
-    And I am logged in as "admin@example.com"
+    And I am logged in as "admin@link.cuhk.edu.hk"
     When I visit the bookings page
     Then I should see "Lecture Hall A"
-    And I should see "member@example.com"
+    And I should see "member@link.cuhk.edu.hk"
 
   # Constraint: Venues can only be booked at least 5 days in advance
   Scenario: Member can book a venue exactly 5 days in advance
     Given there is a venue "Lecture Hall A"
-    And I am logged in as "member@example.com"
+    And I am logged in as "member@link.cuhk.edu.hk"
     When I visit the venues page
     And I click "Lecture Hall A"
     And I click "Book Venue"
@@ -95,7 +95,7 @@ Feature: Venue Booking System
 
   Scenario: Member cannot book a venue less than 5 days in advance
     Given there is a venue "Lecture Hall A"
-    And I am logged in as "member@example.com"
+    And I am logged in as "member@link.cuhk.edu.hk"
     When I visit the venues page
     And I click "Lecture Hall A"
     And I click "Book Venue"
@@ -108,7 +108,7 @@ Feature: Venue Booking System
   # Constraint: Venues can be booked for at most 4 hours
   Scenario: Member can book a venue for up to 4 hours
     Given there is a venue "Lecture Hall A"
-    And I am logged in as "member@example.com"
+    And I am logged in as "member@link.cuhk.edu.hk"
     When I visit the venues page
     And I click "Lecture Hall A"
     And I click "Book Venue"
@@ -122,7 +122,7 @@ Feature: Venue Booking System
 
   Scenario: Member cannot book a venue for more than 4 hours
     Given there is a venue "Lecture Hall A"
-    And I am logged in as "member@example.com"
+    And I am logged in as "member@link.cuhk.edu.hk"
     When I visit the venues page
     And I click "Lecture Hall A"
     And I click "Book Venue"

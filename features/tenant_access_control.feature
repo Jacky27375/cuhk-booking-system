@@ -18,8 +18,8 @@ Feature: Tenant access control for staff and admin
       | NA Projector   | New Asia College | 5        |
     And the following pending bookings exist:
       | venue           | user_email              |
-      | Shaw Hall       | booker_shaw@example.com |
-      | New Asia Lounge | booker_na@example.com   |
+      | Shaw Hall       | booker.shaw@link.cuhk.edu.hk |
+      | New Asia Lounge | booker.na@link.cuhk.edu.hk   |
 
   Scenario: Staff can only see resources from their own tenant
     Given I am logged in as a "staff" of "Shaw College"
@@ -34,8 +34,8 @@ Feature: Tenant access control for staff and admin
     And I should not see "New Asia Lounge"
 
   Scenario: Admin can see resources from all tenants
-    Given there is a user "admin-all@example.com" with role "admin"
-    And I am logged in as "admin-all@example.com"
+    Given there is a user "admin.all@link.cuhk.edu.hk" with role "admin"
+    And I am logged in as "admin.all@link.cuhk.edu.hk"
     When I visit the venues page
     Then I should see "Shaw Hall"
     And I should see "New Asia Lounge"

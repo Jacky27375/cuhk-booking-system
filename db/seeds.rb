@@ -227,21 +227,22 @@ unless Rails.env.production?
 
   # Create test users.
   test_users = [
-    { email: "admin@cuhk.edu.hk", role: :admin },
-    { email: "staff.university@cuhk.edu.hk", role: :staff, tenant: "University" },
-    { email: "member.university@cuhk.edu.hk", role: :society_member, tenant: "University" },
+    { email: "admin@link.cuhk.edu.hk", role: :admin },
+    { email: "staff.university@link.cuhk.edu.hk", role: :staff, tenant: "University" },
+    { email: "member.university@link.cuhk.edu.hk", role: :society_member, tenant: "University" },
 
-    { email: "staff.shaw@cuhk.edu.hk", role: :staff, tenant: "Shaw College" },
-    { email: "staff.newasia@cuhk.edu.hk", role: :staff, tenant: "New Asia College" },
-    { email: "staff.wys@cuhk.edu.hk", role: :staff, tenant: "Wu Yee Sun College" },
-    { email: "member.shaw@cuhk.edu.hk", role: :society_member, tenant: "Shaw College" },
-    { email: "member.newasia@cuhk.edu.hk", role: :society_member, tenant: "New Asia College" },
-    { email: "member.wys@cuhk.edu.hk", role: :society_member, tenant: "Wu Yee Sun College" }
+    { email: "staff.shaw@link.cuhk.edu.hk", role: :staff, tenant: "Shaw College" },
+    { email: "staff.newasia@link.cuhk.edu.hk", role: :staff, tenant: "New Asia College" },
+    { email: "staff.wys@link.cuhk.edu.hk", role: :staff, tenant: "Wu Yee Sun College" },
+    { email: "member.shaw@link.cuhk.edu.hk", role: :society_member, tenant: "Shaw College" },
+    { email: "member.newasia@link.cuhk.edu.hk", role: :society_member, tenant: "New Asia College" },
+    { email: "member.wys@link.cuhk.edu.hk", role: :society_member, tenant: "Wu Yee Sun College" }
   ]
 
   test_users.each do |attrs|
     User.find_or_create_by!(email: attrs[:email]) do |u|
       u.password = "Password1!"
+      u.password_confirmation = "Password1!"
       u.role = attrs[:role]
       u.tenant = department_tenants.fetch(attrs[:tenant])
     end

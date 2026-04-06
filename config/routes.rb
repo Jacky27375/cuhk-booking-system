@@ -5,6 +5,9 @@ Rails.application.routes.draw do
   post "login",  to: "sessions#create"
   delete "logout", to: "sessions#destroy"
 
+  get  "signup", to: "registrations#new"
+  post "signup", to: "registrations#create"
+
   get "dashboard", to: "dashboards#show"
   get "approval_dashboard", to: "dashboards#approvals"
   get "admin",     to: "admin#show"
