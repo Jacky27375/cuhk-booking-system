@@ -10,16 +10,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_05_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_06_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "api_keys", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "expires_at"
+    t.datetime "last_used_at"
+    t.string "name", null: false
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["token"], name: "index_api_keys_on_token", unique: true
+    t.index ["user_id"], name: "index_api_keys_on_user_id"
+  end
 
   create_table "bookings", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.date "end_date"
     t.datetime "end_time"
     t.bigint "equipment_id"
-    t.integer "quantity"
+    t.integer "quantity", default: 0
     t.text "rejection_reason"
     t.date "start_date"
     t.datetime "start_time"
@@ -82,6 +95,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_05_000000) do
     t.index ["tenant_id"], name: "index_venues_on_tenant_id"
   end
 
+  add_foreign_key "api_keys", "users"
   add_foreign_key "bookings", "equipment"
   add_foreign_key "bookings", "users"
   add_foreign_key "bookings", "venues"

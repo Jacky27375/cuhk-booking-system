@@ -118,7 +118,7 @@ class BookingsController < ApplicationController
 
   def approve
     @booking.approve!
-    BookingMailer.with(booking: @booking).approved.deliver_now
+    send_booking_notification(:approved)
 
     redirect_to approval_dashboard_path, notice: "Booking approved."
   end
@@ -126,7 +126,7 @@ class BookingsController < ApplicationController
   def reject
     reason = params[:rejection_reason].to_s.strip
     @booking.reject!(reason)
-    BookingMailer.with(booking: @booking, reason: reason).rejected.deliver_now
+    send_booking_notification(:rejected, reason: reason)
 
     redirect_to approval_dashboard_path, notice: "Booking rejected."
   end
@@ -202,6 +202,28 @@ class BookingsController < ApplicationController
 
     def venue_accessible?(venue_id)
       accessible_venues.exists?(id: venue_id)
+    end
+
+    def send_booking_notification(action, reason: nil)
+      sent = if action == :approved
+        SendgridEmailService.send_booking_approved(@booking)
+      elsif action == :rejected
+        SendgridEmailService.send_booking_rejected(@booking, reason: reason)
+      end
+
+      # Fall back to ActionMailer when SendGrid is not configured or fails
+      send_via_action_mailer(action, reason) unless sent
+    rescue SendgridEmailService::DeliveryError => e
+      Rails.logger.error("SendGrid delivery failed, falling back to ActionMailer: #{e.message}")
+      send_via_action_mailer(action, reason)
+    end
+
+    def send_via_action_mailer(action, reason)
+      if action == :approved
+        BookingMailer.with(booking: @booking).approved.deliver_now
+      else
+        BookingMailer.with(booking: @booking, reason: reason).rejected.deliver_now
+      end
     end
 
     def unauthorized_booking_redirect_path

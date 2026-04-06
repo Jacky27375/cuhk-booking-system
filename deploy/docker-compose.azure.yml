@@ -36,6 +36,8 @@ services:
       POSTGRES_CACHE_DB: ${POSTGRES_CACHE_DB}
       POSTGRES_QUEUE_DB: ${POSTGRES_QUEUE_DB}
       POSTGRES_CABLE_DB: ${POSTGRES_CABLE_DB}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL:-noreply@csci3100.tylerl.cyou}
     ports:
       - "127.0.0.1:3000:80"
     volumes:
