@@ -22,6 +22,7 @@ class EquipmentsController < ApplicationController
   def create
     if current_user.admin?
       @equipment = Equipment.new(equipment_params)
+      @equipment.tenant ||= current_user.tenant
       @tenants = Tenant.all
     else
       @equipment = current_user.tenant.equipment.new(equipment_params)
