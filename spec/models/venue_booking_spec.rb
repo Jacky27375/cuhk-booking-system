@@ -10,8 +10,8 @@ RSpec.describe VenueBooking, type: :model do
       :booking,
       user: user,
       venue: venue,
-      start_time: Time.zone.parse('2026-04-10 10:00:00'),
-      end_time: Time.zone.parse('2026-04-10 12:00:00')
+      start_time: Time.zone.parse(5.days.from_now.strftime('%Y-%m-%d') + ' 10:00:00'),
+      end_time: Time.zone.parse(5.days.from_now.strftime('%Y-%m-%d') + ' 12:00:00')
     )
 
     expect(booking).to be_valid

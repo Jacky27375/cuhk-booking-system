@@ -8,8 +8,8 @@ RSpec.describe BookingMailer, type: :mailer do
     VenueBooking.create!(
       user: user,
       venue: venue,
-      start_time: 2.days.from_now.change(hour: 10, min: 0),
-      end_time: 2.days.from_now.change(hour: 12, min: 0)
+      start_time: 5.days.from_now.change(hour: 10, min: 0),
+      end_time: 5.days.from_now.change(hour: 12, min: 0)
     )
   end
 

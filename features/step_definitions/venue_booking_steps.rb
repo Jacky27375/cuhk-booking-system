@@ -48,3 +48,23 @@ end
 When('I select {string} from {string}') do |option, dropdown|
   select option, from: dropdown
 end
+
+When('I fill in {string} with a date {int} days in the future') do |field, days|
+  future_date = (Date.current + days.days).strftime('%Y-%m-%d')
+  fill_in field, with: future_date
+
+  # The booking form submits booking[booking_date] from a hidden field.
+  # Keep both fields synchronized in non-JS test runs.
+  hidden_booking_date = find("input[name='booking[booking_date]']", visible: :all)
+  hidden_booking_date.set(future_date)
+end
+
+Given('there is a booking for {string} by {string} from today at {string} to today at {string}') do |venue_name, user_email, start_time, end_time|
+  venue = Venue.find_by(name: venue_name)
+  user = User.find_by(email: user_email)
+  # Create booking 5 days in the future to meet advance booking constraint
+  booking_date = 5.days.from_now
+  start_datetime = Time.zone.parse("#{booking_date.strftime('%Y-%m-%d')} #{start_time}:00")
+  end_datetime = Time.zone.parse("#{booking_date.strftime('%Y-%m-%d')} #{end_time}:00")
+  create(:booking, venue: venue, user: user, start_time: start_datetime, end_time: end_datetime)
+end

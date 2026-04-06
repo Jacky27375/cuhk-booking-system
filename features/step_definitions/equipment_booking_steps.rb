@@ -72,3 +72,25 @@ Then('my booking should show status {string}') do |status|
   visit my_bookings_path
   expect(page).to have_content(status)
 end
+
+When('I borrow {int} {string} from {int} days from now to {int} days from now') do |qty, name, start_days, end_days|
+  equipment = Equipment.find_by!(name: name)
+  visit borrow_form_equipment_path(equipment)
+  fill_in 'Quantity', with: qty
+  start_date = (Date.current + start_days.days).strftime('%Y-%m-%d')
+  end_date = (Date.current + end_days.days).strftime('%Y-%m-%d')
+  fill_in 'Start date', with: start_date
+  fill_in 'End date', with: end_date
+  click_button 'Borrow'
+end
+
+When('I attempt to borrow {int} {string} from {int} days from now to {int} days from now') do |qty, name, start_days, end_days|
+  equipment = Equipment.find_by!(name: name)
+  visit borrow_form_equipment_path(equipment)
+  fill_in 'Quantity', with: qty
+  start_date = (Date.current + start_days.days).strftime('%Y-%m-%d')
+  end_date = (Date.current + end_days.days).strftime('%Y-%m-%d')
+  fill_in 'Start date', with: start_date
+  fill_in 'End date', with: end_date
+  click_button 'Borrow'
+end

@@ -11,7 +11,7 @@ Feature: Booking Approval Workflow
     And the following venues exist:
       | name     | department      |
       | Room 101 | Science Faculty |
-    And "student@link.cuhk.edu.hk" has a pending booking for "Room 101" on "2026-04-20"
+    And "student@link.cuhk.edu.hk" has a pending booking for "Room 101" on a date 5 days in the future
 
   Scenario: Staff sees pending booking requests
     Given I am logged in as "staff@link.cuhk.edu.hk"
@@ -21,7 +21,7 @@ Feature: Booking Approval Workflow
 
   Scenario: Staff approves a booking
     Given I am logged in as "staff@link.cuhk.edu.hk"
-    When I approve the booking for "Room 101" on "2026-04-20"
+    When I approve the booking for "Room 101" on a date 5 days in the future
     Then the booking status should be "Approved"
     And "student@link.cuhk.edu.hk" should receive a confirmation email
 
@@ -34,8 +34,8 @@ Feature: Booking Approval Workflow
   Scenario: Staff cannot approve another department booking via direct request
     Given I am logged in as "staff@link.cuhk.edu.hk"
     And there is a pending booking for "LT1" which belongs to "Arts Faculty"
-    When I attempt to approve the booking for "LT1" on "2026-04-20" directly
-    Then the booking for "LT1" on "2026-04-20" should remain "Pending"
+    When I attempt to approve the booking for "LT1" on a date 5 days in the future directly
+    Then the booking for "LT1" on a date 5 days in the future should remain "Pending"
     And I should see "You are not authorized to access this booking."
 
   Scenario: Society member cannot access approval dashboard

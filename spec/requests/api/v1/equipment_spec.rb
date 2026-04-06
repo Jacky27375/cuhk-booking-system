@@ -33,8 +33,8 @@ RSpec.describe "/api/v1/equipment", type: :request do
         user: user,
         equipment: equipment,
         quantity: 2,
-        start_date: 1.day.from_now.to_date,
-        end_date: 3.days.from_now.to_date,
+        start_date: 5.day.from_now.to_date,
+        end_date: 8.days.from_now.to_date,
         status: :approved
       )
 

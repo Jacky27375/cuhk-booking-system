@@ -10,14 +10,14 @@ RSpec.describe "dashboards/approvals", type: :view do
                venue: venue,
                user: user,
                status: :pending,
-               start_time: 2.days.from_now.change(hour: 10, min: 0),
-               end_time: 2.days.from_now.change(hour: 12, min: 0))
+               start_time: 5.days.from_now.change(hour: 10, min: 0),
+               end_time: 5.days.from_now.change(hour: 12, min: 0))
     booking_2 = create(:booking,
                venue: venue,
                user: user,
                status: :pending,
-               start_time: 2.days.from_now.change(hour: 13, min: 0),
-               end_time: 2.days.from_now.change(hour: 15, min: 0))
+               start_time: 5.days.from_now.change(hour: 13, min: 0),
+               end_time: 5.days.from_now.change(hour: 15, min: 0))
 
     assign(:bookings, [booking_1, booking_2])
     assign(:sort_column, nil)
