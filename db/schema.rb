@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_06_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_06_010002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -25,6 +25,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_000000) do
     t.bigint "user_id", null: false
     t.index ["token"], name: "index_api_keys_on_token", unique: true
     t.index ["user_id"], name: "index_api_keys_on_user_id"
+  end
+
+  create_table "approval_steps", force: :cascade do |t|
+    t.string "action", null: false
+    t.bigint "actor_id", null: false
+    t.bigint "booking_id", null: false
+    t.datetime "created_at", null: false
+    t.string "from_status", null: false
+    t.text "reason"
+    t.string "to_status", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_approval_steps_on_actor_id"
+    t.index ["booking_id", "created_at"], name: "index_approval_steps_on_booking_id_and_created_at"
+    t.index ["booking_id"], name: "index_approval_steps_on_booking_id"
   end
 
   create_table "bookings", force: :cascade do |t|
@@ -64,6 +78,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_000000) do
   end
 
   create_table "tenants", force: :cascade do |t|
+    t.integer "approval_mode", default: 0, null: false
     t.datetime "created_at", null: false
     t.text "description"
     t.string "name", null: false
@@ -96,6 +111,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_000000) do
   end
 
   add_foreign_key "api_keys", "users"
+  add_foreign_key "approval_steps", "bookings"
+  add_foreign_key "approval_steps", "users", column: "actor_id"
   add_foreign_key "bookings", "equipment"
   add_foreign_key "bookings", "users"
   add_foreign_key "bookings", "venues"

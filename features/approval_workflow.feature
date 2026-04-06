@@ -25,6 +25,14 @@ Feature: Booking Approval Workflow
     Then the booking status should be "Approved"
     And "student@link.cuhk.edu.hk" should receive a confirmation email
 
+  Scenario: Two-step tenant requires two approvals before final approval
+    Given tenant "Science Faculty" uses two-step approval
+    And I am logged in as "staff@link.cuhk.edu.hk"
+    When I approve the booking for "Room 101" on "2026-04-20"
+    Then the booking status should be "Under review"
+    When I approve the booking for "Room 101" on "2026-04-20"
+    Then the booking status should be "Approved"
+
   Scenario: Staff cannot manage bookings from another department
     Given I am logged in as "staff@link.cuhk.edu.hk"
     And there is a pending booking for "LT1" which belongs to "Arts Faculty"
@@ -43,6 +51,12 @@ Feature: Booking Approval Workflow
     When I visit the approval dashboard
     Then I should see "You are not authorized to perform this action."
     And I should not be on the approval dashboard page
+
+  Scenario: Society member can cancel own pending booking
+    Given I am logged in as "student@link.cuhk.edu.hk"
+    When I visit my bookings page
+    And I click "Cancel Booking"
+    Then the booking for "Room 101" on "2026-04-20" should remain "Cancelled"
 
   @javascript
   Scenario: Student is notified in real-time when booking is approved

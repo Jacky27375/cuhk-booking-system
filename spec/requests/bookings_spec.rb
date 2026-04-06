@@ -286,16 +286,22 @@ RSpec.describe "/bookings", type: :request do
       log_in_as(staff_user)
     end
 
-    it "shows only pending bookings in the staff tenant" do
+    it "shows bookings awaiting approval in the staff tenant" do
       scoped_venue = create(:venue, name: "Room 101", department: science_tenant.name, tenant: science_tenant)
+      scoped_under_review_venue = create(:venue, name: "Room 102", department: science_tenant.name, tenant: science_tenant)
+      scoped_approved_venue = create(:venue, name: "Room 103", department: science_tenant.name, tenant: science_tenant)
       foreign_venue = create(:venue, name: "LT1", department: arts_tenant.name, tenant: arts_tenant)
       create(:booking, venue: scoped_venue, user: create(:user, tenant: science_tenant), status: :pending)
+      create(:booking, venue: scoped_under_review_venue, user: create(:user, tenant: science_tenant), status: :under_review)
+      create(:booking, venue: scoped_approved_venue, user: create(:user, tenant: science_tenant), status: :approved)
       create(:booking, venue: foreign_venue, user: create(:user, tenant: arts_tenant), status: :pending)
 
       get approval_dashboard_path
 
       expect(response).to be_successful
       expect(response.body).to include("Room 101")
+      expect(response.body).to include("Room 102")
+      expect(response.body).not_to include("Room 103")
       expect(response.body).not_to include("LT1")
     end
 
@@ -342,6 +348,8 @@ RSpec.describe "/bookings", type: :request do
 
       expect(response).to redirect_to(approval_dashboard_path)
       expect(booking.reload.status).to eq("approved")
+      expect(booking.approval_steps.count).to eq(1)
+      expect(booking.approval_steps.last.action).to eq("approve")
     end
 
     it "rejects approval for bookings outside staff tenant" do
@@ -352,6 +360,35 @@ RSpec.describe "/bookings", type: :request do
 
       expect(response).to redirect_to(approval_dashboard_path)
       expect(booking.reload.status).to eq("pending")
+    end
+
+    context "when tenant uses two-step approval" do
+      before do
+        science_tenant.update!(approval_mode: :two_step)
+      end
+
+      it "moves pending bookings to under_review on first approval" do
+        scoped_venue = create(:venue, department: science_tenant.name, tenant: science_tenant)
+        booking = create(:booking, venue: scoped_venue, user: create(:user, tenant: science_tenant), status: :pending)
+
+        patch approve_booking_path(booking)
+
+        expect(response).to redirect_to(approval_dashboard_path)
+        expect(booking.reload.status).to eq("under_review")
+        expect(booking.approval_steps.count).to eq(1)
+        expect(booking.approval_steps.last.action).to eq("start_review")
+      end
+
+      it "requires a second approval to reach approved status" do
+        scoped_venue = create(:venue, department: science_tenant.name, tenant: science_tenant)
+        booking = create(:booking, venue: scoped_venue, user: create(:user, tenant: science_tenant), status: :pending)
+
+        patch approve_booking_path(booking)
+        patch approve_booking_path(booking)
+
+        expect(booking.reload.status).to eq("approved")
+        expect(booking.approval_steps.pluck(:action)).to eq(%w[start_review approve])
+      end
     end
   end
 
@@ -373,6 +410,8 @@ RSpec.describe "/bookings", type: :request do
       expect(response).to redirect_to(approval_dashboard_path)
       expect(booking.reload.status).to eq("rejected")
       expect(booking.rejection_reason).to eq("Maintenance")
+      expect(booking.approval_steps.count).to eq(1)
+      expect(booking.approval_steps.last.action).to eq("reject")
     end
 
     it "blocks staff from rejecting bookings outside their tenant" do
@@ -385,6 +424,67 @@ RSpec.describe "/bookings", type: :request do
       expect(flash[:alert]).to eq("You are not authorized to access this booking.")
       expect(booking.reload.status).to eq("pending")
       expect(booking.rejection_reason).to be_nil
+    end
+
+    it "allows rejecting bookings in under_review state" do
+      scoped_venue = create(:venue, department: science_tenant.name, tenant: science_tenant)
+      booking = create(:booking, venue: scoped_venue, user: create(:user, tenant: science_tenant), status: :under_review)
+
+      patch reject_booking_path(booking), params: { rejection_reason: "No staff available" }
+
+      expect(response).to redirect_to(approval_dashboard_path)
+      expect(booking.reload.status).to eq("rejected")
+      expect(booking.rejection_reason).to eq("No staff available")
+    end
+  end
+
+  describe "PATCH /bookings/:id/cancel" do
+    let(:owner) { create(:user, tenant: tenant) }
+
+    before do
+      log_in_as(owner)
+    end
+
+    it "allows owner to cancel an eligible booking" do
+      booking = create(:booking,
+                       user: owner,
+                       venue: venue,
+                       status: :pending,
+                       start_time: 2.days.from_now.change(hour: 10, min: 0),
+                       end_time: 2.days.from_now.change(hour: 12, min: 0))
+
+      patch cancel_booking_path(booking)
+
+      expect(response).to redirect_to(my_bookings_path)
+      expect(booking.reload.status).to eq("cancelled")
+      expect(booking.approval_steps.count).to eq(1)
+      expect(booking.approval_steps.last.action).to eq("cancel")
+    end
+
+    it "blocks owner from cancelling past bookings" do
+      booking = create(:booking,
+                       user: owner,
+                       venue: venue,
+                       status: :pending,
+                       start_time: 2.days.ago.change(hour: 10, min: 0),
+                       end_time: 2.days.ago.change(hour: 12, min: 0))
+
+      patch cancel_booking_path(booking)
+
+      expect(response).to redirect_to(my_bookings_path)
+      expect(flash[:alert]).to eq("This booking cannot be cancelled.")
+      expect(booking.reload.status).to eq("pending")
+    end
+
+    it "blocks cancelling another user's booking" do
+      other_user = create(:user, tenant: tenant)
+      booking = create(:booking, user: other_user, venue: venue, status: :pending)
+
+      patch cancel_booking_path(booking)
+
+      expect(response).to redirect_to(my_bookings_path)
+      expect(flash[:alert]).to eq("You are not authorized to access this booking.")
+      expect(booking.reload.status).to eq("pending")
     end
   end
 

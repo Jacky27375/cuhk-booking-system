@@ -22,6 +22,11 @@ Given("{string} has a pending booking for {string} on {string}") do |email, venu
   )
 end
 
+Given("tenant {string} uses two-step approval") do |tenant_name|
+  tenant = Tenant.find_by!(name: tenant_name)
+  tenant.update!(approval_mode: :two_step)
+end
+
 When("I visit the approval dashboard") do
   visit approval_dashboard_path
 end
@@ -50,7 +55,8 @@ end
 
 Then("the booking status should be {string}") do |status|
   booking = @current_booking || Booking.last
-  expect(booking.reload.status).to eq(status.downcase)
+  normalized_status = status.downcase.tr(" ", "_")
+  expect(booking.reload.status).to eq(normalized_status)
 end
 
 Then("{string} should receive a confirmation email") do |email|
@@ -112,7 +118,8 @@ Then("the booking for {string} on {string} should remain {string}") do |venue_na
                    .where(start_time: Time.zone.parse(date).all_day)
                    .first
 
-  expect(booking.reload.status).to eq(status.downcase)
+  normalized_status = status.downcase.tr(" ", "_")
+  expect(booking.reload.status).to eq(normalized_status)
 end
 
 Given("I am viewing {string}") do |page_name|

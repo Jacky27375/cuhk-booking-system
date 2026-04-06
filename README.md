@@ -97,6 +97,14 @@ Additional cross-tenant test accounts are also created by seeds:
 | **Society Member** | New Asia College | `member.newasia@cuhk.edu.hk` | `Password1!` |
 | **Society Member** | Wu Yee Sun College | `member.wys@cuhk.edu.hk` | `Password1!` |
 
+## Feature Ownership (Process Evidence)
+
+### Member 1 (Lam Chun Yu / `tylerjlcy`)
+- Approval workflow completion: booking lifecycle states and transition rules
+- Society-member booking cancellation flow (`My Bookings`)
+- Approval audit trail persistence (`ApprovalStep`) and related tests
+- Approval workflow regression coverage (RSpec + Cucumber)
+
 ## Deployment (Azure VM)
 
 Production URL: [https://csci3100.tylerl.cyou](https://csci3100.tylerl.cyou)
