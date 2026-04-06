@@ -26,7 +26,7 @@ RSpec.describe 'Sessions', type: :request do
     end
 
     it 'rejects non-existent email' do
-      post login_path, params: { email: 'nobody@cuhk.edu.hk', password: 'Password1!' }
+      post login_path, params: { email: 'nobody@link.cuhk.edu.hk', password: 'Password1!' }
       expect(response).to have_http_status(:unprocessable_entity)
       expect(response.body).to include('Invalid email or password')
     end

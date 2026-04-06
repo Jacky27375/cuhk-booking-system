@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe SendgridEmailService do
   let(:tenant) { create(:tenant) }
-  let(:user) { create(:user, :with_tenant, tenant: tenant, email: "test@cuhk.edu.hk") }
+  let(:user) { create(:user, :with_tenant, tenant: tenant, email: "test@link.cuhk.edu.hk") }
   let(:venue) { create(:venue, tenant: tenant, department: tenant.name) }
   let(:booking) do
     VenueBooking.create!(

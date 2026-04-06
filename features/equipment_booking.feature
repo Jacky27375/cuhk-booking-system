@@ -5,7 +5,7 @@ Feature: Equipment Booking
   So that I can use it for my society's activities
 
   Background:
-    Given I am logged in as "student@cuhk.edu.hk"
+    Given I am logged in as "student@link.cuhk.edu.hk"
     And the following equipment exists:
       | name          | department       | quantity |
       | Projector     | Science Faculty  | 3        |

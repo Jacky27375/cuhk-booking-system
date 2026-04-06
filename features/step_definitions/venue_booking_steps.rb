@@ -8,7 +8,7 @@ end
 
 Given('there is a user {string} with role {string}') do |email, role|
   tenant = Tenant.first || create(:tenant, name: 'University', slug: 'university')
-  create(:user, email: email, password: 'password', role: role.to_sym, tenant: tenant)
+  create(:user, email: email, password: 'Password1!', password_confirmation: 'Password1!', role: role.to_sym, tenant: tenant)
 end
 
 Given('I am logged in as {string}') do |email|

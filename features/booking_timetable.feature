@@ -4,13 +4,13 @@ Feature: Booking timetable and conflict prevention
 
   Background:
     Given there is a tenant "University"
-    And there is a user "member@example.com" with role "society_member"
-    And there is a user "other@example.com" with role "society_member"
+    And there is a user "member@link.cuhk.edu.hk" with role "society_member"
+    And there is a user "other@link.cuhk.edu.hk" with role "society_member"
     And there is a venue "Lecture Hall A"
 
   Scenario: Timetable shows booked and available slots for selected date
-    Given there is a booking for "Lecture Hall A" by "other@example.com" from "2026-04-10 10:00:00" to "2026-04-10 11:00:00"
-    And I am logged in as "member@example.com"
+    Given there is a booking for "Lecture Hall A" by "other@link.cuhk.edu.hk" from "2026-04-10 10:00:00" to "2026-04-10 11:00:00"
+    And I am logged in as "member@link.cuhk.edu.hk"
     When I open the booking page for "Lecture Hall A" on "2026-04-10"
     Then I should not see "Show Timetable"
     Then I should see timetable date "2026-04-10"
@@ -18,7 +18,7 @@ Feature: Booking timetable and conflict prevention
     And the slot "11:00 - 12:00" should be marked available
 
   Scenario: Booking outside business hours is rejected
-    Given I am logged in as "member@example.com"
+    Given I am logged in as "member@link.cuhk.edu.hk"
     When I open the booking page for "Lecture Hall A" on "2026-04-10"
     And I select "08:00" from "Start time"
     And I select "08:00" from "End time"
@@ -27,7 +27,7 @@ Feature: Booking timetable and conflict prevention
     Then I should see "must be after start time"
 
   Scenario: Booking with non hourly increments is rejected
-    Given I am logged in as "member@example.com"
+    Given I am logged in as "member@link.cuhk.edu.hk"
     When I open the booking page for "Lecture Hall A" on "2026-04-10"
     Then I should not see "09:15"
     And I should not see "09:30"
@@ -35,8 +35,8 @@ Feature: Booking timetable and conflict prevention
     And I should see "10:00"
 
   Scenario: Overlapping booking is rejected
-    Given there is a booking for "Lecture Hall A" by "other@example.com" from "2026-04-10 10:00:00" to "2026-04-10 11:00:00"
-    And I am logged in as "member@example.com"
+    Given there is a booking for "Lecture Hall A" by "other@link.cuhk.edu.hk" from "2026-04-10 10:00:00" to "2026-04-10 11:00:00"
+    And I am logged in as "member@link.cuhk.edu.hk"
     When I open the booking page for "Lecture Hall A" on "2026-04-10"
     And I select "10:00" from "Start time"
     And I select "12:00" from "End time"
@@ -47,7 +47,7 @@ Feature: Booking timetable and conflict prevention
     And the slot "10:00 - 11:00" should not be marked selected
 
   Scenario: Selected slot is highlighted on edit page
-    Given there is a booking for "Lecture Hall A" by "member@example.com" from "2026-04-10 12:00:00" to "2026-04-10 13:00:00"
-    And I am logged in as "member@example.com"
+    Given there is a booking for "Lecture Hall A" by "member@link.cuhk.edu.hk" from "2026-04-10 12:00:00" to "2026-04-10 13:00:00"
+    And I am logged in as "member@link.cuhk.edu.hk"
     When I open the edit booking page for my booking on "2026-04-10"
     Then the slot "12:00 - 13:00" should be marked selected
