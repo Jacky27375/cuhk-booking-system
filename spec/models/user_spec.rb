@@ -71,30 +71,14 @@ RSpec.describe User, type: :model do
       expect(assoc.macro).to eq(:belongs_to)
     end
 
-    it 'optionally belongs to a society' do
-      assoc = User.reflect_on_association(:society)
-      expect(assoc).not_to be_nil
-      expect(assoc.macro).to eq(:belongs_to)
-    end
-
     it 'is valid without a tenant' do
       expect(build(:user, tenant: nil)).to be_valid
-    end
-
-    it 'is valid without a society' do
-      expect(build(:user, society: nil)).to be_valid
     end
 
     it 'can belong to a tenant' do
       tenant = create(:tenant)
       user = create(:user, :staff, tenant: tenant)
       expect(user.tenant).to eq(tenant)
-    end
-
-    it 'can belong to a society' do
-      society = create(:society)
-      user = create(:user, :society_member, society: society)
-      expect(user.society).to eq(society)
     end
   end
 

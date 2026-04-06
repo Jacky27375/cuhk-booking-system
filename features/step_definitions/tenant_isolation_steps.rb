@@ -1,6 +1,8 @@
 Given('the following tenants exist:') do |table|
   table.hashes.each do |row|
-    Tenant.create!(name: row['name'], slug: row['name'].parameterize)
+    Tenant.find_or_create_by!(slug: row['name'].parameterize) do |tenant|
+      tenant.name = row['name']
+    end
   end
 end
 
@@ -46,4 +48,36 @@ Then('I cannot access bookings for {string}') do |venue_name|
   end
   visit '/approval_dashboard'
   expect(page).not_to have_content(venue_name)
+end
+
+Given('the following equipments exist:') do |table|
+  table.hashes.each do |row|
+    tenant = Tenant.find_by!(name: row['tenant'])
+    Equipment.find_or_create_by!(name: row['name'], tenant: tenant) do |equipment|
+      equipment.quantity = row['quantity'].to_i
+    end
+  end
+end
+
+Given('the following pending bookings exist:') do |table|
+  table.hashes.each do |row|
+    venue = Venue.find_by!(name: row['venue'])
+    user = User.find_or_create_by!(email: row['user_email']) do |u|
+      u.password = 'password'
+      u.role = :society_member
+      u.tenant = venue.tenant
+    end
+
+    Booking.create!(
+      venue: venue,
+      user: user,
+      start_time: 1.day.from_now.change(hour: 10, min: 0),
+      end_time: 1.day.from_now.change(hour: 12, min: 0),
+      status: :pending
+    )
+  end
+end
+
+When('I visit the equipments page') do
+  visit '/equipments'
 end

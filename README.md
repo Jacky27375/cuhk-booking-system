@@ -86,6 +86,17 @@ If you ran `rails db:seed`, the development database includes the following acco
 | **Staff** | `staff@cuhk.edu.hk` | `Password1!` |
 | **Society Member** | `member@cuhk.edu.hk` | `Password1!` |
 
+Additional cross-tenant test accounts are also created by seeds:
+
+| Role | Tenant | Email | Password |
+|------|--------|-------|----------|
+| **Staff** | Shaw College | `staff.shaw@cuhk.edu.hk` | `Password1!` |
+| **Staff** | New Asia College | `staff.newasia@cuhk.edu.hk` | `Password1!` |
+| **Staff** | Wu Yee Sun College | `staff.wys@cuhk.edu.hk` | `Password1!` |
+| **Society Member** | Shaw College | `member.shaw@cuhk.edu.hk` | `Password1!` |
+| **Society Member** | New Asia College | `member.newasia@cuhk.edu.hk` | `Password1!` |
+| **Society Member** | Wu Yee Sun College | `member.wys@cuhk.edu.hk` | `Password1!` |
+
 ## Deployment (Azure VM)
 
 Production URL: [https://csci3100.tylerl.cyou](https://csci3100.tylerl.cyou)

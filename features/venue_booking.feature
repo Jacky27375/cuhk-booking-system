@@ -5,7 +5,6 @@ Feature: Venue Booking System
 
   Background:
     Given there is a tenant "University"
-    And there is a society "Computer Science Society"
     And there is a user "admin@example.com" with role "admin"
     And there is a user "staff@example.com" with role "staff"
     And there is a user "member@example.com" with role "society_member"
