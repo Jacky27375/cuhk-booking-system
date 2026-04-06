@@ -8,6 +8,7 @@ Given('the following users exist:') do |table|
 
     user = User.find_or_initialize_by(email: hash['email'])
     user.password = hash['password']
+    user.password_confirmation = hash['password']
     user.role = role
     user.tenant = tenant
     user.save!

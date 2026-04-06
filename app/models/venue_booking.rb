@@ -8,6 +8,8 @@ class VenueBooking < Booking
   validate :venue_booking_time_rules
   validate :venue_accessible_by_user
   validate :no_time_conflict
+  validate :advance_booking_limit
+  validate :booking_duration_limit
 
   private
 
@@ -46,5 +48,23 @@ class VenueBooking < Booking
     return unless venue_id.present? && start_time.present? && end_time.present?
 
     errors.add(:base, "conflicts with an existing booking") if BookingConflictChecker.new(self).conflict_exists?
+  end
+
+  def advance_booking_limit
+    return unless start_time.present?
+
+    # Booking must be at least 5 days in advance
+    if start_time.to_date < 5.days.from_now.to_date
+      errors.add(:base, "Venue must be booked at least 5 days in advance")
+    end
+  end
+
+  def booking_duration_limit
+    return unless start_time.present? && end_time.present?
+
+    duration_hours = ((end_time - start_time) / 3600).round
+    if duration_hours > 4
+      errors.add(:base, "Booking duration cannot exceed 4 hours")
+    end
   end
 end

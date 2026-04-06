@@ -11,20 +11,20 @@ RSpec.describe Booking, type: :model do
         :booking,
         user: user,
         venue: venue,
-        start_time: Time.zone.parse("2026-04-10 10:00:00"),
-        end_time: Time.zone.parse("2026-04-10 12:00:00")
+        start_time: 5.days.from_now.beginning_of_day + 10.hours,
+        end_time: 5.days.from_now.beginning_of_day + 12.hours
       )
       expect(booking).to be_valid
     end
 
     it 'is invalid without a start_time' do
-      booking = build(:booking, user: user, venue: venue, start_time: nil, end_time: Time.zone.parse("2026-04-10 12:00:00"))
+      booking = build(:booking, user: user, venue: venue, start_time: nil, end_time: 5.days.from_now.beginning_of_day + 12.hours)
       expect(booking).not_to be_valid
       expect(booking.errors[:start_time]).to include("can't be blank")
     end
 
     it 'is invalid without an end_time' do
-      booking = build(:booking, user: user, venue: venue, start_time: Time.zone.parse("2026-04-10 10:00:00"), end_time: nil)
+      booking = build(:booking, user: user, venue: venue, start_time: 5.days.from_now.beginning_of_day + 10.hours, end_time: nil)
       expect(booking).not_to be_valid
       expect(booking.errors[:end_time]).to include("can't be blank")
     end
@@ -195,6 +195,189 @@ RSpec.describe Booking, type: :model do
       expect(ActionCable.server).not_to receive(:broadcast)
 
       booking.update!(end_time: booking.end_time + 1.hour)
+    end
+  end
+
+  describe 'booking constraints' do
+    describe 'VenueBooking constraints' do
+      describe 'advance booking constraint (at least 5 days)' do
+        it 'allows booking exactly 5 days in advance' do
+          booking = build(
+            :booking,
+            user: user,
+            venue: venue,
+            start_time: 5.days.from_now.beginning_of_day + 10.hours,
+            end_time: 5.days.from_now.beginning_of_day + 12.hours
+          )
+          expect(booking).to be_valid
+        end
+
+        it 'does not allow booking less than 5 days in advance' do
+          booking = build(
+            :booking,
+            user: user,
+            venue: venue,
+            start_time: 4.days.from_now.beginning_of_day + 10.hours,
+            end_time: 4.days.from_now.beginning_of_day + 12.hours
+          )
+          expect(booking).not_to be_valid
+          expect(booking.errors[:base]).to include("Venue must be booked at least 5 days in advance")
+        end
+
+        it 'allows booking more than 5 days in advance' do
+          booking = build(
+            :booking,
+            user: user,
+            venue: venue,
+            start_time: 10.days.from_now.beginning_of_day + 10.hours,
+            end_time: 10.days.from_now.beginning_of_day + 12.hours
+          )
+          expect(booking).to be_valid
+        end
+
+        it 'does not allow booking today' do
+          booking = build(
+            :booking,
+            user: user,
+            venue: venue,
+            start_time: Time.zone.now.beginning_of_day + 10.hours,
+            end_time: Time.zone.now.beginning_of_day + 12.hours
+          )
+          expect(booking).not_to be_valid
+          expect(booking.errors[:base]).to include("Venue must be booked at least 5 days in advance")
+        end
+      end
+
+      describe 'duration constraint (max 4 hours)' do
+        it 'allows booking exactly 4 hours' do
+          booking = build(
+            :booking,
+            user: user,
+            venue: venue,
+            start_time: 5.days.from_now.beginning_of_day + 10.hours,
+            end_time: 5.days.from_now.beginning_of_day + 14.hours
+          )
+          expect(booking).to be_valid
+        end
+
+        it 'does not allow booking more than 4 hours' do
+          booking = build(
+            :booking,
+            user: user,
+            venue: venue,
+            start_time: 5.days.from_now.beginning_of_day + 10.hours,
+            end_time: 5.days.from_now.beginning_of_day + 15.hours
+          )
+          expect(booking).not_to be_valid
+          expect(booking.errors[:base]).to include("Booking duration cannot exceed 4 hours")
+        end
+
+        it 'allows booking less than 4 hours' do
+          booking = build(
+            :booking,
+            user: user,
+            venue: venue,
+            start_time: 5.days.from_now.beginning_of_day + 10.hours,
+            end_time: 5.days.from_now.beginning_of_day + 11.hours
+          )
+          expect(booking).to be_valid
+        end
+      end
+    end
+
+    describe 'EquipmentBooking constraints' do
+      let(:equipment) { create(:equipment, tenant: tenant) }
+
+      describe 'advance booking constraint (at least 5 days)' do
+        it 'allows booking exactly 5 days in advance' do
+          booking = build(
+            :equipment_booking,
+            user: user,
+            equipment: equipment,
+            quantity: 1,
+            start_date: 5.days.from_now.to_date,
+            end_date: 6.days.from_now.to_date
+          )
+          expect(booking).to be_valid
+        end
+
+        it 'does not allow booking less than 5 days in advance' do
+          booking = build(
+            :equipment_booking,
+            user: user,
+            equipment: equipment,
+            quantity: 1,
+            start_date: 4.days.from_now.to_date,
+            end_date: 5.days.from_now.to_date
+          )
+          expect(booking).not_to be_valid
+          expect(booking.errors[:base]).to include("Equipment must be booked at least 5 days in advance")
+        end
+
+        it 'allows booking more than 5 days in advance' do
+          booking = build(
+            :equipment_booking,
+            user: user,
+            equipment: equipment,
+            quantity: 1,
+            start_date: 10.days.from_now.to_date,
+            end_date: 15.days.from_now.to_date
+          )
+          expect(booking).to be_valid
+        end
+
+        it 'does not allow booking today' do
+          booking = build(
+            :equipment_booking,
+            user: user,
+            equipment: equipment,
+            quantity: 1,
+            start_date: Date.current,
+            end_date: 1.day.from_now.to_date
+          )
+          expect(booking).not_to be_valid
+          expect(booking.errors[:base]).to include("Equipment must be booked at least 5 days in advance")
+        end
+      end
+
+      describe 'duration constraint (max 7 days)' do
+        it 'allows booking exactly 7 days' do
+          booking = build(
+            :equipment_booking,
+            user: user,
+            equipment: equipment,
+            quantity: 1,
+            start_date: 5.days.from_now.to_date,
+            end_date: 12.days.from_now.to_date
+          )
+          expect(booking).to be_valid
+        end
+
+        it 'does not allow booking more than 7 days' do
+          booking = build(
+            :equipment_booking,
+            user: user,
+            equipment: equipment,
+            quantity: 1,
+            start_date: 5.days.from_now.to_date,
+            end_date: 13.days.from_now.to_date
+          )
+          expect(booking).not_to be_valid
+          expect(booking.errors[:base]).to include("Equipment booking duration cannot exceed 7 days")
+        end
+
+        it 'allows booking less than 7 days' do
+          booking = build(
+            :equipment_booking,
+            user: user,
+            equipment: equipment,
+            quantity: 1,
+            start_date: 5.days.from_now.to_date,
+            end_date: 10.days.from_now.to_date
+          )
+          expect(booking).to be_valid
+        end
+      end
     end
   end
 end
