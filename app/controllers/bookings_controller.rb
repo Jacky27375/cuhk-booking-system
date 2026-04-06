@@ -3,8 +3,8 @@ class BookingsController < ApplicationController
   TIMETABLE_END_HOUR = 22
 
   before_action :require_student_for_edit!, only: %i[ edit update ]
-  before_action :require_student_for_my!, only: :my
-  before_action :set_booking, only: %i[ show edit update destroy approve reject mark_returned ]
+  before_action :require_student_for_my!, only: %i[ my cancel ]
+  before_action :set_booking, only: %i[ show edit update destroy approve reject mark_returned cancel ]
   before_action :require_admin_or_staff, only: %i[ index approve reject ]
 
   # GET /bookings or /bookings.json
@@ -119,7 +119,16 @@ class BookingsController < ApplicationController
   end
 
   def approve
+    previous_status = @booking.status
+    if two_step_approval_required? && @booking.pending?
+      @booking.start_review!
+      record_approval_step!(action: "start_review", from_status: previous_status, to_status: @booking.status)
+      redirect_to approval_dashboard_path, notice: "Booking moved to under review."
+      return
+    end
+
     @booking.approve!
+    record_approval_step!(action: "approve", from_status: previous_status, to_status: @booking.status)
     send_booking_notification(:approved)
 
     redirect_to approval_dashboard_path, notice: "Booking approved."
@@ -128,13 +137,30 @@ class BookingsController < ApplicationController
   end
 
   def reject
+    previous_status = @booking.status
     reason = params[:rejection_reason].to_s.strip
     @booking.reject!(reason)
+    record_approval_step!(action: "reject", from_status: previous_status, to_status: @booking.status, reason: reason)
     send_booking_notification(:rejected, reason: reason)
 
     redirect_to approval_dashboard_path, notice: "Booking rejected."
   rescue ActiveRecord::RecordInvalid => e
     redirect_to approval_dashboard_path, alert: booking_transition_error_message(e, "Booking could not be rejected.")
+  end
+
+  def cancel
+    unless @booking.cancelable_by_owner?
+      redirect_to my_bookings_path, alert: "This booking cannot be cancelled."
+      return
+    end
+
+    previous_status = @booking.status
+    @booking.cancel!
+    record_approval_step!(action: "cancel", from_status: previous_status, to_status: @booking.status)
+
+    redirect_to my_bookings_path, notice: "Booking cancelled."
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to my_bookings_path, alert: booking_transition_error_message(e, "Booking could not be cancelled.")
   end
 
   def mark_returned
@@ -234,6 +260,24 @@ class BookingsController < ApplicationController
       end
     end
 
+    def two_step_approval_required?
+      approval_tenant_for(@booking)&.two_step?
+    end
+
+    def approval_tenant_for(booking)
+      booking.user&.tenant || booking.venue&.tenant || booking.equipment&.tenant
+    end
+
+    def record_approval_step!(action:, from_status:, to_status:, reason: nil)
+      @booking.approval_steps.create!(
+        actor: current_user,
+        action: action,
+        from_status: from_status,
+        to_status: to_status,
+        reason: reason.presence
+      )
+    end
+
     def unauthorized_booking_redirect_path
       return approval_dashboard_path if action_name.in?(["approve", "reject"])
 
@@ -272,8 +316,8 @@ class BookingsController < ApplicationController
       scope = Booking.where(venue_id: selected_venue_id)
                      .where("start_time < ? AND end_time > ?", day_end, day_start)
       if Booking.defined_enums.key?("status")
-        rejected_status = Booking.statuses["rejected"]
-        scope = scope.where.not(status: rejected_status) if rejected_status
+        non_blocking_statuses = Booking.non_blocking_venue_status_values
+        scope = scope.where.not(status: non_blocking_statuses) if non_blocking_statuses.any?
       end
       scope
     end
