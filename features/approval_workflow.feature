@@ -28,9 +28,9 @@ Feature: Booking Approval Workflow
   Scenario: Two-step tenant requires two approvals before final approval
     Given tenant "Science Faculty" uses two-step approval
     And I am logged in as "staff@link.cuhk.edu.hk"
-    When I approve the booking for "Room 101" on "2026-04-20"
+    When I approve the booking for "Room 101" on a date 5 days in the future
     Then the booking status should be "Under review"
-    When I approve the booking for "Room 101" on "2026-04-20"
+    When I approve the booking for "Room 101" on a date 5 days in the future
     Then the booking status should be "Approved"
 
   Scenario: Staff cannot manage bookings from another department
@@ -56,7 +56,7 @@ Feature: Booking Approval Workflow
     Given I am logged in as "student@link.cuhk.edu.hk"
     When I visit my bookings page
     And I click "Cancel Booking"
-    Then the booking for "Room 101" on "2026-04-20" should remain "Cancelled"
+    Then the booking for "Room 101" on a date 5 days in the future should remain "Cancelled"
 
   @javascript
   Scenario: Student is notified in real-time when booking is approved
