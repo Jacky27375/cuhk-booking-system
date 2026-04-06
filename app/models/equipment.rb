@@ -1,5 +1,6 @@
 class Equipment < ApplicationRecord
   INVENTORY_HOLDING_STATUSES = %w[pending approved borrowed].freeze
+  self.table_name = "equipment"
 
   belongs_to :tenant
   has_many :bookings, dependent: :destroy

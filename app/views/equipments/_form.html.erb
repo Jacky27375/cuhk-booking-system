@@ -10,6 +10,13 @@
     </div>
   <% end %>
 
+  <% if defined?(@tenants) && @tenants.present? %>
+    <div>
+      <%= f.label :tenant_id, "Tenant" %>
+      <%= f.collection_select :tenant_id, @tenants, :id, :name, prompt: "Select a tenant" %>
+    </div>
+  <% end %>
+
   <div>
     <%= f.label :name %>
     <%= f.text_field :name, required: true %>
