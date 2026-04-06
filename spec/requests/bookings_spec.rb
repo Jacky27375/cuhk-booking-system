@@ -315,8 +315,8 @@ RSpec.describe "/bookings", type: :request do
     end
 
     it "sorts approval rows by venue name ascending and descending" do
-      zulu_start = 7.days.from_now.change(min: 0, sec: 0)
-      alpha_start = 5.day.from_now.change(min: 0, sec: 0)
+      zulu_start = 8.days.from_now.change(hour: 10, min: 0, sec: 0)
+      alpha_start = 7.days.from_now.change(hour: 10, min: 0, sec: 0)
       create(:booking, venue: create(:venue, name: "Zulu Room", department: science_tenant.name, tenant: science_tenant), user: create(:user, tenant: science_tenant), status: :pending, start_time: zulu_start, end_time: zulu_start + 1.hour)
       create(:booking, venue: create(:venue, name: "Alpha Room", department: science_tenant.name, tenant: science_tenant), user: create(:user, tenant: science_tenant), status: :pending, start_time: alpha_start, end_time: alpha_start + 1.hour)
 
@@ -450,8 +450,8 @@ RSpec.describe "/bookings", type: :request do
                        user: owner,
                        venue: venue,
                        status: :pending,
-                       start_time: 2.days.from_now.change(hour: 10, min: 0),
-                       end_time: 2.days.from_now.change(hour: 12, min: 0))
+                       start_time: 7.days.from_now.change(hour: 10, min: 0),
+                       end_time: 7.days.from_now.change(hour: 12, min: 0))
 
       patch cancel_booking_path(booking)
 
@@ -461,24 +461,30 @@ RSpec.describe "/bookings", type: :request do
       expect(booking.approval_steps.last.action).to eq("cancel")
     end
 
-    it "blocks owner from cancelling past bookings" do
-      booking = create(:booking,
+    it "blocks owner from cancelling non-cancellable bookings" do
+      equipment = create(:equipment, tenant: tenant)
+      booking = create(:equipment_booking,
                        user: owner,
-                       venue: venue,
-                       status: :pending,
-                       start_time: 2.days.ago.change(hour: 10, min: 0),
-                       end_time: 2.days.ago.change(hour: 12, min: 0))
+                       equipment: equipment,
+                       status: :returned,
+                       start_date: 7.days.from_now.to_date,
+                       end_date: 8.days.from_now.to_date)
 
       patch cancel_booking_path(booking)
 
       expect(response).to redirect_to(my_bookings_path)
       expect(flash[:alert]).to eq("This booking cannot be cancelled.")
-      expect(booking.reload.status).to eq("pending")
+      expect(booking.reload.status).to eq("returned")
     end
 
     it "blocks cancelling another user's booking" do
       other_user = create(:user, tenant: tenant)
-      booking = create(:booking, user: other_user, venue: venue, status: :pending)
+      booking = create(:booking,
+                       user: other_user,
+                       venue: venue,
+                       status: :pending,
+                       start_time: 7.days.from_now.change(hour: 10, min: 0),
+                       end_time: 7.days.from_now.change(hour: 12, min: 0))
 
       patch cancel_booking_path(booking)
 

@@ -159,19 +159,19 @@ RSpec.describe Booking, type: :model do
 
   describe '#cancelable_by_owner?' do
     it 'returns true for pending future venue bookings' do
-      booking = create(:booking,
-                       status: :pending,
-                       start_time: 2.days.from_now.change(hour: 10, min: 0),
-                       end_time: 2.days.from_now.change(hour: 12, min: 0))
+      booking = build(:booking,
+                      status: :pending,
+                      start_time: 7.days.from_now.change(hour: 10, min: 0),
+                      end_time: 7.days.from_now.change(hour: 12, min: 0))
 
       expect(booking.cancelable_by_owner?).to be(true)
     end
 
     it 'returns false for past venue bookings' do
-      booking = create(:booking,
-                       status: :pending,
-                       start_time: 2.days.ago.change(hour: 10, min: 0),
-                       end_time: 2.days.ago.change(hour: 12, min: 0))
+      booking = build(:booking,
+                      status: :pending,
+                      start_time: 2.days.ago.change(hour: 10, min: 0),
+                      end_time: 2.days.ago.change(hour: 12, min: 0))
 
       expect(booking.cancelable_by_owner?).to be(false)
     end
