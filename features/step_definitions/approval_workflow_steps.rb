@@ -129,9 +129,11 @@ Given("I am viewing {string}") do |page_name|
 end
 
 When("the staff approves my booking for {string}") do |venue_name|
+  student = User.find_by!(email: "student@link.cuhk.edu.hk")
   booking = Booking.joins(:venue)
-                   .where(venues: { name: venue_name })
-                   .first
+                   .where(user: student, venues: { name: venue_name }, status: :pending)
+                   .order(created_at: :desc)
+                   .first!
   @current_booking = booking
 
   Capybara.using_session("staff_session") do
@@ -145,17 +147,22 @@ When("the staff approves my booking for {string}") do |venue_name|
       click_button "Approve"
     end
   end
+
+  wait_for_booking_status!(booking, "approved", timeout: 10)
 end
 
 Then("I should see the status update to {string} without refreshing the page") do |status|
   booking = @current_booking || Booking.last
+  expected_status = status.downcase
 
   unless @cable_connected &&
          page.has_css?("[data-booking-id='#{booking.id}']", text: status, wait: 10)
+    wait_for_booking_status!(booking, expected_status, timeout: 10)
     # ActionCable did not deliver in time; verify via refresh as fallback
     visit my_bookings_path
-    expect(page).to have_css("[data-booking-id='#{booking.id}']", text: status, wait: 5)
   end
+
+  expect(page).to have_css("[data-booking-id='#{booking.id}']", text: status, wait: 10)
 end
 
 Then("I should not be on the approval dashboard page") do
@@ -164,4 +171,18 @@ end
 
 Then("I should not see the booking for {string}") do |venue_name|
   expect(page).not_to have_content(venue_name)
+end
+
+def wait_for_booking_status!(booking, expected_status, timeout: 10)
+  deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
+
+  loop do
+    return if booking.reload.status == expected_status
+
+    if Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
+      raise "Expected booking ##{booking.id} status to become #{expected_status}, but was #{booking.status}."
+    end
+
+    sleep 0.1
+  end
 end
