@@ -1,0 +1,98 @@
+CUHK 訂場系統 - 剩餘工作總結（對齊 CSCI3100）
+日期：2026-04-06
+
+適用範圍
+- 本清單以目前最新 pull 後的 repository 狀態為基準。
+- 依照 CSCI3100 常見評分面向整理：功能、工程品質、測試、CI/CD、文件與專案管理。
+
+==================================================
+A) 目前狀態快照（已具備項目）
+==================================================
+1) 核心功能已具備
+- 使用者驗證登入與角色權限控制
+- 場地預約、時段表檢查、審批流程
+- 器材借用流程
+- Analytics 儀表板（含權限控制、圖表、日期篩選）
+
+2) 品質流程已具備
+- GitHub Actions CI 已包含安全掃描 + Lint + RSpec + Cucumber
+- Coverage 工具（SimpleCov + Cobertura）與 CI Coverage Summary 已配置
+- Azure VM 部署流程已配置
+
+3) 近期已知風險
+- approval 的即時更新（JavaScript）Cucumber 情境過往有不穩定（ActionCable 時序/Session 行為）
+- 需在最新合併版本上再次確認
+
+==================================================
+B) 剩餘工作（依優先順序）
+==================================================
+[P0 - 最終提交前必做]
+1. 在最新 main 執行完整回歸檢查
+- 合併後執行完整 RSpec + 完整 Cucumber + RuboCop + Brakeman
+- 目標：團隊負責範圍內無失敗案例；無新增警告/違規
+
+2. 修復任何仍存在的不穩定（flaky）測試
+- 優先處理 approval workflow 的即時更新 @javascript 情境
+- 確保 selector 與等待機制穩定，不依賴脆弱假設
+
+3. 在正式環境做最終 smoke test
+- 驗證各角色登入、預約建立/核准/拒絕、器材借還、analytics 頁面載入
+- 保存證據（截圖/日誌），供 demo 與評分答辯使用
+
+[P1 - 建議完成，可提升 CSCI3100 評分]
+4. 文件一致性檢查（README 與實際行為一致）
+- 確保 README 的 setup/testing/deploy 指令與實際環境完全一致
+- 確認部署段落正確反映 Azure VM 流程與必要 secrets
+
+5. Rubric 對照表（精簡版）
+- 增加或維護「評分項目 -> 程式碼/測試」的簡短對照
+- 若團隊偏好精簡 README，可保留精簡，但需在某處保留可追溯對照
+
+6. 多租戶/授權邊界情境複測
+- 再測跨租戶/跨部門的預約與審批路徑隔離
+- 確認合併後沒有回歸
+
+[P2 - 加分型優化（有時間再做）]
+7. 非阻塞警告清理
+- Ruby 對 fiddle gem 的未來版本警告（Ruby 4 預設變更）
+- 可選：處理 Windows VIPS 警告（若團隊想讓本地輸出更乾淨）
+
+8. Demo 彩排包
+- 準備 5-8 分鐘流程：角色登入 -> 建立預約 -> 審批 -> 即時更新 -> analytics -> CI badge/部署證明
+
+==================================================
+C) 按成員建議分工
+==================================================
+- Member 1（Auth/Email）：最終 auth 與 email 寄送驗證
+- Member 2（Booking/Equipment）：最新 main 上的衝突檢查與器材流程回歸
+- Member 3（Approval/Realtime）：穩定化 @javascript approval 即時更新情境
+- Member 4（Analytics/Quality）：analytics 回歸、CI/coverage 守門、最終文件一致性
+
+==================================================
+D) 最終驗證指令（團隊 Runbook）
+==================================================
+1) 單元/請求/視圖/路由測試
+- bundle exec rspec
+
+2) BDD/整合測試
+- bundle exec cucumber
+
+3) Lint
+- bin/rubocop
+
+4) 安全檢查
+- bin/brakeman --no-pager
+- bin/bundler-audit
+
+5) Analytics 快速檢查（可選）
+- bundle exec rake analytics:test
+- bundle exec rake analytics:cucumber
+
+==================================================
+E) 最終提交完成標準（Definition of Done）
+==================================================
+- main 分支 CI 全綠
+- 無未解決的 P0 問題
+- Coverage 報告成功產出，且高於專案門檻
+- README 指令準確、可重現
+- 正式環境 smoke test 通過，且 demo 流程已彩排

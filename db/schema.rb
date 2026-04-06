@@ -32,7 +32,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_000000) do
     t.date "end_date"
     t.datetime "end_time"
     t.bigint "equipment_id"
-    t.integer "quantity", default: 0
+    t.integer "quantity"
     t.text "rejection_reason"
     t.date "start_date"
     t.datetime "start_time"

@@ -1,0 +1,98 @@
+CUHK Booking System - Remaining Work Summary (CSCI3100-aligned)
+Date: 2026-04-06
+
+Scope
+- This checklist is based on current repository state after latest pull.
+- Organized by common CSCI3100 grading dimensions: Functionality, Engineering Quality, Testing, CI/CD, Documentation & Project Management.
+
+==================================================
+A) Current Status Snapshot (What is already in place)
+==================================================
+1) Core features available
+- Authentication/login and role-based access
+- Venue booking, timetable checks, approval workflow
+- Equipment booking flow
+- Analytics dashboard (including access control, charts, filter)
+
+2) Quality pipeline available
+- GitHub Actions CI includes security scan + lint + RSpec + Cucumber
+- Coverage tooling (SimpleCov + Cobertura) and CI coverage summary
+- Azure VM deployment workflow is configured
+
+3) Known risk from recent logs
+- Historically unstable JS real-time approval Cucumber scenario (ActionCable timing/session behavior).
+- Needs final confirmation after latest merge.
+
+==================================================
+B) Remaining Work (Priority Order)
+==================================================
+[P0 - Must finish before final submission]
+1. Full end-to-end regression check on latest main
+- Run full RSpec + full Cucumber + RuboCop + Brakeman after merge.
+- Target: no failures in team-owned scenarios; no new warnings/offenses.
+
+2. Resolve any remaining flaky scenario(s)
+- Focus first on approval workflow real-time @javascript scenario.
+- Ensure selectors and waiting strategy are stable and not dependent on brittle assumptions.
+
+3. Final production smoke test on deployed site
+- Verify login by role, booking create/approve/reject path, equipment borrow/return, analytics page load.
+- Capture evidence (screenshots/log notes) for demo and grading defense.
+
+[P1 - Should finish for stronger CSCI3100 score]
+4. Documentation consistency pass (README vs real behavior)
+- Ensure README setup/testing/deploy instructions exactly match current commands and environment.
+- Confirm deployment section reflects Azure VM workflow and required secrets accurately.
+
+5. Rubric traceability table (concise)
+- Add or maintain a short mapping from each rubric item to file/tests.
+- Keep concise if team prefers short README, but preserve traceability in one place.
+
+6. Multi-tenant/authorization edge-case recheck
+- Re-test cross-tenant/cross-department isolation for booking and approval paths.
+- Confirm no regression after merged changes.
+
+[P2 - Nice-to-have polish]
+7. Non-blocking warning cleanup
+- Ruby warning about fiddle gem (future Ruby 4 default change).
+- Optional Windows VIPS warnings investigation (if team wants clean local logs).
+
+8. Demo rehearsal package
+- Prepare 5-8 minute flow: role login -> booking -> approval -> realtime update -> analytics -> CI badge/deploy proof.
+
+==================================================
+C) Owner-Oriented Suggested Split
+==================================================
+- Member 1 (Auth/Email): final auth + email delivery verification
+- Member 2 (Booking/Equipment): booking conflict and equipment flow regression on latest main
+- Member 3 (Approval/Realtime): stabilize @javascript approval realtime scenario
+- Member 4 (Analytics/Quality): analytics regression, CI/coverage guardrail verification, final documentation consistency
+
+==================================================
+D) Final Validation Command Set (Team Runbook)
+==================================================
+1) Unit/request/view/routing tests
+- bundle exec rspec
+
+2) BDD/integration tests
+- bundle exec cucumber
+
+3) Lint
+- bin/rubocop
+
+4) Security
+- bin/brakeman --no-pager
+- bin/bundler-audit
+
+5) Analytics-focused quick checks (optional)
+- bundle exec rake analytics:test
+- bundle exec rake analytics:cucumber
+
+==================================================
+E) Definition of Done for Final Submission
+==================================================
+- CI workflow fully green on main
+- No unresolved P0 defects
+- Coverage report generated and above project threshold
+- README instructions are accurate and reproducible
+- Production smoke test passed and demo path rehearsed
