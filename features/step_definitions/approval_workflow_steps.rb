@@ -22,6 +22,21 @@ Given("{string} has a pending booking for {string} on {string}") do |email, venu
   )
 end
 
+Given("{string} has a pending booking for {string} on a date {int} days in the future") do |email, venue_name, days|
+  user = User.find_by!(email: email)
+  venue = Venue.find_by!(name: venue_name)
+  date = (Date.current + days.days).strftime("%Y-%m-%d")
+
+  create(
+    :booking,
+    user: user,
+    venue: venue,
+    start_time: Time.zone.parse("#{date} 10:00"),
+    end_time: Time.zone.parse("#{date} 12:00"),
+    status: :pending
+  )
+end
+
 When("I visit the approval dashboard") do
   visit approval_dashboard_path
 end
@@ -46,6 +61,11 @@ When("I approve the booking for {string} on {string}") do |venue_name, date|
   within("##{ActionView::RecordIdentifier.dom_id(booking)}") do
     click_button "Approve"
   end
+end
+
+When("I approve the booking for {string} on a date {int} days in the future") do |venue_name, days|
+  date = (Date.current + days.days).strftime("%Y-%m-%d")
+  step "I approve the booking for \"#{venue_name}\" on \"#{date}\""
 end
 
 Then("the booking status should be {string}") do |status|
@@ -87,13 +107,14 @@ Given("there is a pending booking for {string} which belongs to {string}") do |v
   tenant = Tenant.find_by(name: department) || create(:tenant, name: department)
   venue = create(:venue, name: venue_name, department: department, tenant: tenant)
   user = create(:user, tenant: tenant)
+  date = 5.days.from_now.strftime("%Y-%m-%d")
   create(
     :booking,
     venue: venue,
     user: user,
     status: :pending,
-    start_time: Time.zone.parse("2026-04-20 10:00"),
-    end_time: Time.zone.parse("2026-04-20 12:00")
+    start_time: Time.zone.parse("#{date} 10:00"),
+    end_time: Time.zone.parse("#{date} 12:00")
   )
 end
 
@@ -106,6 +127,11 @@ When("I attempt to approve the booking for {string} on {string} directly") do |v
   page.driver.submit :patch, approve_booking_path(booking), {}
 end
 
+When("I attempt to approve the booking for {string} on a date {int} days in the future directly") do |venue_name, days|
+  date = (Date.current + days.days).strftime("%Y-%m-%d")
+  step "I attempt to approve the booking for \"#{venue_name}\" on \"#{date}\" directly"
+end
+
 Then("the booking for {string} on {string} should remain {string}") do |venue_name, date, status|
   booking = Booking.joins(:venue)
                    .where(venues: { name: venue_name })
@@ -113,6 +139,11 @@ Then("the booking for {string} on {string} should remain {string}") do |venue_na
                    .first
 
   expect(booking.reload.status).to eq(status.downcase)
+end
+
+Then("the booking for {string} on a date {int} days in the future should remain {string}") do |venue_name, days, status|
+  date = (Date.current + days.days).strftime("%Y-%m-%d")
+  step "the booking for \"#{venue_name}\" on \"#{date}\" should remain \"#{status}\""
 end
 
 Given("I am viewing {string}") do |page_name|
