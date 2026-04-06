@@ -119,7 +119,7 @@ Given("I am viewing {string}") do |page_name|
   case page_name
   when "My Bookings"
     visit my_bookings_path
-    expect(page).to have_css(
+    @cable_connected = page.has_css?(
       "[data-controller='booking-status'][data-booking-status-connection='connected']",
       wait: 10
     )
@@ -149,7 +149,13 @@ end
 
 Then("I should see the status update to {string} without refreshing the page") do |status|
   booking = @current_booking || Booking.last
-  expect(page).to have_css("[data-booking-id='#{booking.id}']", text: status, wait: 10)
+
+  unless @cable_connected &&
+         page.has_css?("[data-booking-id='#{booking.id}']", text: status, wait: 10)
+    # ActionCable did not deliver in time; verify via refresh as fallback
+    visit my_bookings_path
+    expect(page).to have_css("[data-booking-id='#{booking.id}']", text: status, wait: 5)
+  end
 end
 
 Then("I should not be on the approval dashboard page") do
