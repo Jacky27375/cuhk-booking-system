@@ -25,6 +25,15 @@ RSpec.describe Equipment, type: :model do
       eq = Equipment.create!(name: "iPad", quantity: 10, tenant: tenant)
       expect(eq.available_quantity).to eq(10)
     end
+
+    it "can exclude the current booking when recalculating availability" do
+      eq = Equipment.create!(name: "Projector", quantity: 1, tenant: tenant)
+      user = create(:user, tenant: tenant)
+      booking = create(:equipment_booking, user: user, equipment: eq, quantity: 1, status: :approved)
+
+      expect(eq.available_quantity).to eq(0)
+      expect(eq.available_quantity(excluding_booking_id: booking.id)).to eq(1)
+    end
   end
 
   describe '.visible_to_student' do

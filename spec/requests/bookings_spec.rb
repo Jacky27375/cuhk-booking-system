@@ -277,4 +277,37 @@ RSpec.describe "/bookings", type: :request do
       expect(booking.reload.venue_id).to eq(own_venue.id)
     end
   end
+
+  describe "PATCH /bookings/:id/mark_returned" do
+    it "allows users to return approved equipment bookings" do
+      equipment = create(:equipment, tenant: tenant)
+      booking = create(:equipment_booking, user: user, equipment: equipment, status: :approved)
+
+      patch mark_returned_booking_path(booking)
+
+      expect(response).to redirect_to(my_bookings_path)
+      expect(booking.reload.status).to eq("returned")
+    end
+
+    it "blocks returning venue bookings" do
+      booking = create(:booking, user: user, venue: venue, status: :approved)
+
+      patch mark_returned_booking_path(booking)
+
+      expect(response).to redirect_to(my_bookings_path)
+      expect(flash[:alert]).to include("can only be marked as returned")
+      expect(booking.reload.status).to eq("approved")
+    end
+
+    it "blocks returning equipment bookings that are not approved or borrowed" do
+      equipment = create(:equipment, tenant: tenant)
+      booking = create(:equipment_booking, user: user, equipment: equipment, status: :pending)
+
+      patch mark_returned_booking_path(booking)
+
+      expect(response).to redirect_to(my_bookings_path)
+      expect(flash[:alert]).to include("cannot transition from pending to returned")
+      expect(booking.reload.status).to eq("pending")
+    end
+  end
 end

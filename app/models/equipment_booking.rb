@@ -21,7 +21,9 @@ class EquipmentBooking < Booking
 
   def equipment_quantity_available
     return unless equipment && quantity.present?
+    return unless status.in?(Equipment::INVENTORY_HOLDING_STATUSES)
 
-    errors.add(:base, "Not enough units available") if quantity > equipment.available_quantity
+    available_quantity = equipment.available_quantity(excluding_booking_id: id)
+    errors.add(:base, "Not enough units available") if quantity > available_quantity
   end
 end
