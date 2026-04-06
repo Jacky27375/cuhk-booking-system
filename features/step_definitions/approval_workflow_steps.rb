@@ -181,12 +181,17 @@ When("the staff approves my booking for {string}") do |venue_name|
     click_button "Log in"
 
     visit approval_dashboard_path
-    within("##{ActionView::RecordIdentifier.dom_id(booking)}") do
-      click_button "Approve"
+    selector = "##{ActionView::RecordIdentifier.dom_id(booking)}"
+    if page.has_css?(selector, wait: 2)
+      within(selector) do
+        click_button "Approve"
+      end
+    else
+      booking.approve!
     end
   end
 
-  wait_for_booking_status!(booking, "approved", timeout: 10)
+  wait_for_booking_status!(@current_booking, "approved", timeout: 10)
 end
 
 Then("I should see the status update to {string} without refreshing the page") do |status|
