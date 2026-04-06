@@ -3,7 +3,7 @@
 <% if @bookings.empty? %>
   <p>No pending bookings.</p>
 <% else %>
-  <table id="approvals-table">
+  <table id="approvals-table" class="resource-grid-table">
     <thead>
       <tr>
         <th><%= sortable_header_link("Venue", "venue", current_sort: @sort_column, current_direction: @sort_direction) %></th>

@@ -60,3 +60,13 @@ Feature: Sorting in list pages
     Then the first row in table "approvals-table" should contain "New Asia Lounge"
     When I click "Venue (asc)"
     Then the first row in table "approvals-table" should contain "Shaw Hall"
+
+  Scenario: List pages render tables with grid styling
+    When I visit the venues page
+    Then table "venues-table" should have class "resource-grid-table"
+    When I visit the equipments page
+    Then table "equipments-table" should have class "resource-grid-table"
+    When I visit the bookings page
+    Then table "bookings-table" should have class "resource-grid-table"
+    When I visit the approval dashboard
+    Then table "approvals-table" should have class "resource-grid-table"

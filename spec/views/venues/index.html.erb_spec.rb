@@ -19,7 +19,7 @@ RSpec.describe "venues/index", type: :view do
 
   it "renders a list of venues" do
     render
-    assert_select "table#venues-table"
+    assert_select "table#venues-table.resource-grid-table"
     assert_select "table#venues-table tbody tr", count: 2
     expect(rendered).to include("Venue 1")
     expect(rendered).to include("Venue 2")

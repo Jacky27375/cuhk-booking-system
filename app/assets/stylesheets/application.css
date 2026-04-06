@@ -145,6 +145,31 @@
 	color: #444;
 }
 
+.resource-grid-table {
+	width: 100%;
+	border-collapse: collapse;
+	border: 1px solid #cbd5e1;
+	background: #fff;
+	margin: 1rem 0 1.5rem;
+}
+
+.resource-grid-table th,
+.resource-grid-table td {
+	border: 1px solid #cbd5e1;
+	padding: 0.7rem 0.85rem;
+	vertical-align: top;
+	text-align: left;
+}
+
+.resource-grid-table thead th {
+	background: #f8fafc;
+	font-weight: 700;
+}
+
+.resource-grid-table tbody tr:nth-child(even) {
+	background: #fcfdff;
+}
+
 /* ===== Analytics Dashboard ===== */
 
 .analytics-cards {

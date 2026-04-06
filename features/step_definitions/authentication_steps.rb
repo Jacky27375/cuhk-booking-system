@@ -74,6 +74,10 @@ Then('the first row in table {string} should contain {string}') do |table_id, te
   expect(page).to have_css("##{table_id} tbody tr:first-child", text: text)
 end
 
+Then('table {string} should have class {string}') do |table_id, class_name|
+  expect(page).to have_css("table##{table_id}.#{class_name}")
+end
+
 Then('I should see link {string}') do |text|
   expect(page).to have_selector('a', exact_text: text)
 end

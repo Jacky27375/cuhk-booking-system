@@ -5,7 +5,7 @@
 <h1>Bookings</h1>
 
 <% if @bookings.any? %>
-  <table id="bookings-table">
+  <table id="bookings-table" class="resource-grid-table">
     <thead>
       <tr>
         <th><%= sortable_header_link("Resource", "resource", current_sort: @sort_column, current_direction: @sort_direction) %></th>

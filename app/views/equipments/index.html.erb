@@ -5,7 +5,7 @@
 <% end %>
 
 <% if @equipments.any? %>
-  <table id="equipments-table">
+  <table id="equipments-table" class="resource-grid-table">
     <thead>
       <tr>
         <th><%= sortable_header_link("Name", "name", current_sort: @sort_column, current_direction: @sort_direction) %></th>
