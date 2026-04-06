@@ -2,15 +2,16 @@ Before('@equipment_booking') do
   tenant = Tenant.find_or_create_by!(slug: 'science-faculty') do |t|
     t.name = 'Science Faculty'
   end
-  User.find_or_create_by!(email: 'student@cuhk.edu.hk') do |u|
+  User.find_or_create_by!(email: 'student@link.cuhk.edu.hk') do |u|
     u.password = 'Password1!'
+    u.password_confirmation = 'Password1!'
     u.role = :society_member
     u.tenant = tenant
   end
 end
 
 Given('the following equipment exists:') do |table|
-  user = User.find_by!(email: 'student@cuhk.edu.hk')
+  user = User.find_by!(email: 'student@link.cuhk.edu.hk')
   tenant = user.tenant
   table.hashes.each do |hash|
     Equipment.create!(
@@ -40,7 +41,7 @@ Then('the available count for {string} should show {int}') do |name, count|
 end
 
 Given('I have an approved loan of {int} {string} ending today') do |qty, name|
-  user = User.find_by!(email: 'student@cuhk.edu.hk')
+  user = User.find_by!(email: 'student@link.cuhk.edu.hk')
   equipment = Equipment.find_by!(name: name)
   Booking.create!(
     equipment: equipment,

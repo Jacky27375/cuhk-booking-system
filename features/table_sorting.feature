@@ -18,10 +18,10 @@ Feature: Sorting in list pages
       | NA Projector   | New Asia College | 5        |
     And the following pending bookings exist:
       | venue           | user_email              |
-      | Shaw Hall       | booker_shaw@example.com |
-      | New Asia Lounge | booker_na@example.com   |
-    And there is a user "admin-all@example.com" with role "admin"
-    And I am logged in as "admin-all@example.com"
+      | Shaw Hall       | booker.shaw@link.cuhk.edu.hk |
+      | New Asia Lounge | booker.na@link.cuhk.edu.hk   |
+    And there is a user "admin.all@link.cuhk.edu.hk" with role "admin"
+    And I am logged in as "admin.all@link.cuhk.edu.hk"
 
   Scenario: Venue list toggles sort by Name
     When I visit the venues page

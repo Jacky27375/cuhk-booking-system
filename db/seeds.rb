@@ -231,38 +231,42 @@ unless Rails.env.production?
   ]
 
   # Create default admin user
-  User.find_or_create_by!(email: "admin@cuhk.edu.hk") do |u|
+  User.find_or_create_by!(email: "admin@link.cuhk.edu.hk") do |u|
     u.password = "Password1!"
+    u.password_confirmation = "Password1!"
     u.role = :admin
   end
 
   # Create default staff user
-  User.find_or_create_by!(email: "staff@cuhk.edu.hk") do |u|
+  User.find_or_create_by!(email: "staff@link.cuhk.edu.hk") do |u|
     u.password = "Password1!"
+    u.password_confirmation = "Password1!"
     u.role = :staff
     u.tenant = university_tenant
   end
 
   # Create default member user
-  member = User.find_or_create_by!(email: "member@cuhk.edu.hk") do |u|
+  member = User.find_or_create_by!(email: "member@link.cuhk.edu.hk") do |u|
     u.password = "Password1!"
+    u.password_confirmation = "Password1!"
     u.role = :society_member
     u.tenant = university_tenant
   end
 
   # Create additional cross-tenant test users.
   test_users = [
-    { email: "staff.shaw@cuhk.edu.hk", role: :staff, tenant: "Shaw College" },
-    { email: "staff.newasia@cuhk.edu.hk", role: :staff, tenant: "New Asia College" },
-    { email: "staff.wys@cuhk.edu.hk", role: :staff, tenant: "Wu Yee Sun College" },
-    { email: "member.shaw@cuhk.edu.hk", role: :society_member, tenant: "Shaw College" },
-    { email: "member.newasia@cuhk.edu.hk", role: :society_member, tenant: "New Asia College" },
-    { email: "member.wys@cuhk.edu.hk", role: :society_member, tenant: "Wu Yee Sun College" }
+    { email: "staff.shaw@link.cuhk.edu.hk", role: :staff, tenant: "Shaw College" },
+    { email: "staff.newasia@link.cuhk.edu.hk", role: :staff, tenant: "New Asia College" },
+    { email: "staff.wys@link.cuhk.edu.hk", role: :staff, tenant: "Wu Yee Sun College" },
+    { email: "member.shaw@link.cuhk.edu.hk", role: :society_member, tenant: "Shaw College" },
+    { email: "member.newasia@link.cuhk.edu.hk", role: :society_member, tenant: "New Asia College" },
+    { email: "member.wys@link.cuhk.edu.hk", role: :society_member, tenant: "Wu Yee Sun College" }
   ]
 
   test_users.each do |attrs|
     User.find_or_create_by!(email: attrs[:email]) do |u|
       u.password = "Password1!"
+      u.password_confirmation = "Password1!"
       u.role = attrs[:role]
       u.tenant = department_tenants.fetch(attrs[:tenant])
     end
@@ -294,13 +298,13 @@ unless Rails.env.production?
   # end
 
   puts "Seed data created successfully."
-  puts "  Admin:  admin@cuhk.edu.hk  / Password1!"
-  puts "  Staff:  staff@cuhk.edu.hk  / Password1!"
-  puts "  Member: member@cuhk.edu.hk / Password1!"
+  puts "  Admin:  admin@link.cuhk.edu.hk  / Password1!"
+  puts "  Staff:  staff@link.cuhk.edu.hk  / Password1!"
+  puts "  Member: member@link.cuhk.edu.hk / Password1!"
   puts "  Extra staff users:"
-  puts "    staff.shaw@cuhk.edu.hk, staff.newasia@cuhk.edu.hk, staff.wys@cuhk.edu.hk"
+  puts "    staff.shaw@link.cuhk.edu.hk, staff.newasia@link.cuhk.edu.hk, staff.wys@link.cuhk.edu.hk"
   puts "  Extra member users:"
-  puts "    member.shaw@cuhk.edu.hk, member.newasia@cuhk.edu.hk, member.wys@cuhk.edu.hk"
+  puts "    member.shaw@link.cuhk.edu.hk, member.newasia@link.cuhk.edu.hk, member.wys@link.cuhk.edu.hk"
 else
   puts "Skipping dummy data generation in production environment."
 end
