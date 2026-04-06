@@ -24,7 +24,10 @@
           <td><%= booking.status.titleize %></td>
           <td>
             <%= button_to "Approve", approve_booking_path(booking), method: :patch %>
-            <%= button_to "Reject", reject_booking_path(booking), method: :patch %>
+            <%= form_with url: reject_booking_path(booking), method: :patch, local: true, class: "inline-reject-form" do |f| %>
+              <%= f.text_field :rejection_reason, placeholder: "Reason", size: 20 %>
+              <%= f.submit "Reject" %>
+            <% end %>
           </td>
         </tr>
       <% end %>
