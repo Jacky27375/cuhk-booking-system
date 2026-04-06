@@ -1,5 +1,5 @@
 class Equipment < ApplicationRecord
-  INVENTORY_HOLDING_STATUSES = %w[pending approved borrowed].freeze
+  INVENTORY_HOLDING_STATUSES = %w[pending under_review approved borrowed].freeze
   self.table_name = "equipment"
 
   belongs_to :tenant
