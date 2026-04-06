@@ -31,7 +31,7 @@ class EquipmentsController < ApplicationController
     if @equipment.save
       redirect_to equipment_path(@equipment), notice: "Equipment created successfully."
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -42,7 +42,7 @@ class EquipmentsController < ApplicationController
     if @equipment.update(equipment_params)
       redirect_to equipment_path(@equipment), notice: "Equipment updated successfully."
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -69,7 +69,7 @@ class EquipmentsController < ApplicationController
     if @booking.save
       redirect_to equipment_path(@equipment), notice: "Equipment booking submitted"
     else
-      render :borrow_form, status: :unprocessable_entity
+      render :borrow_form, status: :unprocessable_content
     end
   end
 

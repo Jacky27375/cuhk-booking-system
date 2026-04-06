@@ -13,8 +13,8 @@ RSpec.describe User, type: :model do
     end
 
     it 'requires a unique email (case-insensitive)' do
-      create(:user, email: 'test@cuhk.edu.hk')
-      user = build(:user, email: 'TEST@cuhk.edu.hk')
+      create(:user, email: 'test@link.cuhk.edu.hk')
+      user = build(:user, email: 'TEST@link.cuhk.edu.hk')
       expect(user).not_to be_valid
       expect(user.errors[:email]).to include("has already been taken")
     end
@@ -22,23 +22,23 @@ RSpec.describe User, type: :model do
     it 'requires a valid email format' do
       user = build(:user, email: 'invalid-email')
       expect(user).not_to be_valid
-      expect(user.errors[:email]).to include("is invalid")
+      expect(user.errors[:email]).to include("must be a valid @link.cuhk.edu.hk address")
     end
 
     it 'requires a password on create' do
-      user = build(:user, password: nil)
+      user = build(:user, password: nil, password_confirmation: nil)
       expect(user).not_to be_valid
     end
 
     it 'requires a password of at least 8 characters' do
-      user = build(:user, password: 'short')
+      user = build(:user, password: 'short', password_confirmation: 'short')
       expect(user).not_to be_valid
       expect(user.errors[:password]).to include("is too short (minimum is 8 characters)")
     end
 
     it 'normalizes email to lowercase' do
-      user = create(:user, email: ' Admin@CUHK.edu.hk ')
-      expect(user.email).to eq('admin@cuhk.edu.hk')
+      user = create(:user, email: ' Admin@link.CUHK.edu.hk ')
+      expect(user.email).to eq('admin@link.cuhk.edu.hk')
     end
   end
 

@@ -5,7 +5,7 @@ Feature: Equipment Booking
   So that I can use it for my society's activities
 
   Background:
-    Given I am logged in as "student@cuhk.edu.hk"
+    Given I am logged in as "student@link.cuhk.edu.hk"
     And the following equipment exists:
       | name          | department       | quantity |
       | Projector     | Science Faculty  | 3        |
@@ -18,12 +18,12 @@ Feature: Equipment Booking
     And I should see "available: 3"
 
   Scenario: Student successfully borrows available equipment
-    When I borrow 1 "Projector" from "2026-04-20" to "2026-04-21"
+    When I borrow 1 "Projector" from 5 days from now to 6 days from now
     Then I should see "Equipment booking submitted"
     And the available count for "Projector" should show 2
 
   Scenario: Student cannot borrow more than available quantity
-    When I borrow 5 "Laptop" from "2026-04-20" to "2026-04-21"
+    When I borrow 5 "Laptop" from 5 days from now to 6 days from now
     Then I should see "Not enough units available"
 
   Scenario: Student returns equipment
@@ -31,3 +31,21 @@ Feature: Equipment Booking
     When I mark the "Projector" as returned
     Then the available count for "Projector" should be restored
     And my booking should show status "Returned"
+
+  # Constraint: Equipment can only be booked at least 5 days in advance
+  Scenario: Student can borrow equipment exactly 5 days in advance
+    When I borrow 1 "Projector" from 5 days from now to 6 days from now
+    Then I should see "Equipment booking submitted"
+
+  Scenario: Student cannot borrow equipment less than 5 days in advance
+    When I attempt to borrow 1 "Projector" from 4 days from now to 5 days from now
+    Then I should see "Equipment must be booked at least 5 days in advance"
+
+  # Constraint: Equipment can be booked for at most 7 days
+  Scenario: Student can borrow equipment for up to 7 days
+    When I borrow 1 "Projector" from 5 days from now to 12 days from now
+    Then I should see "Equipment booking submitted"
+
+  Scenario: Student cannot borrow equipment for more than 7 days
+    When I attempt to borrow 1 "Projector" from 5 days from now to 13 days from now
+    Then I should see "Equipment booking duration cannot exceed 7 days"

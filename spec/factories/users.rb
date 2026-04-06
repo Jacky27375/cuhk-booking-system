@@ -1,7 +1,8 @@
 FactoryBot.define do
   factory :user do
-    sequence(:email) { |n| "user#{n}@cuhk.edu.hk" }
+    sequence(:email) { |n| "user#{n}@link.cuhk.edu.hk" }
     password { "Password1!" }
+    password_confirmation { "Password1!" }
     role { :society_member }
 
     trait :admin do

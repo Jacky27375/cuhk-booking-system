@@ -24,7 +24,7 @@ RSpec.describe Venue, type: :model do
       tenant = create(:tenant, name: 'University', slug: 'university')
       venue = create(:venue, tenant: tenant, department: tenant.name)
       user = create(:user, tenant: tenant)
-      create(:booking, venue: venue, user: user, start_time: Time.zone.parse('2026-04-10 10:00:00'), end_time: Time.zone.parse('2026-04-10 11:00:00'))
+      create(:booking, venue: venue, user: user, start_time: Time.zone.parse(5.days.from_now.strftime('%Y-%m-%d') + ' 10:00:00'), end_time: Time.zone.parse(5.days.from_now.strftime('%Y-%m-%d') + ' 12:00:00'))
       expect { venue.destroy }.to change { Booking.count }.by(-1)
     end
   end

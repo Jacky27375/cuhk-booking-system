@@ -30,8 +30,8 @@ class VenuesController < ApplicationController
         format.html { redirect_to @venue, notice: "Venue was successfully created." }
         format.json { render :show, status: :created, location: @venue }
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @venue.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @venue.errors, status: :unprocessable_content }
       end
     end
   end
@@ -45,8 +45,8 @@ class VenuesController < ApplicationController
         format.html { redirect_to @venue, notice: "Venue was successfully updated.", status: :see_other }
         format.json { render :show, status: :ok, location: @venue }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @venue.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @venue.errors, status: :unprocessable_content }
       end
     end
   end
