@@ -9,7 +9,7 @@ Feature: Booking timetable and conflict prevention
     And there is a venue "Lecture Hall A"
 
   Scenario: Timetable shows booked and available slots for selected date
-    Given there is a booking for "Lecture Hall A" by "other@example.com" from 5 days in the future at "10:00" to 5 days in the future at "11:00"
+    Given there is a booking for "Lecture Hall A" by "other@link.cuhk.edu.hk" from 5 days in the future at "10:00" to 5 days in the future at "11:00"
     And I am logged in as "member@link.cuhk.edu.hk"
     When I open the booking page for "Lecture Hall A" on a date 5 days in the future
     Then I should not see "Show Timetable"

@@ -57,7 +57,7 @@ class BookingsController < ApplicationController
     unless venue_accessible?(@booking.venue_id)
       @booking.errors.add(:venue, "is not accessible for your account")
       prepare_timetable_context
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
       return
     end
 
@@ -65,7 +65,7 @@ class BookingsController < ApplicationController
     if @booking.valid?
       render :confirm
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -78,7 +78,7 @@ class BookingsController < ApplicationController
     unless venue_accessible?(@booking.venue_id)
       @booking.errors.add(:venue, "is not accessible for your account")
       prepare_timetable_context
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
       return
     end
 
@@ -88,8 +88,8 @@ class BookingsController < ApplicationController
         format.json { render :show, status: :created, location: @booking }
       else
         prepare_timetable_context
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @booking.errors, status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @booking.errors, status: :unprocessable_content }
       end
     end
   end
@@ -102,7 +102,7 @@ class BookingsController < ApplicationController
     unless venue_accessible?(requested_venue_id)
       @booking.errors.add(:venue, "is not accessible for your account")
       prepare_timetable_context
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
       return
     end
 
@@ -112,8 +112,8 @@ class BookingsController < ApplicationController
         format.json { render :show, status: :ok, location: @booking }
       else
         prepare_timetable_context
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @booking.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @booking.errors, status: :unprocessable_content }
       end
     end
   end

@@ -124,7 +124,7 @@ RSpec.describe "/api/v1/bookings", type: :request do
 
       it "returns errors for invalid venue booking" do
         post "/api/v1/bookings", headers: headers, params: valid_params.merge(start_time: nil)
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         json = JSON.parse(response.body)
         expect(json["error"]).to eq("Validation failed")
       end
@@ -156,13 +156,13 @@ RSpec.describe "/api/v1/bookings", type: :request do
 
       it "returns errors when exceeding available quantity" do
         post "/api/v1/bookings", headers: headers, params: valid_params.merge(quantity: 100)
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
 
     it "returns error for missing booking_type" do
       post "/api/v1/bookings", headers: headers, params: { venue_id: venue.id }
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       json = JSON.parse(response.body)
       expect(json["details"]).to include("Booking type must be 'venue' or 'equipment'")
     end

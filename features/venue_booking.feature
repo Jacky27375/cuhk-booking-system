@@ -72,7 +72,7 @@ Feature: Venue Booking System
 
   Scenario: Admin can see booking requests
     Given there is a venue "Lecture Hall A"
-    And there is a booking for "Lecture Hall A" by "member@example.com" from today at "10:00" to today at "12:00"
+    And there is a booking for "Lecture Hall A" by "member@link.cuhk.edu.hk" from 5 days in the future at "10:00" to 5 days in the future at "12:00"
     And I am logged in as "admin@link.cuhk.edu.hk"
     When I visit the bookings page
     Then I should see "Lecture Hall A"

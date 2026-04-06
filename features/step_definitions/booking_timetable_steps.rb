@@ -16,7 +16,8 @@ end
 
 When('I open the edit booking page for my booking on a date {int} days in the future') do |days|
   date = (Date.current + days.days).strftime('%Y-%m-%d')
-  booking = Booking.joins(:user).where(users: { email: 'member@example.com' }).where(start_time: Time.zone.parse("#{date} 00:00:00")..Time.zone.parse("#{date} 23:59:59")).first!
+  email = @current_user_email || 'member@link.cuhk.edu.hk'
+  booking = Booking.joins(:user).where(users: { email: email }).where(start_time: Time.zone.parse("#{date} 00:00:00")..Time.zone.parse("#{date} 23:59:59")).first!
   visit edit_booking_path(booking, booking_date: date)
 end
 

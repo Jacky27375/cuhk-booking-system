@@ -119,7 +119,7 @@ RSpec.describe SendgridEmailService do
 
       it "raises a DeliveryError" do
         expect {
-          described_class.send_email(to: "test@example.com", subject: "Test", html_content: "<p>Test</p>")
+          described_class.send_email(to: "test@link.cuhk.edu.hk", subject: "Test", html_content: "<p>Test</p>")
         }.to raise_error(SendgridEmailService::DeliveryError, /403/)
       end
     end
