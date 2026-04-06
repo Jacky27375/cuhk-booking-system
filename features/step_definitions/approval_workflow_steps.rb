@@ -153,6 +153,11 @@ Then("the booking for {string} on a date {int} days in the future should remain 
   step "the booking for \"#{venue_name}\" on \"#{date}\" should remain \"#{status}\""
 end
 
+Then("the booking for {string} on a date {int} days in the future should remain {string}") do |venue_name, days, status|
+  date = (Date.current + days.days).strftime("%Y-%m-%d")
+  step "the booking for \"#{venue_name}\" on \"#{date}\" should remain \"#{status}\""
+end
+
 Given("I am viewing {string}") do |page_name|
   case page_name
   when "My Bookings"
