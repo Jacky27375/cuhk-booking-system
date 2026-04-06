@@ -10,11 +10,8 @@ class RegistrationsController < ApplicationController
 
   def create
     @user = User.new(registration_params)
-    @user.role = if ALLOWED_SIGNUP_ROLES.include?(params.dig(:user, :role))
-                   params[:user][:role]
-                 else
-                   :society_member
-                 end
+    role = params.dig(:user, :role)
+    @user.role = ALLOWED_SIGNUP_ROLES.include?(role) ? role : :society_member
     @tenants = Tenant.order(:name)
 
     if @user.save
