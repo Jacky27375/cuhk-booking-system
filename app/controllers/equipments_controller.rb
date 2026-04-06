@@ -11,11 +11,21 @@ class EquipmentsController < ApplicationController
   end
 
   def new
-    @equipment = current_user.tenant.equipment.new
+    if current_user.admin?
+      @equipment = Equipment.new
+      @tenants = Tenant.all
+    else
+      @equipment = current_user.tenant.equipment.new
+    end
   end
 
   def create
-    @equipment = current_user.tenant.equipment.new(equipment_params)
+    if current_user.admin?
+      @equipment = Equipment.new(equipment_params)
+      @tenants = Tenant.all
+    else
+      @equipment = current_user.tenant.equipment.new(equipment_params)
+    end
 
     if @equipment.save
       redirect_to equipment_path(@equipment), notice: "Equipment created successfully."
@@ -81,12 +91,17 @@ class EquipmentsController < ApplicationController
   end
 
   def ensure_tenant_present_for_manage!
+    return if current_user.admin?
     return if current_user.tenant.present?
 
     redirect_to equipments_path, alert: "Your account is not linked to a tenant."
   end
 
   def equipment_params
-    params.require(:equipment).permit(:name, :quantity)
+    if current_user.admin?
+      params.require(:equipment).permit(:name, :quantity, :tenant_id)
+    else
+      params.require(:equipment).permit(:name, :quantity)
+    end
   end
 end

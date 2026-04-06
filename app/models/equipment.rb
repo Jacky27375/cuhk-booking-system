@@ -1,4 +1,6 @@
 class Equipment < ApplicationRecord
+  self.table_name = "equipment"
+
   belongs_to :tenant
   has_many :bookings, dependent: :destroy
   has_many :equipment_bookings, class_name: "EquipmentBooking", dependent: :destroy
