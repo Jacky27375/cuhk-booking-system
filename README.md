@@ -141,6 +141,14 @@ The deploy workflow runs automatically after `CI` succeeds on `main`, and can al
 | **Future: Documentation consistency pass (README vs real behavior)** | TBD | TBD | Verify setup/testing/deploy commands and required deployment secrets match current repository behavior exactly. |
 | **Future: Multi-tenant authorization edge-case regression pass** | TBD | TBD | Re-test cross-tenant/cross-department isolation across booking and approval flows after recent merges. |
 | **Future: Staff dashboard realtime auto-update on new submissions** | TBD | TBD | Initial team plan includes live updates for staff approval dashboard when new bookings arrive; current realtime wiring is focused on user booking status updates. |
+| **Future: Process audit evidence & contribution balance checkpoint** | TBD | TBD | Add a final process-audit checkpoint to verify regular commit cadence and balanced per-member contribution evidence before submission. |
+| **Future: Cucumber key-user-journey coverage closure** | TBD | TBD | Build a traceable checklist showing each required end-to-end user journey is covered by Cucumber scenarios and remains green in CI. |
+| **Future: Final submission artifact lock (Repo URL + SaaS URL + README evidence)** | TBD | TBD | Add a release gate confirming Phase 2 submission artifacts are complete and cross-validated (repository link, live URL, video, README evidence). |
+| **Future: Concurrency-safe reservation enforcement** | TBD | TBD | Harden venue/equipment reservation paths against race conditions with transaction/locking strategy and concurrent-request tests. |
+| **Future: Web/API authorization parity regression suite** | TBD | TBD | Ensure API v1 and web controllers enforce identical tenant/role authorization behavior via shared policy checks and regression tests. |
+| **Future: Idempotent lifecycle actions for approval/cancel flows** | TBD | TBD | Prevent duplicate transitions when approve/reject/cancel actions are retried, double-submitted, or race concurrently. |
+| **Future: Deterministic seed/reset runbook for TA demo reproducibility** | TBD | TBD | Provide a single reset-and-seed flow that consistently generates all tenants, roles, resources, and booking states needed for demos. |
+| **Future: Timezone and boundary-condition booking tests** | TBD | TBD | Add explicit tests for timezone-sensitive behavior, slot boundary edges, date rollover, and adjacent-time conflict handling. |
 | **Future: Async email delivery via Solid Queue jobs** | TBD | TBD | Team plan targets background email delivery; current approval notification path still sends synchronously (`deliver_now`). |
 | **Future: Non-blocking warning cleanup** | TBD | TBD | Resolve remaining runtime/tooling warnings (for example Ruby `fiddle`) as final submission polish. |
 | **Future: Demo rehearsal + final 5-minute video deliverable** | TBD | TBD | Prepare and capture the required narrated end-to-end demo flow for final submission. |
