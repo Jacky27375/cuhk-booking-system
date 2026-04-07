@@ -4,6 +4,7 @@ class BookingsController < ApplicationController
 
   before_action :require_student_for_edit!, only: %i[ edit update ]
   before_action :require_student_for_my!, only: %i[ my cancel ]
+  before_action :require_student_for_booking_create!, only: %i[ new confirm create ]
   before_action :set_booking, only: %i[ show edit update destroy approve reject mark_returned cancel ]
   before_action :require_admin_or_staff, only: %i[ index approve reject ]
 
@@ -397,6 +398,12 @@ class BookingsController < ApplicationController
       return if current_user.society_member?
 
       redirect_to dashboard_path, alert: "Only students can access My Bookings."
+    end
+
+    def require_student_for_booking_create!
+      return if current_user.society_member?
+
+      redirect_to dashboard_path, alert: "Staff and admin cannot create bookings."
     end
 
     def sort_bookings(scope)

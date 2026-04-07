@@ -17,8 +17,8 @@
   <p>You are a <strong>Society Member</strong>.</p>
 <% end %>
 
-<p><%= link_to "Book Equipment", equipments_path %></p>
-<p><%= link_to "Book Venue", venues_path %> </p>
+<p><%= link_to "View Equipment", equipments_path %></p>
+<p><%= link_to "View Venue", venues_path %></p>
 
 <% unless current_user.society_member? %>
   <p><%= link_to "Booking", bookings_path %></p>

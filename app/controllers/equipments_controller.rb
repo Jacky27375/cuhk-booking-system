@@ -1,6 +1,7 @@
 class EquipmentsController < ApplicationController
   before_action :set_equipment, only: [:show, :edit, :update, :destroy]
   before_action :require_staff_or_admin, only: [:new, :create, :edit, :update, :destroy]
+  before_action :require_student_for_borrow!, only: [:borrow_form, :borrow]
   before_action :ensure_tenant_present_for_manage!, only: [:new, :create]
 
   def index
@@ -96,6 +97,12 @@ class EquipmentsController < ApplicationController
     return if current_user.tenant.present?
 
     redirect_to equipments_path, alert: "Your account is not linked to a tenant."
+  end
+
+  def require_student_for_borrow!
+    return if current_user.society_member?
+
+    redirect_to dashboard_path, alert: "Staff and admin cannot create bookings."
   end
 
   def equipment_params
