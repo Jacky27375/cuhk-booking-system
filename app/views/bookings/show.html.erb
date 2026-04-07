@@ -6,5 +6,10 @@
     <%= link_to "My Bookings", my_bookings_path %>
 
     <%= button_to "Destroy this booking", @booking, method: :delete %>
+  <% elsif respond_to?(:current_user) && (current_user&.admin? || current_user&.staff?) %>
+    <%= link_to "Back to Bookings", bookings_path %> |
+    <%= link_to "Back to Dashboard", dashboard_path %>
+  <% else %>
+    <%= link_to "Back to Dashboard", dashboard_path %>
   <% end %>
 </div>

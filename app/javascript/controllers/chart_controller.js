@@ -1,5 +1,4 @@
 import { Controller } from "@hotwired/stimulus"
-import Chart from "chart.js"
 
 export default class extends Controller {
   static targets = ["canvas"]
@@ -14,6 +13,9 @@ export default class extends Controller {
   }
 
   connect() {
+    const Chart = globalThis.Chart
+    if (!Chart) { console.error("Chart.js not loaded"); return }
+
     const ctx = this.canvasTarget.getContext("2d")
     const defaultColors = [
       "#4dc9f6", "#f67019", "#f53794", "#537bc4",

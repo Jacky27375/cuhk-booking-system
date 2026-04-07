@@ -123,7 +123,7 @@ class BookingsController < ApplicationController
     if two_step_approval_required? && @booking.pending?
       @booking.start_review!
       record_approval_step!(action: "start_review", from_status: previous_status, to_status: @booking.status)
-      redirect_to approval_dashboard_path, notice: "Booking moved to under review."
+      redirect_back fallback_location: approval_dashboard_path, notice: "Booking moved to under review."
       return
     end
 
@@ -131,9 +131,9 @@ class BookingsController < ApplicationController
     record_approval_step!(action: "approve", from_status: previous_status, to_status: @booking.status)
     send_booking_notification(:approved)
 
-    redirect_to approval_dashboard_path, notice: "Booking approved."
+    redirect_back fallback_location: approval_dashboard_path, notice: "Booking approved."
   rescue ActiveRecord::RecordInvalid => e
-    redirect_to approval_dashboard_path, alert: booking_transition_error_message(e, "Booking could not be approved.")
+    redirect_back fallback_location: approval_dashboard_path, alert: booking_transition_error_message(e, "Booking could not be approved.")
   end
 
   def reject
@@ -143,9 +143,9 @@ class BookingsController < ApplicationController
     record_approval_step!(action: "reject", from_status: previous_status, to_status: @booking.status, reason: reason)
     send_booking_notification(:rejected, reason: reason)
 
-    redirect_to approval_dashboard_path, notice: "Booking rejected."
+    redirect_back fallback_location: approval_dashboard_path, notice: "Booking rejected."
   rescue ActiveRecord::RecordInvalid => e
-    redirect_to approval_dashboard_path, alert: booking_transition_error_message(e, "Booking could not be rejected.")
+    redirect_back fallback_location: approval_dashboard_path, alert: booking_transition_error_message(e, "Booking could not be rejected.")
   end
 
   def cancel

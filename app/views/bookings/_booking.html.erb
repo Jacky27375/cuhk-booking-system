@@ -1,7 +1,7 @@
 <div id="<%= dom_id booking %>">
   <div>
-    <strong>Venue:</strong>
-    <%= booking.venue.name %>
+    <strong>Resource:</strong>
+    <%= booking.venue&.name || booking.equipment&.name || "-" %>
   </div>
 
   <div>
@@ -9,19 +9,43 @@
     <%= booking.user.email %>
   </div>
 
-  <div>
-    <strong>Start time:</strong>
-    <%= booking.start_time %>
-  </div>
+  <% if booking.venue.present? %>
+    <div>
+      <strong>Start time:</strong>
+      <%= booking.start_time %>
+    </div>
 
-  <div>
-    <strong>End time:</strong>
-    <%= booking.end_time %>
-  </div>
+    <div>
+      <strong>End time:</strong>
+      <%= booking.end_time %>
+    </div>
+  <% elsif booking.equipment.present? %>
+    <div>
+      <strong>Start date:</strong>
+      <%= booking.start_date %>
+    </div>
+
+    <div>
+      <strong>End date:</strong>
+      <%= booking.end_date %>
+    </div>
+
+    <div>
+      <strong>Quantity:</strong>
+      <%= booking.quantity %>
+    </div>
+  <% end %>
 
   <div>
     <strong>Status:</strong>
     <%= booking.status.titleize %>
   </div>
+
+  <% if booking.rejected? %>
+    <div>
+      <strong>Rejection reason:</strong>
+      <%= booking.rejection_reason.presence || "No reason provided" %>
+    </div>
+  <% end %>
 
 </div>

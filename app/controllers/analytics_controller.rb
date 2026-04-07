@@ -19,7 +19,7 @@ class AnalyticsController < ApplicationController
                                 .sort_by { |date, _| date }
                                 .to_h
 
-    @peak_hours = base_scope.where.not(start_time: nil)
+    @peak_hours = base_scope.approved.where.not(start_time: nil)
                             .pluck(:start_time)
                             .map { |t| t.hour }
                             .tally
@@ -90,11 +90,22 @@ class AnalyticsController < ApplicationController
 
   def compute_peak_hours_by_venue(venue_bookings)
     rows = venue_bookings
-             .where.not(start_time: nil)
-             .select("venues.name AS venue_name, bookings.start_time")
+             .approved
+             .where.not(start_time: nil, end_time: nil)
+             .select("venues.name AS venue_name, bookings.start_time, bookings.end_time")
 
     grid = Hash.new { |h, k| h[k] = Hash.new(0) }
-    rows.each { |r| grid[r.venue_name][r.start_time.hour] += 1 }
+    rows.each do |row|
+      start_hour = row.start_time.hour
+      end_hour = row.end_time.hour
+      end_hour += 1 if row.end_time.min.positive? || row.end_time.sec.positive?
+
+      (start_hour...end_hour).each do |hour|
+        next unless (8..21).cover?(hour)
+
+        grid[row.venue_name][hour] += 1
+      end
+    end
 
     @heatmap_venues = grid.keys.sort
     @heatmap_hours = (8..21).to_a
@@ -104,10 +115,11 @@ class AnalyticsController < ApplicationController
   end
 
   def compute_summary_stats(base_scope)
-    @total_bookings = base_scope.count
-    @pending_count  = base_scope.pending.count
-    @approved_count = base_scope.approved.count
-    @venues_count   = Venue.count
+    @total_bookings  = base_scope.count
+    @pending_count   = base_scope.pending.count
+    @approved_count  = base_scope.approved.count
+    @rejected_count  = base_scope.rejected.count
+    @venues_count    = Venue.count
     @equipment_count = Equipment.count
   end
 

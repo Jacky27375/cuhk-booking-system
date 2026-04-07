@@ -1,5 +1,18 @@
-<p>Your booking for <%= @booking.venue.name %> has been approved.</p>
-
 <p>
-  Time: <%= @booking.start_time %> - <%= @booking.end_time %>
+  Your booking for
+  <%= @booking.venue&.name || @booking.equipment&.name || "Booking ##{@booking.id}" %>
+  has been approved.
 </p>
+
+<% if @booking.venue.present? %>
+  <p>
+    Time: <%= @booking.start_time %> - <%= @booking.end_time %>
+  </p>
+<% elsif @booking.equipment.present? %>
+  <p>
+    Quantity: <%= @booking.quantity %>
+  </p>
+  <p>
+    Period: <%= @booking.start_date %> - <%= @booking.end_date %>
+  </p>
+<% end %>

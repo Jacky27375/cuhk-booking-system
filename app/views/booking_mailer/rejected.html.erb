@@ -1,4 +1,8 @@
-<p>Your booking for <%= @booking.venue.name %> has been rejected.</p>
+<p>
+  Your booking for
+  <%= @booking.venue&.name || @booking.equipment&.name || "Booking ##{@booking.id}" %>
+  has been rejected.
+</p>
 
 <p>
   Reason: <%= @reason %>

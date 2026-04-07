@@ -92,8 +92,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_010002) do
     t.string "email", null: false
     t.string "password_digest", null: false
     t.integer "role", default: 0, null: false
-    t.integer "society_id"
-    t.integer "tenant_id"
+    t.bigint "society_id"
+    t.bigint "tenant_id"
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["society_id"], name: "index_users_on_society_id"

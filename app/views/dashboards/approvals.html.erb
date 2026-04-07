@@ -3,50 +3,105 @@
 <% if @bookings.empty? %>
   <p>No bookings awaiting approval.</p>
 <% else %>
-  <table id="approvals-table" class="resource-grid-table">
-    <thead>
-      <tr>
-        <th><%= sortable_header_link("Venue", "venue", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-        <th><%= sortable_header_link("Department", "department", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-        <th><%= sortable_header_link("User", "user", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-        <th><%= sortable_header_link("Date", "date", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-        <th><%= sortable_header_link("Status", "status", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-        <th>Last Action</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @bookings.each do |booking| %>
-        <tr id="<%= dom_id(booking) %>">
-          <td><%= booking.venue.name %></td>
-          <td><%= booking.venue.department %></td>
-          <td><%= booking.user.email %></td>
-          <td><%= booking.start_time.to_date %></td>
-          <td>
-            <%= booking.status.titleize %>
-            <% if booking.under_review? && booking.user&.tenant&.two_step? %>
-              (Step 1/2)
-            <% end %>
-          </td>
-          <td>
-            <% latest_step = booking.approval_steps.max_by(&:created_at) %>
-            <% if latest_step.present? %>
-              <%= "#{latest_step.action.humanize} by #{latest_step.actor.email}" %>
-            <% else %>
-              -
-            <% end %>
-          </td>
-          <td>
-            <%= button_to(booking.under_review? ? "Approve (Final)" : "Approve", approve_booking_path(booking), method: :patch) %>
-            <%= form_with url: reject_booking_path(booking), method: :patch, local: true, class: "inline-reject-form" do |f| %>
-              <%= f.text_field :rejection_reason, placeholder: "Reason", size: 20 %>
-              <%= f.submit "Reject" %>
-            <% end %>
-          </td>
+  <% venue_bookings, equipment_bookings = @bookings.partition { |booking| booking.venue.present? } %>
+
+  <% if venue_bookings.any? %>
+    <h2>Venue Approvals</h2>
+    <table id="approvals-table" class="resource-grid-table">
+      <thead>
+        <tr>
+          <th><%= sortable_header_link("Venue", "venue", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th><%= sortable_header_link("Department", "department", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th><%= sortable_header_link("User", "user", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th><%= sortable_header_link("Date", "date", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th><%= sortable_header_link("Status", "status", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th>Last Action</th>
+          <th>Actions</th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% venue_bookings.each do |booking| %>
+          <tr id="<%= dom_id(booking) %>">
+            <td><%= booking.venue&.name || "-" %></td>
+            <td><%= booking.venue&.department || booking.user&.tenant&.name || "-" %></td>
+            <td><%= booking.user.email %></td>
+            <td><%= booking.start_time&.to_date || "-" %></td>
+            <td>
+              <%= booking.status.titleize %>
+              <% if booking.under_review? && booking.user&.tenant&.two_step? %>
+                (Step 1/2)
+              <% end %>
+            </td>
+            <td>
+              <% latest_step = booking.approval_steps.max_by(&:created_at) %>
+              <% if latest_step.present? %>
+                <%= "#{latest_step.action.humanize} by #{latest_step.actor.email}" %>
+              <% else %>
+                -
+              <% end %>
+            </td>
+            <td>
+              <%= button_to(booking.under_review? ? "Approve (Final)" : "Approve", approve_booking_path(booking), method: :patch) %>
+              <%= form_with url: reject_booking_path(booking), method: :patch, local: true, class: "inline-reject-form" do |f| %>
+                <%= f.text_field :rejection_reason, placeholder: "Reason", size: 20 %>
+                <%= f.submit "Reject" %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+
+  <% if equipment_bookings.any? %>
+    <h2>Equipment Approvals</h2>
+    <table id="approvals-equipment-table" class="resource-grid-table">
+      <thead>
+        <tr>
+          <th><%= sortable_header_link("Equipment", "venue", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th><%= sortable_header_link("Department", "department", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th><%= sortable_header_link("User", "user", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th>Quantity</th>
+          <th><%= sortable_header_link("Date", "date", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th><%= sortable_header_link("Status", "status", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th>Last Action</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% equipment_bookings.each do |booking| %>
+          <tr id="<%= dom_id(booking) %>">
+            <td><%= booking.equipment&.name || "-" %></td>
+            <td><%= booking.equipment&.tenant&.name || booking.user&.tenant&.name || "-" %></td>
+            <td><%= booking.user.email %></td>
+            <td><%= booking.quantity || "-" %></td>
+            <td><%= booking.start_date || "-" %></td>
+            <td>
+              <%= booking.status.titleize %>
+              <% if booking.under_review? && booking.user&.tenant&.two_step? %>
+                (Step 1/2)
+              <% end %>
+            </td>
+            <td>
+              <% latest_step = booking.approval_steps.max_by(&:created_at) %>
+              <% if latest_step.present? %>
+                <%= "#{latest_step.action.humanize} by #{latest_step.actor.email}" %>
+              <% else %>
+                -
+              <% end %>
+            </td>
+            <td>
+              <%= button_to(booking.under_review? ? "Approve (Final)" : "Approve", approve_booking_path(booking), method: :patch) %>
+              <%= form_with url: reject_booking_path(booking), method: :patch, local: true, class: "inline-reject-form" do |f| %>
+                <%= f.text_field :rejection_reason, placeholder: "Reason", size: 20 %>
+                <%= f.submit "Reject" %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
 <% end %>
 
 <%= link_to "Back to Dashboard", dashboard_path %>

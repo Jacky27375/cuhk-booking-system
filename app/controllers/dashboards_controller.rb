@@ -6,11 +6,11 @@ class DashboardsController < ApplicationController
 
   def approvals
     @bookings = Booking.awaiting_approval
-                       .where.not(venue_id: nil)
-                       .includes(:venue, :user, approval_steps: :actor)
+                       .includes(:venue, :equipment, :user, approval_steps: :actor)
 
     if current_user.staff?
-      @bookings = @bookings.joins(:venue).merge(Venue.visible_to_tenant(current_user.tenant))
+      scoped_ids = Booking.for_tenant(current_user.tenant).select(:id)
+      @bookings = @bookings.where(id: scoped_ids)
     end
 
     @bookings = sort_approval_bookings(@bookings)
