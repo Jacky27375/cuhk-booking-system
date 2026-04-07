@@ -119,3 +119,28 @@ The deploy workflow runs automatically after `CI` succeeds on `main`, and can al
 1. Merge/push to `main` (deploy runs after CI passes), or run **CD - Azure VM** manually in GitHub Actions.
 2. The workflow uploads the repository to `/opt/cuhk-booking-system`, builds containers on the VM, and starts them with `deploy/docker-compose.azure.yml`.
 3. It keeps recent releases and rolls back to the previous release automatically if health checks fail.
+
+## Feature Ownership (Git History Summary)
+
+| Feature Name | Primary Developer (Name) | Secondary Developer | Notes |
+| --- | --- | --- | --- |
+| Authentication & Role-Based Access | Tyler | Jacky | Built user/session auth flow, role access scenarios, and seed-role foundations; later role/access refinements were added. |
+| CI, Coverage & Security Quality Gates | Tyler | Jacky | Drove CI evolution (SimpleCov/Cobertura reporting, security scan hardening, PostgreSQL CI alignment), with follow-up workflow/lint updates. |
+| Azure Deployment Pipeline & Health Checks | Tyler | Jacky | Implemented Azure CD pipeline, deployment compose wiring, diagnostics, and `/up` health-check support. |
+| Venue Booking, Timetable & Conflict Handling | Jacky | Joe | Implemented venue CRUD, timetable/slot UX, conflict checks, and booking confirmation flow; later tenant/approval constraints were reinforced. |
+| Multi-Tenant Isolation & Authorization Policies | Jacky | Joe | Added policy/query-driven authorization and tenant visibility controls; shared-resource scoping was hardened in follow-up commits. |
+| Equipment Booking & Inventory Flow | Sam | Jacky | Introduced equipment domain and borrow flow with tests, then refactored booking modeling and validations for lifecycle safety. |
+| Approval Workflow & Lifecycle Transitions | Joe | Tyler | Built approval dashboard, state transitions, and workflow tests/mail hooks; later extended with two-step approval and cancellation controls. |
+| Realtime Booking Status Updates (ActionCable) | Joe | Jacky | Added channel/stream-based status broadcasting for user bookings, with frontend status update handling. |
+| Analytics Dashboard & Utilization Reporting | Sam | Jacky | Implemented analytics controller/views, chart rendering, trend/date filtering, and supporting request/BDD coverage. |
+| API v1 + SendGrid Email Integration | Joe | Jacky | Added API-key auth, v1 endpoints, SendGrid delivery service wiring, and related API/mailer/service specs. |
+| Resource Table Sorting & Query Optimization | Jacky | N/A | Implemented sortable listings for bookings/venues/equipment and refactored sorting logic to Arel for maintainability/performance. |
+| **Future: Stabilize realtime approval @javascript scenarios** | Joe | Tyler | Remaining work logs flag ActionCable/session timing instability; scenario synchronization still needs hardening. |
+| **Future: Final submission hardening run (full regression + production smoke evidence)** | Sam | Tyler | Remaining runbook items include complete regression execution and production smoke-test evidence capture before final submission. |
+| **Future: README rubric traceability polish (coverage screenshot + concise mapping)** | Tyler | Sam | Spec alignment can be improved by adding explicit coverage screenshot evidence and concise rubric-to-implementation traceability. |
+| **Future: Documentation consistency pass (README vs real behavior)** | TBD | TBD | Verify setup/testing/deploy commands and required deployment secrets match current repository behavior exactly. |
+| **Future: Multi-tenant authorization edge-case regression pass** | TBD | TBD | Re-test cross-tenant/cross-department isolation across booking and approval flows after recent merges. |
+| **Future: Staff dashboard realtime auto-update on new submissions** | TBD | TBD | Initial team plan includes live updates for staff approval dashboard when new bookings arrive; current realtime wiring is focused on user booking status updates. |
+| **Future: Async email delivery via Solid Queue jobs** | TBD | TBD | Team plan targets background email delivery; current approval notification path still sends synchronously (`deliver_now`). |
+| **Future: Non-blocking warning cleanup** | TBD | TBD | Resolve remaining runtime/tooling warnings (for example Ruby `fiddle`) as final submission polish. |
+| **Future: Demo rehearsal + final 5-minute video deliverable** | TBD | TBD | Prepare and capture the required narrated end-to-end demo flow for final submission. |
