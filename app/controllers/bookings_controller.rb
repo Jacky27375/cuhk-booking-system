@@ -2,11 +2,11 @@ class BookingsController < ApplicationController
   TIMETABLE_START_HOUR = 8
   TIMETABLE_END_HOUR = 22
 
-  before_action :require_student_for_edit!, only: %i[ edit update ]
-  before_action :require_student_for_my!, only: %i[ my cancel ]
-  before_action :require_student_for_booking_create!, only: %i[ new confirm create ]
-  before_action :set_booking, only: %i[ show edit update destroy approve reject mark_returned cancel ]
-  before_action :require_admin_or_staff, only: %i[ index approve reject ]
+  before_action :require_student_for_edit!, only: %i[edit update]
+  before_action :require_student_for_my!, only: %i[my cancel]
+  before_action :require_student_for_booking_create!, only: %i[new confirm create]
+  before_action :set_booking, only: %i[show edit update destroy approve reject mark_returned cancel]
+  before_action :require_admin_or_staff, only: %i[index approve reject]
 
   # GET /bookings or /bookings.json
   def index

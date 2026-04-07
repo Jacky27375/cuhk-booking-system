@@ -1,6 +1,6 @@
 class VenuesController < ApplicationController
-  before_action :set_venue, only: %i[ show edit update destroy ]
-  before_action :require_admin_or_staff, only: %i[ new create edit update destroy ]
+  before_action :set_venue, only: %i[show edit update destroy]
+  before_action :require_admin_or_staff, only: %i[new create edit update destroy]
 
   # GET /venues or /venues.json
   def index

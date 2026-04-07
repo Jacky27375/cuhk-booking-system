@@ -22,7 +22,7 @@ module Api
 
       def create
         unless current_api_user.society_member?
-          render json: { error: "Forbidden", details: [ "Only society members can create bookings." ] }, status: :forbidden
+          render json: { error: "Forbidden", details: ["Only society members can create bookings."] }, status: :forbidden
           return
         end
 
