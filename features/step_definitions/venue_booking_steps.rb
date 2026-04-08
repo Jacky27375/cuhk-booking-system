@@ -19,7 +19,7 @@ Given('I am logged in as {string}') do |email|
   visit login_path
   fill_in 'Email', with: email
   fill_in 'Password', with: password
-  click_button 'Log in'
+  click_button 'Sign In'
 end
 
 When('I visit the venues page') do

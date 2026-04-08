@@ -20,7 +20,7 @@ Given('I am logged in as a {string} of {string}') do |role, tenant_name|
   visit '/login'
   fill_in 'Email', with: @current_user.email
   fill_in 'Password', with: 'Password1!'
-  click_button 'Log in'
+  click_button 'Sign In'
 end
 
 When('I view the bookable venues list') do

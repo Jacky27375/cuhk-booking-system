@@ -40,7 +40,7 @@
                   <div class="btn-group">
                     <%= link_to "View", booking_path(booking), class: "btn btn-outline btn-sm" %>
                     <% if booking.cancelable_by_owner? %>
-                      <%= button_to "Cancel", cancel_booking_path(booking), method: :patch, class: "btn btn-warning btn-sm", data: { turbo: false, turbo_confirm: "Cancel this booking?" } %>
+                      <%= button_to "Cancel Booking", cancel_booking_path(booking), method: :patch, class: "btn btn-warning btn-sm", data: { turbo: false, turbo_confirm: "Cancel this booking?" } %>
                     <% end %>
                   </div>
                 </td>
@@ -79,10 +79,10 @@
                   <div class="btn-group">
                     <%= link_to "View", booking_path(booking), class: "btn btn-outline btn-sm" %>
                     <% if booking.cancelable_by_owner? %>
-                      <%= button_to "Cancel", cancel_booking_path(booking), method: :patch, class: "btn btn-warning btn-sm", data: { turbo: false, turbo_confirm: "Cancel this booking?" } %>
+                      <%= button_to "Cancel Booking", cancel_booking_path(booking), method: :patch, class: "btn btn-warning btn-sm", data: { turbo: false, turbo_confirm: "Cancel this booking?" } %>
                     <% end %>
                     <% if booking.returnable? %>
-                      <%= button_to "Return", mark_returned_booking_path(booking), method: :patch, class: "btn btn-success btn-sm", data: { turbo: false } %>
+                      <%= button_to "Mark as Returned", mark_returned_booking_path(booking), method: :patch, class: "btn btn-success btn-sm", data: { turbo: false } %>
                     <% end %>
                   </div>
                 </td>

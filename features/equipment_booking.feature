@@ -15,7 +15,7 @@ Feature: Equipment Booking
   Scenario: Student views available equipment
     When I visit the equipment page
     Then I should see "Projector"
-    And I should see "available: 3"
+    And I should see "3 available"
 
   Scenario: Student successfully borrows available equipment
     When I borrow 1 "Projector" from 5 days from now to 6 days from now

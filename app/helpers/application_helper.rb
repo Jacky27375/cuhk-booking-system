@@ -11,13 +11,13 @@ module ApplicationHelper
     next_sort = next_direction.present? ? column : nil
     params_hash = request.query_parameters.merge(sort: next_sort, direction: next_direction).compact
 
-    arrow = if current_sort == column && current_direction.present?
-      current_direction == "asc" ? " \u25B2" : " \u25BC"
+    direction_label = if current_sort == column && current_direction.present?
+      " (#{current_direction})"
     else
       ""
     end
 
-    link_to "#{label}#{arrow}".html_safe, params_hash
+    link_to "#{label}#{direction_label}".html_safe, params_hash
   end
 
   def nav_link(label, path, icon: "", controllers: [])

@@ -13,8 +13,8 @@ RSpec.describe "bookings/index", type: :view do
 
   it "renders a list of bookings" do
     render
-    assert_select "table#bookings-venue-table.resource-grid-table"
-    assert_select "table#bookings-venue-table tbody tr", count: 2
+    assert_select "table#bookings-table.resource-grid-table"
+    assert_select "table#bookings-table tbody tr", count: 2
     expect(rendered).to include(@booking1.venue.name)
     expect(rendered).to include(@booking2.venue.name)
     expect(rendered).to include(@booking1.user.email)

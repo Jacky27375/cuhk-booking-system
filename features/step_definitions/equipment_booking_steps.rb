@@ -37,7 +37,7 @@ end
 
 Then('the available count for {string} should show {int}') do |name, count|
   visit equipments_path
-  expect(page).to have_content("available: #{count}")
+  expect(page).to have_content("#{count} available")
 end
 
 Given('I have an approved loan of {int} {string} ending today') do |qty, name|
@@ -65,7 +65,7 @@ end
 Then('the available count for {string} should be restored') do |name|
   equipment = Equipment.find_by!(name: name)
   visit equipments_path
-  expect(page).to have_content("available: #{equipment.quantity}")
+  expect(page).to have_content("#{equipment.quantity} available")
 end
 
 Then('my booking should show status {string}') do |status|

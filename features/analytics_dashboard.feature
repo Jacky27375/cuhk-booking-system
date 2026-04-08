@@ -53,14 +53,14 @@ Feature: Analytics Dashboard
   Scenario: Dashboard shows analytics link for admin
     Given I am logged in as "admin@link.cuhk.edu.hk" with password "Password1!"
     When I try to visit the dashboard
-    Then I should see link "Analytics Dashboard"
+    Then I should see link "Analytics"
 
   Scenario: Dashboard shows analytics link for staff
     Given I am logged in as "staff@link.cuhk.edu.hk" with password "Password1!"
     When I try to visit the dashboard
-    Then I should see link "Analytics Dashboard"
+    Then I should see link "Analytics"
 
   Scenario: Dashboard hides analytics link for member
     Given I am logged in as "member@link.cuhk.edu.hk" with password "Password1!"
     When I try to visit the dashboard
-    Then I should not see link "Analytics Dashboard"
+    Then I should not see link "Analytics"

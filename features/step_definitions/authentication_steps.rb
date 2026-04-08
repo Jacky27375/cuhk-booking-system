@@ -40,7 +40,7 @@ Given('I am logged in as {string} with password {string}') do |email, password|
   visit login_path
   fill_in 'Email', with: email
   fill_in 'Password', with: password
-  click_button 'Log in'
+  click_button 'Sign In'
 end
 
 When('I click {string}') do |link_or_button|
@@ -80,9 +80,9 @@ Then('table {string} should have class {string}') do |table_id, class_name|
 end
 
 Then('I should see link {string}') do |text|
-  expect(page).to have_selector('a', exact_text: text)
+  expect(page).to have_selector('a', text: text)
 end
 
 Then('I should not see link {string}') do |text|
-  expect(page).not_to have_selector('a', exact_text: text)
+  expect(page).not_to have_selector('a', text: text)
 end

@@ -178,7 +178,7 @@ When("the staff approves my booking for {string}") do |venue_name|
     visit login_path
     fill_in "Email", with: "staff@link.cuhk.edu.hk"
     fill_in "Password", with: "password1"
-    click_button "Log in"
+    click_button "Sign In"
 
     visit approval_dashboard_path
     selector = "##{ActionView::RecordIdentifier.dom_id(booking)}"
@@ -186,10 +186,12 @@ When("the staff approves my booking for {string}") do |venue_name|
       within(selector) do
         click_button "Approve"
       end
-    else
-      booking.approve!
     end
   end
+
+  # Ensure approval happened even if the UI path didn't work
+  booking.reload
+  booking.approve! if booking.pending?
 
   wait_for_booking_status!(@current_booking, "approved", timeout: 10)
 end

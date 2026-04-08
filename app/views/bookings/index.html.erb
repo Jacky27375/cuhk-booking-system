@@ -7,10 +7,10 @@
   <% if venue_bookings.any? %>
     <h2 class="mb-1">Venue Bookings</h2>
     <div class="card mb-2">
-      <table id="bookings-venue-table" class="resource-grid-table" style="margin:0;border:none;box-shadow:none;">
+      <table id="bookings-table" class="resource-grid-table" style="margin:0;border:none;box-shadow:none;">
         <thead>
           <tr>
-            <th><%= sortable_header_link("Venue", "resource", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+            <th><%= sortable_header_link("Resource", "resource", current_sort: @sort_column, current_direction: @sort_direction) %></th>
             <th><%= sortable_header_link("User", "user", current_sort: @sort_column, current_direction: @sort_direction) %></th>
             <th><%= sortable_header_link("Start", "start_time", current_sort: @sort_column, current_direction: @sort_direction) %></th>
             <th><%= sortable_header_link("End", "end_time", current_sort: @sort_column, current_direction: @sort_direction) %></th>

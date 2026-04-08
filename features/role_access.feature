@@ -28,19 +28,19 @@ Feature: Role-based Access Control
   Scenario: Society member dashboard hides Booking link
     Given I am logged in as "member@link.cuhk.edu.hk" with password "Password1!"
     When I try to visit the dashboard
-    Then I should not see link "Booking"
+    Then I should not see link "All Bookings"
     And I should see link "My Bookings"
 
   Scenario: Staff dashboard hides My Bookings link
     Given I am logged in as "staff@link.cuhk.edu.hk" with password "Password1!"
     When I try to visit the dashboard
-    Then I should see link "Booking"
+    Then I should see link "All Bookings"
     And I should not see link "My Bookings"
 
   Scenario: Admin dashboard hides My Bookings link
     Given I am logged in as "admin@link.cuhk.edu.hk" with password "Password1!"
     When I try to visit the dashboard
-    Then I should see link "Booking"
+    Then I should see link "All Bookings"
     And I should not see link "My Bookings"
 
   Scenario: Staff cannot access My Bookings page directly

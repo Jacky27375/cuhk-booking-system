@@ -49,9 +49,9 @@ Feature: Venue Booking System
     And I select "10:00" from "booking_start_slot"
     And I select "12:00" from "booking_end_slot"
     And I click "Review Booking"
-    Then I should see "Confirm booking details"
+    Then I should see "Booking Summary"
     And I should see "Lecture Hall A"
-    And I should see "Time period: 10:00 - 12:00"
+    And I should see "10:00 - 12:00"
     When I click "Submit Booking"
     Then I should see "Booking was successfully created."
     And I should see "Booking was successfully created." only once
@@ -89,7 +89,7 @@ Feature: Venue Booking System
     And I select "10:00" from "booking_start_slot"
     And I select "12:00" from "booking_end_slot"
     And I click "Review Booking"
-    Then I should see "Confirm booking details"
+    Then I should see "Booking Summary"
     When I click "Submit Booking"
     Then I should see "Booking was successfully created."
 
@@ -116,7 +116,7 @@ Feature: Venue Booking System
     And I select "10:00" from "booking_start_slot"
     And I select "14:00" from "booking_end_slot"
     And I click "Review Booking"
-    Then I should see "Confirm booking details"
+    Then I should see "Booking Summary"
     When I click "Submit Booking"
     Then I should see "Booking was successfully created."
 
