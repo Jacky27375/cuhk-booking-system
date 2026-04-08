@@ -29,7 +29,7 @@ RSpec.describe "analytics/show", type: :view do
 
   it "renders the analytics dashboard heading" do
     render
-    expect(rendered).to include("Analytics Dashboard")
+    expect(view.content_for(:page_title)).to include("Analytics Dashboard")
   end
 
   it "renders summary stat cards" do

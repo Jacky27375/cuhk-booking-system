@@ -7,7 +7,7 @@ RSpec.describe 'Sessions', type: :request do
     it 'renders the login form' do
       get login_path
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('Log in')
+      expect(response.body).to include('Sign In')
     end
   end
 
@@ -72,7 +72,7 @@ RSpec.describe 'Sessions', type: :request do
       get dashboard_path
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('>Booking<')
+      expect(response.body).to include('>All Bookings<')
       expect(response.body).not_to include('>My Bookings<')
     end
 
@@ -83,7 +83,7 @@ RSpec.describe 'Sessions', type: :request do
       get dashboard_path
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('>Booking<')
+      expect(response.body).to include('>All Bookings<')
       expect(response.body).not_to include('>My Bookings<')
     end
   end
