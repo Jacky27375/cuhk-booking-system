@@ -41,6 +41,11 @@ class EquipmentBooking < Booking
   def booking_duration_limit
     return unless start_date.present? && end_date.present?
 
+    if end_date < start_date
+      errors.add(:end_date, "must be on or after the start date")
+      return
+    end
+
     duration_days = (end_date - start_date).to_i
     if duration_days > 7
       errors.add(:base, "Equipment booking duration cannot exceed 7 days")

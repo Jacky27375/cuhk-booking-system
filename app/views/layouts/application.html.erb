@@ -11,28 +11,119 @@
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
   <body>
-    <% if flash[:notice] %>
-      <div class="notice"><%= flash[:notice] %></div>
-    <% end %>
-    <% if flash[:alert] %>
-      <div class="alert"><%= flash[:alert] %></div>
-    <% end %>
+    <% if logged_in? %>
+      <%# ===== App Layout with Sidebar ===== %>
+      <div class="app-layout">
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+        <aside class="sidebar" id="sidebar">
+          <div class="sidebar-brand">
+            <h2>
+              <span class="brand-icon">CU</span>
+              Booking System
+            </h2>
+            <small>The Chinese University of Hong Kong</small>
+          </div>
 
-    <%= yield %>
+          <nav class="sidebar-nav">
+            <div class="sidebar-section">Main</div>
+            <%= nav_link "Dashboard", dashboard_path, icon: "\u{1F3E0}", controllers: %w[dashboards] %>
+
+            <% if current_user.society_member? %>
+              <%= nav_link "My Bookings", my_bookings_path, icon: "\u{1F4CB}", controllers: [] %>
+            <% end %>
+
+            <div class="sidebar-section">Resources</div>
+            <%= nav_link "Venues", venues_path, icon: "\u{1F3DB}", controllers: %w[venues] %>
+            <%= nav_link "Equipment", equipments_path, icon: "\u{1F527}", controllers: %w[equipments] %>
+
+            <% unless current_user.society_member? %>
+              <div class="sidebar-section">Management</div>
+              <%= nav_link "All Bookings", bookings_path, icon: "\u{1F4C5}", controllers: %w[bookings] %>
+              <%= nav_link "Approvals", approval_dashboard_path, icon: "\u2705", controllers: [] %>
+            <% end %>
+
+            <% if current_user.admin? || current_user.staff? %>
+              <div class="sidebar-section">Insights</div>
+              <%= nav_link "Analytics", analytics_path, icon: "\u{1F4CA}", controllers: %w[analytics] %>
+            <% end %>
+
+            <% if current_user.admin? %>
+              <div class="sidebar-section">Admin</div>
+              <%= nav_link "Admin Panel", admin_path, icon: "\u2699\uFE0F", controllers: %w[admin] %>
+            <% end %>
+          </nav>
+
+          <div class="sidebar-footer">
+            <div class="sidebar-user">
+              <div class="sidebar-avatar"><%= user_initials(current_user) %></div>
+              <div class="sidebar-user-info">
+                <span class="sidebar-user-email"><%= current_user.email %></span>
+                <span class="sidebar-user-role"><%= current_user.role.humanize %></span>
+              </div>
+            </div>
+            <div class="sidebar-logout">
+              <%= button_to "Sign Out", logout_path, method: :delete %>
+            </div>
+          </div>
+        </aside>
+
+        <div class="main-content">
+          <div class="content-header">
+            <div class="flex items-center gap-1">
+              <button class="mobile-toggle" onclick="toggleSidebar()">&#9776;</button>
+              <h1><%= content_for(:page_title) || content_for(:title) || controller_name.humanize.titleize %></h1>
+            </div>
+            <% if content_for?(:header_actions) %>
+              <div class="btn-group"><%= yield :header_actions %></div>
+            <% end %>
+          </div>
+
+          <div class="content-body">
+            <% if flash[:notice] %>
+              <div class="notice"><%= flash[:notice] %></div>
+            <% end %>
+            <% if flash[:alert] %>
+              <div class="alert"><%= flash[:alert] %></div>
+            <% end %>
+            <%= yield %>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        function toggleSidebar() {
+          document.getElementById('sidebar').classList.toggle('open');
+          document.getElementById('sidebarOverlay').classList.toggle('show');
+        }
+        function closeSidebar() {
+          document.getElementById('sidebar').classList.remove('open');
+          document.getElementById('sidebarOverlay').classList.remove('show');
+        }
+      </script>
+    <% else %>
+      <%# ===== Auth Pages — No Sidebar ===== %>
+      <% if flash[:notice] %>
+        <div style="position:fixed;top:1rem;left:50%;transform:translateX(-50%);z-index:1000;max-width:500px;width:90%;">
+          <div class="notice"><%= flash[:notice] %></div>
+        </div>
+      <% end %>
+      <% if flash[:alert] %>
+        <div style="position:fixed;top:1rem;left:50%;transform:translateX(-50%);z-index:1000;max-width:500px;width:90%;">
+          <div class="alert"><%= flash[:alert] %></div>
+        </div>
+      <% end %>
+      <%= yield %>
+    <% end %>
   </body>
 </html>

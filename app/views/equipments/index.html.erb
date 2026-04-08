@@ -1,41 +1,51 @@
-<h1>Equipment</h1>
+<% content_for(:page_title, "Equipment") %>
 
-<% if current_user.admin? || current_user.staff? %>
-  <p><%= link_to "New Equipment", new_equipment_path %></p>
-<% end %>
+<div class="page-actions">
+  <p class="text-muted text-sm"><%= @equipments.size %> item(s) found</p>
+  <span class="spacer"></span>
+  <% if current_user.admin? || current_user.staff? %>
+    <%= link_to "New Equipment", new_equipment_path, class: "btn btn-primary btn-sm" %>
+  <% end %>
+</div>
 
 <% if @equipments.any? %>
-  <table id="equipments-table" class="resource-grid-table">
-    <thead>
-      <tr>
-        <th><%= sortable_header_link("Name", "name", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-        <th><%= sortable_header_link("Total Quantity", "quantity", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-        <th><%= sortable_header_link("Available Quantity", "available_quantity", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @equipments.each do |equipment| %>
+  <div class="card">
+    <table id="equipments-table" class="resource-grid-table" style="margin:0;border:none;box-shadow:none;">
+      <thead>
         <tr>
-          <td><%= equipment.name %></td>
-          <td><%= equipment.quantity %></td>
-          <td>available: <%= equipment.available_quantity %></td>
-          <td>
-            <%= link_to "View", equipment_path(equipment) %>
-            <% if current_user.society_member? %>
-              | <%= link_to "Borrow", borrow_form_equipment_path(equipment) %>
-            <% end %>
-            <% if current_user.admin? || current_user.staff? %>
-              | <%= link_to "Edit", edit_equipment_path(equipment) %>
-              | <%= button_to "Delete", equipment_path(equipment), method: :delete, form: { style: "display:inline" }, data: { turbo_confirm: "Delete this equipment?" } %>
-            <% end %>
-          </td>
+          <th><%= sortable_header_link("Name", "name", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th><%= sortable_header_link("Total Qty", "quantity", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th><%= sortable_header_link("Available", "available_quantity", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th>Actions</th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% @equipments.each do |equipment| %>
+          <tr>
+            <td><strong><%= link_to equipment.name, equipment_path(equipment) %></strong></td>
+            <td><%= equipment.quantity %></td>
+            <td><span class="badge badge-approved"><%= equipment.available_quantity %> available</span></td>
+            <td>
+              <div class="btn-group">
+                <%= link_to "View", equipment_path(equipment), class: "btn btn-outline btn-sm" %>
+                <% if current_user.society_member? %>
+                  <%= link_to "Borrow", borrow_form_equipment_path(equipment), class: "btn btn-primary btn-sm" %>
+                <% end %>
+                <% if current_user.admin? || current_user.staff? %>
+                  <%= link_to "Edit", edit_equipment_path(equipment), class: "btn btn-secondary btn-sm" %>
+                  <%= button_to "Delete", equipment_path(equipment), method: :delete, class: "btn btn-danger btn-sm", form: { style: "display:inline" }, data: { turbo_confirm: "Delete this equipment?" } %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 <% else %>
-  <p>No equipment found.</p>
+  <div class="empty-state">
+    <div class="empty-icon">&#128295;</div>
+    <h3>No equipment yet</h3>
+    <p>No equipment has been added to the system.</p>
+  </div>
 <% end %>
-
-<p><%= link_to "Back to Dashboard", dashboard_path %></p>

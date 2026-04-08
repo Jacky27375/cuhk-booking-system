@@ -1,20 +1,38 @@
-<% content_for :title, "Confirm booking" %>
+<% content_for :title, "Confirm Booking" %>
+<% content_for(:page_title, "Confirm Booking") %>
 
-<h1>Confirm booking details</h1>
-
-<div class="confirmation-card">
-  <h2>Venue details</h2>
-  <p><strong>Name:</strong> <%= @booking.venue&.name %></p>
-  <% if @booking.venue&.department.present? %>
-    <p><strong>Department:</strong> <%= @booking.venue.department %></p>
-  <% end %>
-  <% if @booking.venue&.description.present? %>
-    <p><strong>Description:</strong> <%= @booking.venue.description %></p>
-  <% end %>
-
-  <h2>Booking details</h2>
-  <p><strong>Date:</strong> <%= @booking.start_time.to_date %></p>
-  <p><strong>Time period:</strong> <%= @booking.start_time.strftime('%H:%M') %> - <%= @booking.end_time.strftime('%H:%M') %></p>
+<div class="card mb-2" style="max-width:800px;">
+  <div class="card-header">
+    <h3>Booking Summary</h3>
+  </div>
+  <div class="card-body">
+    <div class="detail-grid">
+      <div class="detail-item">
+        <div class="detail-label">Venue</div>
+        <div class="detail-value"><%= @booking.venue&.name %></div>
+      </div>
+      <% if @booking.venue&.department.present? %>
+        <div class="detail-item">
+          <div class="detail-label">Department</div>
+          <div class="detail-value"><%= @booking.venue.department %></div>
+        </div>
+      <% end %>
+      <div class="detail-item">
+        <div class="detail-label">Date</div>
+        <div class="detail-value"><%= @booking.start_time.to_date %></div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Time</div>
+        <div class="detail-value"><%= @booking.start_time.strftime('%H:%M') %> - <%= @booking.end_time.strftime('%H:%M') %></div>
+      </div>
+      <% if @booking.venue&.description.present? %>
+        <div class="detail-item">
+          <div class="detail-label">Description</div>
+          <div class="detail-value text-muted"><%= @booking.venue.description %></div>
+        </div>
+      <% end %>
+    </div>
+  </div>
 </div>
 
 <%= render "timetable", booking: @booking %>
@@ -24,8 +42,8 @@
   <%= form.hidden_field :start_time %>
   <%= form.hidden_field :end_time %>
 
-  <div class="confirmation-actions">
-    <%= link_to "Back to edit", new_booking_path(venue_id: @booking.venue_id, booking_date: @booking.start_time.to_date, booking: { start_slot: @booking.start_time.strftime('%H:%M'), end_slot: @booking.end_time.strftime('%H:%M') }), class: "button-secondary" %>
-    <%= form.submit "Submit Booking", class: "button-primary" %>
+  <div class="btn-group mt-2">
+    <%= link_to "Back to Edit", new_booking_path(venue_id: @booking.venue_id, booking_date: @booking.start_time.to_date, booking: { start_slot: @booking.start_time.strftime('%H:%M'), end_slot: @booking.end_time.strftime('%H:%M') }), class: "btn btn-secondary" %>
+    <%= form.submit "Submit Booking", class: "btn btn-primary" %>
   </div>
 <% end %>

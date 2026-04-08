@@ -326,6 +326,7 @@ class BookingsController < ApplicationController
     def selected_range
       return nil unless @booking.start_time.present? && @booking.end_time.present?
       return nil unless @booking.start_time.to_date == @booking_date
+      return nil if @booking.errors.any?
 
       [@booking.start_time, @booking.end_time]
     end

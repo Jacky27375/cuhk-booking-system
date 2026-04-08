@@ -1,5 +1,10 @@
-<h1>New Equipment</h1>
+<% content_for(:page_title, "New Equipment") %>
 
-<%= render "form", equipment: @equipment %>
-
-<p><%= link_to "Back to Equipment", equipments_path %></p>
+<div class="card" style="max-width:600px;">
+  <div class="card-body">
+    <%= render "form", equipment: @equipment %>
+  </div>
+  <div class="card-footer">
+    <%= link_to "Back to Equipment", equipments_path, class: "btn btn-secondary btn-sm" %>
+  </div>
+</div>

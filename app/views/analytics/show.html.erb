@@ -1,20 +1,17 @@
 <% content_for(:title) { "Analytics Dashboard — CUHK Booking System" } %>
-
-<h1>Analytics Dashboard</h1>
-
-<p><%= link_to "← Back to Dashboard", dashboard_path %></p>
+<% content_for(:page_title, "Analytics Dashboard") %>
 
 <%# ===== Date Range Filter ===== %>
 <div class="analytics-filter">
   <%= form_tag analytics_path, method: :get do %>
     <label>From:
-      <%= date_field_tag :start_date, @start_date, style: "padding: 0.3rem;" %>
+      <%= date_field_tag :start_date, @start_date %>
     </label>
     <label>To:
-      <%= date_field_tag :end_date, @end_date, style: "padding: 0.3rem;" %>
+      <%= date_field_tag :end_date, @end_date %>
     </label>
-    <%= submit_tag "Filter", style: "padding: 0.4rem 1.2rem; background: #4e73df; color: #fff; border: none; border-radius: 4px; cursor: pointer;" %>
-    <%= link_to "Reset", analytics_path, style: "color: #4e73df;" %>
+    <%= submit_tag "Filter", class: "btn btn-primary btn-sm" %>
+    <%= link_to "Reset", analytics_path, class: "btn btn-secondary btn-sm" %>
   <% end %>
   <small style="color: #666;">Showing data from <strong><%= @start_date %></strong> to <strong><%= @end_date %></strong></small>
 </div>

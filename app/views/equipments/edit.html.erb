@@ -1,8 +1,12 @@
-<h1>Edit Equipment</h1>
+<% content_for(:page_title, "Edit Equipment") %>
 
-<%= render "form", equipment: @equipment %>
-
-<p>
-  <%= link_to "View", equipment_path(@equipment) %> |
-  <%= link_to "Back to Equipment", equipments_path %>
-</p>
+<div class="card" style="max-width:600px;">
+  <div class="card-body">
+    <%= render "form", equipment: @equipment %>
+  </div>
+  <div class="card-footer">
+    <div class="btn-group">
+      <%= link_to "Back to Equipment", equipments_path, class: "btn btn-secondary btn-sm" %>
+    </div>
+  </div>
+</div>

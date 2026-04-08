@@ -1,15 +1,58 @@
-<%= render @booking %>
+<% content_for(:page_title, "Booking Details") %>
 
-<div>
-  <% if respond_to?(:current_user) && current_user&.society_member? %>
-    <%= link_to "Edit this booking", edit_booking_path(@booking) %> |
-    <%= link_to "My Bookings", my_bookings_path %>
-
-    <%= button_to "Destroy this booking", @booking, method: :delete %>
-  <% elsif respond_to?(:current_user) && (current_user&.admin? || current_user&.staff?) %>
-    <%= link_to "Back to Bookings", bookings_path %> |
-    <%= link_to "Back to Dashboard", dashboard_path %>
-  <% else %>
-    <%= link_to "Back to Dashboard", dashboard_path %>
-  <% end %>
+<div class="card mb-2">
+  <div class="card-body">
+    <div class="detail-grid">
+      <div class="detail-item">
+        <div class="detail-label">Resource</div>
+        <div class="detail-value"><%= @booking.venue&.name || @booking.equipment&.name || "-" %></div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">User</div>
+        <div class="detail-value"><%= @booking.user.email %></div>
+      </div>
+      <% if @booking.venue.present? %>
+        <div class="detail-item">
+          <div class="detail-label">Start Time</div>
+          <div class="detail-value"><%= @booking.start_time %></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">End Time</div>
+          <div class="detail-value"><%= @booking.end_time %></div>
+        </div>
+      <% elsif @booking.equipment.present? %>
+        <div class="detail-item">
+          <div class="detail-label">Start Date</div>
+          <div class="detail-value"><%= @booking.start_date %></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">End Date</div>
+          <div class="detail-value"><%= @booking.end_date %></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Quantity</div>
+          <div class="detail-value"><%= @booking.quantity %></div>
+        </div>
+      <% end %>
+      <div class="detail-item">
+        <div class="detail-label">Status</div>
+        <div class="detail-value"><%= status_badge(@booking.status) %></div>
+      </div>
+      <% if @booking.rejected? %>
+        <div class="detail-item">
+          <div class="detail-label">Rejection Reason</div>
+          <div class="detail-value text-danger"><%= @booking.rejection_reason.presence || "No reason provided" %></div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  <div class="card-footer">
+    <div class="btn-group">
+      <% if current_user&.society_member? %>
+        <%= link_to "Back to My Bookings", my_bookings_path, class: "btn btn-secondary btn-sm" %>
+      <% else %>
+        <%= link_to "Back to All Bookings", bookings_path, class: "btn btn-secondary btn-sm" %>
+      <% end %>
+    </div>
+  </div>
 </div>

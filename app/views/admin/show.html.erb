@@ -1,5 +1,38 @@
-<h1>Admin Panel</h1>
+<% content_for(:page_title, "Admin Panel") %>
 
-<p>Welcome to the administration area.</p>
+<div class="dashboard-grid">
+  <div class="dash-card">
+    <div class="dash-icon">&#9989;</div>
+    <h3>Approval Dashboard</h3>
+    <p>Review and approve pending booking requests</p>
+    <%= link_to "Open Approvals &rarr;".html_safe, approval_dashboard_path %>
+  </div>
 
-<%= link_to "Back to Dashboard", dashboard_path %>
+  <div class="dash-card">
+    <div class="dash-icon">&#128202;</div>
+    <h3>Analytics</h3>
+    <p>View usage statistics and booking trends</p>
+    <%= link_to "View Analytics &rarr;".html_safe, analytics_path %>
+  </div>
+
+  <div class="dash-card">
+    <div class="dash-icon">&#127963;</div>
+    <h3>Manage Venues</h3>
+    <p>Add, edit, or remove venues from the system</p>
+    <%= link_to "Manage Venues &rarr;".html_safe, venues_path %>
+  </div>
+
+  <div class="dash-card">
+    <div class="dash-icon">&#128295;</div>
+    <h3>Manage Equipment</h3>
+    <p>Add, edit, or remove equipment</p>
+    <%= link_to "Manage Equipment &rarr;".html_safe, equipments_path %>
+  </div>
+
+  <div class="dash-card">
+    <div class="dash-icon">&#128197;</div>
+    <h3>All Bookings</h3>
+    <p>View and manage all system bookings</p>
+    <%= link_to "View Bookings &rarr;".html_safe, bookings_path %>
+  </div>
+</div>

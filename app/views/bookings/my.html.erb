@@ -1,45 +1,96 @@
-<h1>My Bookings</h1>
+<% content_for(:page_title, "My Bookings") %>
 
 <div data-controller="booking-status">
   <% if @bookings.empty? %>
-    <p>No bookings found.</p>
+    <div class="empty-state">
+      <div class="empty-icon">&#128203;</div>
+      <h3>No bookings yet</h3>
+      <p>You haven't made any bookings. Browse venues or equipment to get started!</p>
+      <div class="btn-group">
+        <%= link_to "Browse Venues", venues_path, class: "btn btn-primary btn-sm" %>
+        <%= link_to "Browse Equipment", equipments_path, class: "btn btn-outline btn-sm" %>
+      </div>
+    </div>
   <% else %>
-    <table>
-      <thead>
-        <tr>
-          <th>Resource</th>
-          <th>Date</th>
-          <th>Details</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @bookings.each do |booking| %>
-          <tr id="booking_<%= booking.id %>">
-            <% if booking.venue.present? %>
-              <td><%= booking.venue.name %></td>
-              <td><%= booking.start_time.to_date %></td>
-              <td><%= booking.start_time.strftime("%H:%M") %> - <%= booking.end_time.strftime("%H:%M") %></td>
-            <% elsif booking.equipment.present? %>
-              <td><%= booking.equipment.name %></td>
-              <td><%= booking.start_date %> to <%= booking.end_date %></td>
-              <td>Qty: <%= booking.quantity %></td>
+    <% venue_bookings, equipment_bookings = @bookings.partition { |booking| booking.venue.present? } %>
+
+    <% if venue_bookings.any? %>
+      <h2 class="mb-1">Venue Bookings</h2>
+      <div class="card mb-2">
+        <table class="resource-grid-table" style="margin:0;border:none;box-shadow:none;">
+          <thead>
+            <tr>
+              <th>Venue</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Status</th>
+              <th>Rejection Reason</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% venue_bookings.each do |booking| %>
+              <tr id="booking_<%= booking.id %>">
+                <td><strong><%= booking.venue.name %></strong></td>
+                <td><%= booking.start_time %></td>
+                <td><%= booking.end_time %></td>
+                <td data-booking-id="<%= booking.id %>" data-status="<%= booking.status %>"><%= status_badge(booking.status) %></td>
+                <td class="text-muted text-sm"><%= booking.rejected? ? (booking.rejection_reason.presence || "No reason provided") : "" %></td>
+                <td>
+                  <div class="btn-group">
+                    <%= link_to "View", booking_path(booking), class: "btn btn-outline btn-sm" %>
+                    <% if booking.cancelable_by_owner? %>
+                      <%= button_to "Cancel", cancel_booking_path(booking), method: :patch, class: "btn btn-warning btn-sm", data: { turbo: false, turbo_confirm: "Cancel this booking?" } %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
             <% end %>
-            <td data-booking-id="<%= booking.id %>" data-status="<%= booking.status %>"><%= booking.status.titleize %></td>
-            <td>
-              <% if booking.cancelable_by_owner? %>
-                <%= button_to "Cancel Booking", cancel_booking_path(booking), method: :patch, data: { turbo: false, turbo_confirm: "Cancel this booking?" } %>
-              <% end %>
-              <% if booking.returnable? %>
-                <%= button_to "Mark as Returned", mark_returned_booking_path(booking), method: :patch, data: { turbo: false } %>
-              <% end %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+
+    <% if equipment_bookings.any? %>
+      <h2 class="mb-1">Equipment Bookings</h2>
+      <div class="card mb-2">
+        <table class="resource-grid-table" style="margin:0;border:none;box-shadow:none;">
+          <thead>
+            <tr>
+              <th>Equipment</th>
+              <th>Qty</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Status</th>
+              <th>Rejection Reason</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% equipment_bookings.each do |booking| %>
+              <tr id="booking_<%= booking.id %>">
+                <td><strong><%= booking.equipment.name %></strong></td>
+                <td><%= booking.quantity || "-" %></td>
+                <td><%= booking.start_date || booking.start_time %></td>
+                <td><%= booking.end_date || booking.end_time %></td>
+                <td data-booking-id="<%= booking.id %>" data-status="<%= booking.status %>"><%= status_badge(booking.status) %></td>
+                <td class="text-muted text-sm"><%= booking.rejected? ? (booking.rejection_reason.presence || "No reason provided") : "" %></td>
+                <td>
+                  <div class="btn-group">
+                    <%= link_to "View", booking_path(booking), class: "btn btn-outline btn-sm" %>
+                    <% if booking.cancelable_by_owner? %>
+                      <%= button_to "Cancel", cancel_booking_path(booking), method: :patch, class: "btn btn-warning btn-sm", data: { turbo: false, turbo_confirm: "Cancel this booking?" } %>
+                    <% end %>
+                    <% if booking.returnable? %>
+                      <%= button_to "Return", mark_returned_booking_path(booking), method: :patch, class: "btn btn-success btn-sm", data: { turbo: false } %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
   <% end %>
 </div>
-
-<%= link_to "Back to Dashboard", dashboard_path %>

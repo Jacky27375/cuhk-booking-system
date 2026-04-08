@@ -1,48 +1,57 @@
-<h1>Sign up</h1>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <h1>Create Account</h1>
+      <p>Join the CUHK Booking System</p>
+    </div>
 
-<% if @user.errors.any? %>
-  <div class="alert">
-    <ul>
-      <% @user.errors.full_messages.each do |msg| %>
-        <li><%= msg %></li>
-      <% end %>
-    </ul>
+    <% if @user.errors.any? %>
+      <div class="alert">
+        <ul style="margin:0; padding-left:1.2rem;">
+          <% @user.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <%= form_with model: @user, url: signup_path, method: :post, data: { turbo: false } do |f| %>
+      <div class="form-group">
+        <%= f.label :email, "CUHK Email" %>
+        <%= f.email_field :email, required: true, autofocus: true,
+            placeholder: "yourname@link.cuhk.edu.hk" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :password %>
+        <%= f.password_field :password, required: true, placeholder: "Create a password" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :password_confirmation, "Confirm Password" %>
+        <%= f.password_field :password_confirmation, required: true, placeholder: "Confirm your password" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :role, "Identity" %>
+        <%= f.select :role,
+            [["Student", "society_member"], ["Staff", "staff"]],
+            { prompt: "Select your identity" }, { required: true } %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :tenant_id, "College" %>
+        <%= f.collection_select :tenant_id, @tenants, :id, :name,
+            { prompt: "Select your college" }, { required: true } %>
+      </div>
+
+      <div>
+        <%= f.submit "Create Account", class: "btn-primary" %>
+      </div>
+    <% end %>
+
+    <div class="auth-footer">
+      Already have an account? <%= link_to "Sign in", login_path %>
+    </div>
   </div>
-<% end %>
-
-<%= form_with model: @user, url: signup_path, method: :post, data: { turbo: false } do |f| %>
-  <div>
-    <%= f.label :email, "CUHK Email" %>
-    <%= f.email_field :email, required: true, autofocus: true,
-        placeholder: "yourname@link.cuhk.edu.hk" %>
-  </div>
-
-  <div>
-    <%= f.label :password %>
-    <%= f.password_field :password, required: true %>
-  </div>
-
-  <div>
-    <%= f.label :password_confirmation, "Confirm Password" %>
-    <%= f.password_field :password_confirmation, required: true %>
-  </div>
-
-  <div>
-    <%= f.label :role, "Identity" %>
-    <%= f.select :role,
-        [["Student", "society_member"], ["Staff", "staff"]],
-        { prompt: "Select your identity" }, { required: true } %>
-  </div>
-
-  <div>
-    <%= f.label :tenant_id, "College" %>
-    <%= f.collection_select :tenant_id, @tenants, :id, :name,
-        { prompt: "Select your college" }, { required: true } %>
-  </div>
-
-  <div>
-    <%= f.submit "Sign up" %>
-  </div>
-<% end %>
-
-<p>Already have an account? <%= link_to "Log in", login_path %></p>
+</div>

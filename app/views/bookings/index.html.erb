@@ -1,84 +1,82 @@
-<p style="color: green"><%= notice %></p>
-
-<% content_for :title, "Bookings" %>
-
-<h1>Bookings</h1>
+<% content_for :title, "All Bookings" %>
+<% content_for(:page_title, "All Bookings") %>
 
 <% if @bookings.any? %>
   <% venue_bookings, equipment_bookings = @bookings.partition { |booking| booking.venue.present? } %>
 
   <% if venue_bookings.any? %>
-    <h2>Venue Bookings</h2>
-    <table id="bookings-venue-table" class="resource-grid-table">
-      <thead>
-        <tr>
-          <th><%= sortable_header_link("Venue", "resource", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-          <th><%= sortable_header_link("User", "user", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-          <th><%= sortable_header_link("Start", "start_time", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-          <th><%= sortable_header_link("End", "end_time", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-          <th><%= sortable_header_link("Status", "status", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-          <th>Rejection Reason</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% venue_bookings.each do |booking| %>
+    <h2 class="mb-1">Venue Bookings</h2>
+    <div class="card mb-2">
+      <table id="bookings-venue-table" class="resource-grid-table" style="margin:0;border:none;box-shadow:none;">
+        <thead>
           <tr>
-            <td><%= booking.venue&.name || "-" %></td>
-            <td><%= booking.user.email %></td>
-            <td><%= booking.start_time %></td>
-            <td><%= booking.end_time %></td>
-            <td><%= booking.status.titleize %></td>
-            <td><%= booking.rejected? ? (booking.rejection_reason.presence || "No reason provided") : "" %></td>
-            <td>
-              <%= link_to "Show", booking_path(booking) %>
-            </td>
+            <th><%= sortable_header_link("Venue", "resource", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+            <th><%= sortable_header_link("User", "user", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+            <th><%= sortable_header_link("Start", "start_time", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+            <th><%= sortable_header_link("End", "end_time", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+            <th><%= sortable_header_link("Status", "status", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+            <th>Rejection Reason</th>
+            <th>Actions</th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% venue_bookings.each do |booking| %>
+            <tr>
+              <td><strong><%= booking.venue&.name || "-" %></strong></td>
+              <td class="text-muted"><%= booking.user.email %></td>
+              <td><%= booking.start_time %></td>
+              <td><%= booking.end_time %></td>
+              <td><%= status_badge(booking.status) %></td>
+              <td class="text-muted text-sm"><%= booking.rejected? ? (booking.rejection_reason.presence || "No reason provided") : "" %></td>
+              <td>
+                <%= link_to "View", booking_path(booking), class: "btn btn-outline btn-sm" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
   <% end %>
 
   <% if equipment_bookings.any? %>
-    <h2>Equipment Bookings</h2>
-    <table id="bookings-equipment-table" class="resource-grid-table">
-      <thead>
-        <tr>
-          <th><%= sortable_header_link("Equipment", "resource", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-          <th><%= sortable_header_link("User", "user", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-          <th>Quantity</th>
-          <th><%= sortable_header_link("Start", "start_time", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-          <th><%= sortable_header_link("End", "end_time", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-          <th><%= sortable_header_link("Status", "status", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-          <th>Rejection Reason</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% equipment_bookings.each do |booking| %>
+    <h2 class="mb-1">Equipment Bookings</h2>
+    <div class="card mb-2">
+      <table id="bookings-equipment-table" class="resource-grid-table" style="margin:0;border:none;box-shadow:none;">
+        <thead>
           <tr>
-            <td><%= booking.equipment&.name || "-" %></td>
-            <td><%= booking.user.email %></td>
-            <td><%= booking.quantity || "-" %></td>
-            <td><%= booking.start_date || booking.start_time %></td>
-            <td><%= booking.end_date || booking.end_time %></td>
-            <td><%= booking.status.titleize %></td>
-            <td><%= booking.rejected? ? (booking.rejection_reason.presence || "No reason provided") : "" %></td>
-            <td>
-              <%= link_to "Show", booking_path(booking) %>
-            </td>
+            <th><%= sortable_header_link("Equipment", "resource", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+            <th><%= sortable_header_link("User", "user", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+            <th>Qty</th>
+            <th><%= sortable_header_link("Start", "start_time", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+            <th><%= sortable_header_link("End", "end_time", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+            <th><%= sortable_header_link("Status", "status", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+            <th>Rejection Reason</th>
+            <th>Actions</th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% equipment_bookings.each do |booking| %>
+            <tr>
+              <td><strong><%= booking.equipment&.name || "-" %></strong></td>
+              <td class="text-muted"><%= booking.user.email %></td>
+              <td><%= booking.quantity || "-" %></td>
+              <td><%= booking.start_date || booking.start_time %></td>
+              <td><%= booking.end_date || booking.end_time %></td>
+              <td><%= status_badge(booking.status) %></td>
+              <td class="text-muted text-sm"><%= booking.rejected? ? (booking.rejection_reason.presence || "No reason provided") : "" %></td>
+              <td>
+                <%= link_to "View", booking_path(booking), class: "btn btn-outline btn-sm" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
   <% end %>
 <% else %>
-  <p>No bookings found.</p>
+  <div class="empty-state">
+    <div class="empty-icon">&#128197;</div>
+    <h3>No bookings yet</h3>
+    <p>No bookings have been made in the system.</p>
+  </div>
 <% end %>
-
-<% if respond_to?(:current_user) && current_user&.society_member? %>
-  <%= link_to "New booking", new_booking_path %>
-<% end %>
-
-
-<%= link_to "Back to Dashboard", dashboard_path %>

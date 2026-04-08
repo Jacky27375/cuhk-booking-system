@@ -1,41 +1,52 @@
-<p style="color: green"><%= notice %></p>
-
 <% content_for :title, "Venues" %>
+<% content_for(:page_title, "Venues") %>
 
-<h1>Venues</h1>
+<div class="page-actions">
+  <p class="text-muted text-sm"><%= @venues.size %> venue(s) found</p>
+  <span class="spacer"></span>
+  <% if current_user&.admin? || current_user&.staff? %>
+    <%= link_to "New Venue", new_venue_path, class: "btn btn-primary btn-sm" %>
+  <% end %>
+</div>
 
 <% if @venues.any? %>
-  <table id="venues-table" class="resource-grid-table">
-    <thead>
-      <tr>
-        <th><%= sortable_header_link("Name", "name", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-        <th><%= sortable_header_link("Description", "description", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-        <th><%= sortable_header_link("Department", "department", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @venues.each do |venue| %>
+  <div class="card">
+    <table id="venues-table" class="resource-grid-table" style="margin:0; border:none; box-shadow:none;">
+      <thead>
         <tr>
-          <td><%= link_to venue.name, venue_path(venue) %></td>
-          <td><%= venue.description %></td>
-          <td><%= venue.department %></td>
-          <td>
-            <%= link_to "Show", venue_path(venue) %>
-            <% if current_user&.admin? || current_user&.staff? %>
-              | <%= link_to "Edit", edit_venue_path(venue) %>
-              | <%= button_to "Destroy", venue_path(venue), method: :delete, form: { style: "display:inline" } %>
-            <% end %>
-          </td>
+          <th><%= sortable_header_link("Name", "name", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th><%= sortable_header_link("Description", "description", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th><%= sortable_header_link("Department", "department", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+          <th>Actions</th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% @venues.each do |venue| %>
+          <tr>
+            <td><strong><%= link_to venue.name, venue_path(venue) %></strong></td>
+            <td class="text-muted"><%= venue.description %></td>
+            <td><span class="badge badge-role"><%= venue.department %></span></td>
+            <td>
+              <div class="btn-group">
+                <%= link_to "View", venue_path(venue), class: "btn btn-outline btn-sm" %>
+                <% if current_user&.society_member? %>
+                  <%= link_to "Book", new_booking_path(venue_id: venue.id), class: "btn btn-primary btn-sm" %>
+                <% end %>
+                <% if current_user&.admin? || current_user&.staff? %>
+                  <%= link_to "Edit", edit_venue_path(venue), class: "btn btn-secondary btn-sm" %>
+                  <%= button_to "Delete", venue_path(venue), method: :delete, class: "btn btn-danger btn-sm", form: { style: "display:inline" }, data: { turbo_confirm: "Delete this venue?" } %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 <% else %>
-  <p>No venues found.</p>
+  <div class="empty-state">
+    <div class="empty-icon">&#127963;</div>
+    <h3>No venues yet</h3>
+    <p>No venues have been added to the system.</p>
+  </div>
 <% end %>
-
-<% if current_user&.admin? || current_user&.staff? %>
-  <%= link_to "New Venue", new_venue_path %>
-<% end %>
-<%= link_to "Back to Dashboard", dashboard_path %>

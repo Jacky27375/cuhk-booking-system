@@ -1,8 +1,8 @@
 <%= form_with model: equipment, data: { turbo: false } do |f| %>
   <% if equipment.errors.any? %>
-    <div class="alert">
-      <p><strong>Please fix the following:</strong></p>
-      <ul>
+    <div class="alert mb-2">
+      <strong>Please fix the following:</strong>
+      <ul style="margin:0.5rem 0 0; padding-left:1.2rem;">
         <% equipment.errors.full_messages.each do |message| %>
           <li><%= message %></li>
         <% end %>
@@ -11,23 +11,23 @@
   <% end %>
 
   <% if defined?(@tenants) && @tenants.present? %>
-    <div>
+    <div class="form-group">
       <%= f.label :tenant_id, "Tenant" %>
       <%= f.collection_select :tenant_id, @tenants, :id, :name, prompt: "Select a tenant" %>
     </div>
   <% end %>
 
-  <div>
+  <div class="form-group">
     <%= f.label :name %>
-    <%= f.text_field :name, required: true %>
+    <%= f.text_field :name, required: true, placeholder: "Equipment name" %>
   </div>
 
-  <div>
+  <div class="form-group">
     <%= f.label :quantity %>
     <%= f.number_field :quantity, min: 0, required: true %>
   </div>
 
   <div>
-    <%= f.submit %>
+    <%= f.submit class: "btn btn-primary" %>
   </div>
 <% end %>

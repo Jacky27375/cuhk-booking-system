@@ -1,13 +1,8 @@
-<% content_for :title, "New booking" %>
-
-<h1>New booking</h1>
+<% content_for :title, "New Booking" %>
+<% content_for(:page_title, "New Booking") %>
 
 <%= render "form", booking: @booking %>
 
-<br>
-
-<div>
-  <%= link_to "Back to my bookings", my_bookings_path %>
-  <%= link_to "Back to venues", venues_path %>
-  <%= link_to "Back to dashboard", dashboard_path %>
+<div class="btn-group mt-2">
+  <%= link_to "Return", venues_path, class: "btn btn-secondary btn-sm" %>
 </div>

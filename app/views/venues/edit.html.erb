@@ -1,12 +1,13 @@
-<% content_for :title, "Editing venue" %>
+<% content_for :title, "Edit Venue" %>
+<% content_for(:page_title, "Edit Venue") %>
 
-<h1>Editing venue</h1>
-
-<%= render "form", venue: @venue %>
-
-<br>
-
-<div>
-  <%= link_to "Show this venue", @venue %> |
-  <%= link_to "Back to venues", venues_path %>
+<div class="card" style="max-width:600px;">
+  <div class="card-body">
+    <%= render "form", venue: @venue %>
+  </div>
+  <div class="card-footer">
+    <div class="btn-group">
+      <%= link_to "Back to Venues", venues_path, class: "btn btn-secondary btn-sm" %>
+    </div>
+  </div>
 </div>

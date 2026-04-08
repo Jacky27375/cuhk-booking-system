@@ -1,11 +1,11 @@
-<% content_for :title, "New venue" %>
+<% content_for :title, "New Venue" %>
+<% content_for(:page_title, "New Venue") %>
 
-<h1>New venue</h1>
-
-<%= render "form", venue: @venue %>
-
-<br>
-
-<div>
-  <%= link_to "Back to venues", venues_path %>
+<div class="card" style="max-width:600px;">
+  <div class="card-body">
+    <%= render "form", venue: @venue %>
+  </div>
+  <div class="card-footer">
+    <%= link_to "Back to Venues", venues_path, class: "btn btn-secondary btn-sm" %>
+  </div>
 </div>

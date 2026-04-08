@@ -1,16 +1,25 @@
-<p style="color: green"><%= notice %></p>
+<% content_for(:page_title, @venue.name) %>
 
-<%= render @venue %>
-
-<div>
-  <% if current_user&.admin? || current_user&.staff? %>
-    <%= link_to "Edit", edit_venue_path(@venue) %> |
-    <%= button_to "Destroy", @venue, method: :delete %> |
-  <% end %>
-
-  <% if current_user&.society_member? %>
-    <%= link_to "Book Venue", new_booking_path(venue_id: @venue.id) %> |
-  <% end %>
-
-  <%= link_to "Back to venues", venues_path %>
+<div class="card mb-2">
+  <div class="card-body">
+    <div class="detail-grid">
+      <div class="detail-item">
+        <div class="detail-label">Name</div>
+        <div class="detail-value"><%= @venue.name %></div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Department</div>
+        <div class="detail-value"><span class="badge badge-role"><%= @venue.department %></span></div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Description</div>
+        <div class="detail-value"><%= @venue.description.presence || "No description" %></div>
+      </div>
+    </div>
+  </div>
+  <div class="card-footer">
+    <div class="btn-group">
+      <%= link_to "Back to Venues", venues_path, class: "btn btn-secondary btn-sm" %>
+    </div>
+  </div>
 </div>
