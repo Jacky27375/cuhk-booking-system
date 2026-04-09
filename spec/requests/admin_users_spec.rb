@@ -60,15 +60,23 @@ RSpec.describe 'Admin user management', type: :request do
       patch reset_root_staff_password_admin_user_path(root_staff)
 
       expect(response).to redirect_to(admin_users_path)
-      notice = flash[:notice].to_s
-      expect(notice).to include("Temporary password for #{root_staff.email}:")
-      generated_password = notice.match(/Temporary password for .*: (\S+)\. Copy it now;/)&.captures&.first
-      generated_password ||= notice.match(/Temporary password for .*: (\S+)\. Copy it now/)&.captures&.first
+      expect(flash[:notice]).to eq("Temporary password generated for #{root_staff.email}.")
+
+      temp_password_payload = flash[:generated_temp_password]
+      expect(temp_password_payload).to be_present
+      generated_password = temp_password_payload["password"] || temp_password_payload[:password]
+      payload_email = temp_password_payload["email"] || temp_password_payload[:email]
       expect(generated_password).to be_present
+      expect(payload_email).to eq(root_staff.email)
 
       root_staff.reload
       expect(root_staff.authenticate(generated_password)).to eq(root_staff)
       expect(root_staff.authenticate('Password1!')).to be_falsey
+
+      follow_redirect!
+      expect(response.body).to include('Temporary password generated')
+      expect(response.body).to include('Copy')
+      expect(response.body).to include(generated_password)
     end
 
     it 'rejects resetting non-root-staff accounts' do

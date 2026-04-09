@@ -5,6 +5,25 @@
   <p class="text-muted text-sm"><%= @users.size %> account(s)</p>
 </div>
 
+<% if (generated_temp_password = flash[:generated_temp_password]).present? %>
+  <% temp_email = generated_temp_password["email"] || generated_temp_password[:email] %>
+  <% temp_password = generated_temp_password["password"] || generated_temp_password[:password] %>
+  <div class="card mb-2">
+    <div class="card-body"
+         data-controller="clipboard"
+         data-clipboard-copied-text-value="Password copied to clipboard."
+         data-clipboard-failed-text-value="Copy failed. Please copy it manually.">
+      <h3 class="mb-1">Temporary password generated</h3>
+      <p class="text-muted text-sm">Root staff account: <strong><%= temp_email %></strong></p>
+      <div class="temp-password-row">
+        <code class="temp-password-value" data-clipboard-target="source"><%= temp_password %></code>
+        <button type="button" class="btn btn-secondary btn-sm" data-action="clipboard#copy">Copy</button>
+      </div>
+      <p class="text-muted text-sm mb-1" data-clipboard-target="feedback">Shown once. Save it now.</p>
+    </div>
+  </div>
+<% end %>
+
 <div class="card">
   <table class="resource-grid-table" style="margin:0; border:none; box-shadow:none;">
     <thead>

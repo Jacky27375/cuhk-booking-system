@@ -29,8 +29,12 @@ class Admin::UsersController < ApplicationController
     @user.password_confirmation = generated_password
     @user.save!
 
+    flash[:generated_temp_password] = {
+      email: @user.email,
+      password: generated_password
+    }
     redirect_to admin_users_path,
-                notice: "Temporary password for #{@user.email}: #{generated_password}. Copy it now; it will not be shown again."
+                notice: "Temporary password generated for #{@user.email}."
   end
 
   private
