@@ -215,76 +215,90 @@ equipments = [
   { name: "Lee Woo Sing College - Basic Sound System", quantity: 6, tenant: "Lee Woo Sing College" }
 ]
 
+bootstrap_password = ENV["BOOTSTRAP_ACCOUNT_PASSWORD"]
+
+if Rails.env.production? && bootstrap_password.blank?
+  raise "BOOTSTRAP_ACCOUNT_PASSWORD must be set in production."
+end
+
+bootstrap_password = bootstrap_password.presence || "Password1!"
+
+puts "Ensuring tenants..."
+
+# Create college tenants
+tenants = {}
+colleges.each do |college|
+  tenants[college[:name]] = Tenant.find_or_create_by!(slug: college[:slug]) do |t|
+    t.name = college[:name]
+    t.description = "#{college[:name]} facilities"
+  end
+end
+
+# Create University tenant (for shared resources)
+tenants["University"] = Tenant.find_or_create_by!(slug: "university") do |t|
+  t.name = "University"
+  t.description = "University shared facilities"
+end
+
+puts "Ensuring venue records..."
+venues.each do |venue_attrs|
+  Venue.find_or_create_by!(name: venue_attrs[:name]) do |v|
+    v.description = venue_attrs[:description]
+    v.department = venue_attrs[:department]
+    v.tenant = tenants.fetch(venue_attrs[:department])
+  end
+end
+
+puts "Ensuring equipment records..."
+equipments.each do |equipment_attrs|
+  Equipment.find_or_create_by!(name: equipment_attrs[:name]) do |e|
+    e.quantity = equipment_attrs[:quantity]
+    e.tenant = tenants.fetch(equipment_attrs[:tenant])
+  end
+end
+
+Venue.find_or_create_by!(name: "University Room") do |v|
+  v.description = "University shared resource room accessible by all college students"
+  v.department = "University"
+  v.tenant = tenants["University"]
+end
+
+puts "Ensuring admin account..."
+admin = User.find_or_initialize_by(email: "admin@link.cuhk.edu.hk")
+admin.role = :admin
+admin.tenant = tenants["University"]
+
+if admin.new_record? || admin.password_digest.blank?
+  admin.password = bootstrap_password
+  admin.password_confirmation = bootstrap_password
+end
+
+admin.save!
+
+puts "Ensuring root staff accounts..."
+root_staff_emails.each do |college_name, email|
+  user = User.find_or_initialize_by(email: email)
+  user.role = :staff
+  user.is_root_account = true
+  user.tenant = tenants.fetch(college_name)
+
+  if user.new_record? || user.password_digest.blank?
+    user.password = bootstrap_password
+    user.password_confirmation = bootstrap_password
+  end
+
+  user.save!
+end
+
+puts "Seed data ensured successfully."
+
 unless Rails.env.production?
-  puts "Creating tenants..."
-
-  # Create college tenants
-  tenants = {}
-  colleges.each do |college|
-    tenants[college[:name]] = Tenant.find_or_create_by!(slug: college[:slug]) do |t|
-      t.name = college[:name]
-      t.description = "#{college[:name]} facilities"
-    end
-  end
-
-  # Create University tenant (for shared resources)
-  tenants["University"] = Tenant.find_or_create_by!(slug: "university") do |t|
-    t.name = "University"
-    t.description = "University shared facilities"
-  end
-
-  created_venues = venues.map do |venue_attrs|
-    Venue.find_or_create_by!(name: venue_attrs[:name]) do |v|
-      v.description = venue_attrs[:description]
-      v.department = venue_attrs[:department]
-      v.tenant = venue_attrs[:tenant]
-      v.tenant = department_tenants.fetch(venue_attrs[:department])
-    end
-  end
-
-  created_equipments = equipments.map do |equipment_attrs|
-    Equipment.find_or_create_by!(name: equipment_attrs[:name]) do |e|
-      e.quantity = equipment_attrs[:quantity]
-      e.tenant = department_tenants.fetch(equipment_attrs[:tenant])
-    end
-  end
-
-  Venue.find_or_create_by!(name: "University Room") do |v|
-    v.description = "University shared resource room accessible by all college students"
-    v.department = "University"
-    v.tenant = tenants["University"]
-  end
-
-  # Create admin account
-  puts "Creating admin account..."
-  User.find_or_create_by!(email: "admin@link.cuhk.edu.hk") do |u|
-    u.password = "Password1!"
-    u.password_confirmation = "Password1!"
-    u.role = :admin
-    u.tenant = tenants["University"]
-  end
-
-  # Create root staff account for each college
-  puts "Creating root staff accounts..."
-  root_staff_emails.each do |college_name, email|
-    User.find_or_create_by!(email: email) do |u|
-      u.password = "Password1!"
-      u.password_confirmation = "Password1!"
-      u.role = :staff
-      u.is_root_account = true
-      u.tenant = tenants[college_name]
-    end
-  end
-
-  puts "Seed data created successfully."
   puts ""
   puts "=== Seeded Accounts ==="
-  puts "Admin: admin@link.cuhk.edu.hk / Password1!"
+  puts "Admin: admin@link.cuhk.edu.hk / #{bootstrap_password}"
   puts ""
   puts "Root Staff Accounts (one per college):"
   root_staff_emails.each do |college_name, email|
-    puts "  #{college_name}: #{email} / Password1!"
+    puts "  #{college_name}: #{email} / #{bootstrap_password}"
   end
-else
-  puts "Skipping dummy data generation in production environment."
 end

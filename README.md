@@ -78,7 +78,7 @@ bundle exec bundler-audit check --update
 
 ### Seed Data (Login details)
 
-If you ran `rails db:seed`, the development database includes the following accounts:
+If you ran `rails db:seed`, the development database includes the following bootstrap accounts:
 
 **Admin:**
 
@@ -102,6 +102,8 @@ If you ran `rails db:seed`, the development database includes the following acco
 
 Student accounts can be created via the signup page (students select their college during registration).
 
+In production Docker deploys, startup now runs `db:seed` as well. This keeps college tenants, venue/equipment seed records, and bootstrap admin/root accounts present even on a fresh or previously unseeded database.
+
 ## Deployment (Azure VM)
 
 Production URL: [https://csci3100.tylerl.cyou](https://csci3100.tylerl.cyou)
@@ -118,6 +120,7 @@ The deploy workflow runs automatically after `CI` succeeds on `main`, and can al
 | `RAILS_MASTER_KEY` | Content of `config/master.key` |
 | `POSTGRES_PASSWORD` | Password for the production Postgres container |
 | `SECRET_KEY_BASE` | Required (`openssl rand -hex 64`) |
+| `BOOTSTRAP_ACCOUNT_PASSWORD` | **Required for production deploys.** Password used when bootstrap admin/root accounts are first created in production. Deploy fails if unset. |
 
 ### 2. Deploy
 
