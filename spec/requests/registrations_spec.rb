@@ -17,6 +17,35 @@ RSpec.describe 'Registrations', type: :request do
       expect(tenant_options).to include(college_tenant.name)
       expect(tenant_options).not_to include(university_tenant.name)
     end
+
+    context 'when tenant records are missing' do
+      it 'bootstraps college options for registration' do
+        original_university_ids = Tenant.method(:university_tenant_ids)
+        first_call = true
+
+        allow(Tenant).to receive(:university_tenant_ids) do
+          if first_call
+            first_call = false
+            Tenant.select(:id)
+          else
+            original_university_ids.call
+          end
+        end
+        expect(DefaultIdentityBootstrap).to receive(:ensure_college_tenants!).and_call_original
+
+        get signup_path
+
+        expect(response).to have_http_status(:ok)
+
+        tenant_options = Nokogiri::HTML.parse(response.body)
+                                .css('select#user_tenant_id option')
+                                .map { |option| option.text.strip }
+
+        expect(tenant_options).to include('Shaw College')
+        expect(tenant_options).to include('Chung Chi College')
+        expect(tenant_options).not_to include('University')
+      end
+    end
   end
 
   describe 'POST /signup' do

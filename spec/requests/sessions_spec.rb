@@ -19,6 +19,53 @@ RSpec.describe 'Sessions', type: :request do
       expect(response.body).to include('Dashboard')
     end
 
+    it 'bootstraps and logs in with the default admin seed account' do
+      email = 'admin@link.cuhk.edu.hk'
+      first_lookup = true
+
+      allow(User).to receive(:find_by).and_call_original
+      allow(User).to receive(:find_by).with(email: email) do
+        if first_lookup
+          first_lookup = false
+          nil
+        else
+          User.unscoped.where(email: email).first
+        end
+      end
+      expect(DefaultIdentityBootstrap).to receive(:ensure_seed_account_for!).with(email).and_call_original
+
+      post login_path, params: { email: email, password: 'Password1!' }
+
+      expect(response).to redirect_to(dashboard_path)
+      expect(User.unscoped.where(email: email).first).to be_present
+    end
+
+    it 'bootstraps and logs in with a default root staff seed account' do
+      email = 'staff_root_shaw@link.cuhk.edu.hk'
+      first_lookup = true
+
+      allow(User).to receive(:find_by).and_call_original
+      allow(User).to receive(:find_by).with(email: email) do
+        if first_lookup
+          first_lookup = false
+          nil
+        else
+          User.unscoped.where(email: email).first
+        end
+      end
+      expect(DefaultIdentityBootstrap).to receive(:ensure_seed_account_for!).with(email).and_call_original
+
+      post login_path, params: { email: email, password: 'Password1!' }
+
+      expect(response).to redirect_to(dashboard_path)
+
+      root_staff = User.unscoped.where(email: email).first
+      expect(root_staff).to be_present
+      expect(root_staff).to be_staff
+      expect(root_staff).to be_root_account
+      expect(root_staff.tenant&.name).to eq('Shaw College')
+    end
+
     it 'rejects invalid credentials' do
       post login_path, params: { email: user.email, password: 'wrong' }
       expect(response).to have_http_status(:unprocessable_content)
