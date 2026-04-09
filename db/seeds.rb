@@ -238,31 +238,27 @@ tenants["University"] = Tenant.find_or_create_by!(slug: "university") do |t|
   t.description = "University shared facilities"
 end
 
-unless Rails.env.production?
-  puts "Ensuring venue records..."
-  venues.each do |venue_attrs|
-    Venue.find_or_create_by!(name: venue_attrs[:name]) do |v|
-      v.description = venue_attrs[:description]
-      v.department = venue_attrs[:department]
-      v.tenant = tenants.fetch(venue_attrs[:department])
-    end
+puts "Ensuring venue records..."
+venues.each do |venue_attrs|
+  Venue.find_or_create_by!(name: venue_attrs[:name]) do |v|
+    v.description = venue_attrs[:description]
+    v.department = venue_attrs[:department]
+    v.tenant = tenants.fetch(venue_attrs[:department])
   end
+end
 
-  puts "Ensuring equipment records..."
-  equipments.each do |equipment_attrs|
-    Equipment.find_or_create_by!(name: equipment_attrs[:name]) do |e|
-      e.quantity = equipment_attrs[:quantity]
-      e.tenant = tenants.fetch(equipment_attrs[:tenant])
-    end
+puts "Ensuring equipment records..."
+equipments.each do |equipment_attrs|
+  Equipment.find_or_create_by!(name: equipment_attrs[:name]) do |e|
+    e.quantity = equipment_attrs[:quantity]
+    e.tenant = tenants.fetch(equipment_attrs[:tenant])
   end
+end
 
-  Venue.find_or_create_by!(name: "University Room") do |v|
-    v.description = "University shared resource room accessible by all college students"
-    v.department = "University"
-    v.tenant = tenants["University"]
-  end
-else
-  puts "Skipping dummy venue and equipment generation in production environment."
+Venue.find_or_create_by!(name: "University Room") do |v|
+  v.description = "University shared resource room accessible by all college students"
+  v.department = "University"
+  v.tenant = tenants["University"]
 end
 
 puts "Ensuring admin account..."

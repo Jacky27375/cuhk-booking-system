@@ -102,7 +102,7 @@ If you ran `rails db:seed`, the development database includes the following boot
 
 Student accounts can be created via the signup page (students select their college during registration).
 
-In production Docker deploys, startup now runs `db:seed` as well. This keeps college tenants and bootstrap admin/root accounts present even on a fresh or previously unseeded database.
+In production Docker deploys, startup now runs `db:seed` as well. This keeps college tenants, venue/equipment seed records, and bootstrap admin/root accounts present even on a fresh or previously unseeded database.
 
 ## Deployment (Azure VM)
 
