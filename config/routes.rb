@@ -13,6 +13,14 @@ Rails.application.routes.draw do
   get "admin",     to: "admin#show"
   get "analytics", to: "analytics#show"
 
+  namespace :admin do
+    resources :users, only: [:index, :destroy] do
+      member do
+        patch :reset_root_staff_password
+      end
+    end
+  end
+
   resources :staff_accounts, only: [:index, :new, :create]
 
   resources :venue_requests, only: [:index, :new, :create] do
