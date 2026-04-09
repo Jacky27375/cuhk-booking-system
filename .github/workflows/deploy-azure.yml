@@ -71,6 +71,7 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           BOOTSTRAP_ACCOUNT_PASSWORD: ${{ secrets.BOOTSTRAP_ACCOUNT_PASSWORD }}
+          RESET_BOOTSTRAP_ACCOUNTS_ONCE: ${{ secrets.RESET_BOOTSTRAP_ACCOUNTS_ONCE }}
         run: |
           : "${RAILS_MASTER_KEY:?Set RAILS_MASTER_KEY in repository secrets.}"
           : "${SECRET_KEY_BASE:?Set SECRET_KEY_BASE in repository secrets.}"
@@ -95,6 +96,7 @@ jobs:
             printf '%s\n' "SENDGRID_API_KEY=$SENDGRID_API_KEY"
             printf '%s\n' "SENDGRID_FROM_EMAIL=noreply@csci3100.tylerl.cyou"
             printf '%s\n' "BOOTSTRAP_ACCOUNT_PASSWORD=$BOOTSTRAP_ACCOUNT_PASSWORD"
+            printf '%s\n' "RESET_BOOTSTRAP_ACCOUNTS_ONCE=$RESET_BOOTSTRAP_ACCOUNTS_ONCE"
           } > "$REMOTE_ENV_FILE"
 
           chmod 600 "$REMOTE_ENV_FILE"

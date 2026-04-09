@@ -216,12 +216,17 @@ equipments = [
 ]
 
 bootstrap_password = ENV["BOOTSTRAP_ACCOUNT_PASSWORD"]
+reset_bootstrap_accounts_once = ActiveModel::Type::Boolean.new.cast(ENV["RESET_BOOTSTRAP_ACCOUNTS_ONCE"])
 
 if Rails.env.production? && bootstrap_password.blank?
   raise "BOOTSTRAP_ACCOUNT_PASSWORD must be set in production."
 end
 
 bootstrap_password = bootstrap_password.presence || "Password1!"
+
+if Rails.env.production? && reset_bootstrap_accounts_once
+  puts "RESET_BOOTSTRAP_ACCOUNTS_ONCE is enabled; bootstrap account passwords will be reset in this seed run."
+end
 
 puts "Ensuring tenants..."
 
@@ -268,7 +273,7 @@ admin = User.find_or_initialize_by(email: "admin@link.cuhk.edu.hk")
 admin.role = :admin
 admin.tenant = tenants["University"]
 
-if admin.new_record? || admin.password_digest.blank?
+if reset_bootstrap_accounts_once || admin.new_record? || admin.password_digest.blank?
   admin.password = bootstrap_password
   admin.password_confirmation = bootstrap_password
 end
@@ -282,7 +287,7 @@ root_staff_emails.each do |college_name, email|
   user.is_root_account = true
   user.tenant = tenants.fetch(college_name)
 
-  if user.new_record? || user.password_digest.blank?
+  if reset_bootstrap_accounts_once || user.new_record? || user.password_digest.blank?
     user.password = bootstrap_password
     user.password_confirmation = bootstrap_password
   end
