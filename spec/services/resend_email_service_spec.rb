@@ -53,7 +53,7 @@ RSpec.describe ResendEmailService do
         result = described_class.send_booking_approved(booking)
         expect(result).to eq(success_response)
         expect(Resend::Emails).to have_received(:send).with(hash_including(
-          to: ["joejoecheung2000@gmail.com"],
+          to: ["test@link.cuhk.edu.hk"],
           subject: /Booking Approved/
         ))
       end

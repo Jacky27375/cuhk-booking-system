@@ -10,7 +10,6 @@ class ResendEmailService
 
   FROM_EMAIL = ENV.fetch("RESEND_FROM_EMAIL", "onboarding@resend.dev")
   FROM_NAME  = "CUHK Booking System"
-  FORCE_TO_EMAIL = "joejoecheung2000@gmail.com"
 
   class << self
     def send_booking_approved(booking)
@@ -33,7 +32,7 @@ class ResendEmailService
       end
 
       Resend.api_key = api_key
-      recipient = FORCE_TO_EMAIL
+      recipient = to
 
       params = {
         from: "#{FROM_NAME} <#{FROM_EMAIL}>",

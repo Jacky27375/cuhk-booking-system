@@ -11,7 +11,7 @@ RSpec.describe SignupVerificationMailer, type: :mailer do
     it "renders the headers" do
       expect(mail.subject).to eq("Your CUHK signup verification code")
       expect(mail.to).to eq([recipient])
-      expect(mail.from).to eq([ENV.fetch("SENDGRID_FROM_EMAIL", "noreply@csci3100.tylerl.cyou")])
+      expect(mail.from).to eq([ENV.fetch("RESEND_FROM_EMAIL", "noreply@csci3100.tylerl.cyou")])
     end
 
     it "renders the body" do
