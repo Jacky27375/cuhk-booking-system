@@ -5,6 +5,12 @@ FactoryBot.define do
     password_confirmation { "Password1!" }
     role { :student }
 
+    after(:build) do |user|
+      if user.staff? && user.tenant.present?
+        user.college_scope_slug = user.tenant.slug
+      end
+    end
+
     trait :admin do
       role { :admin }
     end

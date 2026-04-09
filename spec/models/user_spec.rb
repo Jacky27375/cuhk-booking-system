@@ -79,6 +79,25 @@ RSpec.describe User, type: :model do
       tenant = create(:tenant)
       user = create(:user, :staff, tenant: tenant)
       expect(user.tenant).to eq(tenant)
+      expect(user.college_scope_slug).to eq(tenant.slug)
+    end
+  end
+
+  describe 'college scope slug' do
+    it 'auto-syncs staff college scope slug from tenant' do
+      tenant = create(:tenant, slug: 'shaw-college')
+      user = build(:user, :staff, tenant: tenant, college_scope_slug: 'wrong-scope')
+
+      user.valid?
+
+      expect(user.college_scope_slug).to eq('shaw-college')
+      expect(user.errors[:college_scope_slug]).to be_empty
+    end
+
+    it 'does not require college scope slug for non-staff users' do
+      user = build(:user, :student, tenant: nil, college_scope_slug: nil)
+
+      expect(user).to be_valid
     end
   end
 

@@ -43,6 +43,7 @@ RSpec.describe 'Staff Accounts', type: :request do
       new_user = User.find_by(email: 'newstaff@link.cuhk.edu.hk')
       expect(new_user.staff?).to be(true)
       expect(new_user.tenant).to eq(tenant)
+      expect(new_user.college_scope_slug).to eq(tenant.slug)
       expect(response).to redirect_to(staff_accounts_path)
     end
 
