@@ -35,6 +35,7 @@ Feature: Venue Request Workflow
     Given "staff@link.cuhk.edu.hk" has submitted a venue request for "Duplicate Room"
     And I am logged in as "admin@link.cuhk.edu.hk" with password "Password1!"
     When I visit the venue requests page
+    And I fill in "Rejection reason" with "Not needed"
     And I press "Reject"
     Then I should see "Venue request rejected"
 

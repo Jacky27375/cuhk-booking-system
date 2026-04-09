@@ -19,6 +19,10 @@
           <% if current_user.admin? %><th>Requested By</th><% end %>
           <th>College</th>
           <th>Status</th>
+          <% if current_user.admin? %><th>Requested At</th><% end %>
+          <% if current_user.admin? %><th>Reviewed By</th><% end %>
+          <% if current_user.admin? %><th>Reviewed At</th><% end %>
+          <% if current_user.admin? %><th>Rejection Reason</th><% end %>
           <% if current_user.admin? %><th>Actions</th><% end %>
         </tr>
       </thead>
@@ -30,15 +34,23 @@
             <% if current_user.admin? %><td><%= request.requester.email %></td><% end %>
             <td><span class="badge badge-role"><%= request.tenant.name %></span></td>
             <td><%= status_badge(request.status) %></td>
+            <% if current_user.admin? %><td class="text-muted"><%= request.created_at.strftime("%Y-%m-%d %H:%M") %></td><% end %>
+            <% if current_user.admin? %><td><%= request.reviewed_by&.email || "-" %></td><% end %>
+            <% if current_user.admin? %><td class="text-muted"><%= request.reviewed_at&.strftime("%Y-%m-%d %H:%M") || "-" %></td><% end %>
+            <% if current_user.admin? %><td class="text-muted"><%= request.rejection_reason.presence || "-" %></td><% end %>
             <% if current_user.admin? %>
               <td>
                 <% if request.pending? %>
                   <div class="btn-group">
                     <%= button_to "Approve", approve_venue_request_path(request), method: :patch, class: "btn btn-primary btn-sm", data: { turbo_confirm: "Approve this venue request?" } %>
-                    <%= button_to "Reject", reject_venue_request_path(request), method: :patch, class: "btn btn-danger btn-sm", data: { turbo_confirm: "Reject this venue request?" } %>
+                    <%= form_with url: reject_venue_request_path(request), method: :patch, local: true do |f| %>
+                      <%= f.label :rejection_reason, "Rejection reason" %>
+                      <%= f.text_field :rejection_reason, required: true, placeholder: "Reason for rejection" %>
+                      <%= f.submit "Reject", class: "btn btn-danger btn-sm", data: { turbo_confirm: "Reject this venue request?" } %>
+                    <% end %>
                   </div>
-                <% elsif request.rejected? && request.rejection_reason.present? %>
-                  <span class="text-muted text-sm"><%= request.rejection_reason %></span>
+                <% else %>
+                  <span class="text-muted text-sm">Reviewed</span>
                 <% end %>
               </td>
             <% end %>

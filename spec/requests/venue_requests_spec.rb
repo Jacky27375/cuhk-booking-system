@@ -14,9 +14,13 @@ RSpec.describe 'Venue Requests', type: :request do
     end
 
     it 'allows admin access' do
+      create(:venue_request, requester: staff_user, tenant: tenant)
       log_in_as(admin_user)
       get venue_requests_path
       expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Reviewed By')
+      expect(response.body).to include('Reviewed At')
+      expect(response.body).to include('Rejection Reason')
     end
 
     it 'denies student access' do
@@ -41,6 +45,17 @@ RSpec.describe 'Venue Requests', type: :request do
       expect(request.tenant).to eq(tenant)
       expect(request.pending?).to be(true)
       expect(response).to redirect_to(venue_requests_path)
+    end
+
+    it 'blocks admin from creating venue requests' do
+      log_in_as(admin_user)
+
+      expect {
+        post venue_requests_path, params: valid_params
+      }.not_to change(VenueRequest, :count)
+
+      expect(response).to redirect_to(venue_requests_path)
+      expect(flash[:alert]).to eq('Only staff can submit venue requests.')
     end
   end
 
@@ -69,6 +84,19 @@ RSpec.describe 'Venue Requests', type: :request do
 
       expect(response).to redirect_to(root_path)
     end
+
+    it 'does not re-approve an already reviewed request' do
+      log_in_as(admin_user)
+      patch approve_venue_request_path(venue_request)
+      venue_request.reload
+
+      expect {
+        patch approve_venue_request_path(venue_request)
+      }.not_to change(Venue, :count)
+
+      expect(response).to redirect_to(venue_requests_path)
+      expect(flash[:alert]).to eq('Only pending requests can be approved.')
+    end
   end
 
   describe 'PATCH /venue_requests/:id/reject' do
@@ -82,6 +110,16 @@ RSpec.describe 'Venue Requests', type: :request do
       expect(venue_request.rejected?).to be(true)
       expect(venue_request.rejection_reason).to eq('Not needed')
       expect(response).to redirect_to(venue_requests_path)
+    end
+
+    it 'requires a rejection reason' do
+      log_in_as(admin_user)
+
+      patch reject_venue_request_path(venue_request), params: { rejection_reason: '   ' }
+
+      expect(response).to redirect_to(venue_requests_path)
+      expect(flash[:alert]).to eq('Rejection reason cannot be blank.')
+      expect(venue_request.reload.status).to eq('pending')
     end
   end
 end
