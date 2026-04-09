@@ -5,7 +5,9 @@
     <div class="dash-icon">&#127963;</div>
     <h3>Venue Requests</h3>
     <p><%= @pending_venue_request_count %> pending request(s) need review</p>
-    <%= link_to "Review Requests &rarr;".html_safe, venue_requests_path %>
+    <%= link_to "Review Pending Requests &rarr;".html_safe, venue_requests_path(status: :pending) %>
+    <br>
+    <%= link_to "View All Requests &rarr;".html_safe, venue_requests_path %>
   </div>
 
   <div class="dash-card">

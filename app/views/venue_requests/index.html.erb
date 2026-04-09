@@ -2,12 +2,28 @@
 <% content_for(:page_title, "Venue Requests") %>
 
 <div class="page-actions">
-  <p class="text-muted text-sm"><%= @venue_requests.size %> request(s)</p>
+  <p class="text-muted text-sm">
+    <% if current_user.admin? %>
+      Showing <%= @venue_requests.size %> of <%= @status_counts["all"] %> request(s)
+    <% else %>
+      <%= @venue_requests.size %> request(s)
+    <% end %>
+  </p>
   <span class="spacer"></span>
   <% if current_user.staff? %>
     <%= link_to "New Venue Request", new_venue_request_path, class: "btn btn-primary btn-sm" %>
   <% end %>
 </div>
+
+<% if current_user.admin? %>
+  <div class="btn-group mb-2">
+    <% [["Pending", "pending"], ["Approved", "approved"], ["Rejected", "rejected"], ["All", "all"]].each do |label, key| %>
+      <%= link_to "#{label} (#{@status_counts[key]})",
+                  venue_requests_path(status: key),
+                  class: "btn btn-sm #{key == @status_filter ? 'btn-primary' : 'btn-secondary'}" %>
+    <% end %>
+  </div>
+<% end %>
 
 <% if @venue_requests.any? %>
   <div class="card">
@@ -28,12 +44,17 @@
       </thead>
       <tbody>
         <% @venue_requests.each do |request| %>
-          <tr>
+          <tr<%= ' style="background-color: rgba(255, 243, 205, 0.45);"' if request.pending? %>>
             <td><strong><%= request.venue_name %></strong></td>
             <td class="text-muted"><%= request.description %></td>
             <% if current_user.admin? %><td><%= request.requester.email %></td><% end %>
             <td><span class="badge badge-role"><%= request.tenant.name %></span></td>
-            <td><%= status_badge(request.status) %></td>
+            <td>
+              <%= status_badge(request.status) %>
+              <% if request.pending? %>
+                <div class="text-muted text-sm">Needs review</div>
+              <% end %>
+            </td>
             <% if current_user.admin? %><td class="text-muted"><%= request.created_at.strftime("%Y-%m-%d %H:%M") %></td><% end %>
             <% if current_user.admin? %><td><%= request.reviewed_by&.email || "-" %></td><% end %>
             <% if current_user.admin? %><td class="text-muted"><%= request.reviewed_at&.strftime("%Y-%m-%d %H:%M") || "-" %></td><% end %>
