@@ -62,10 +62,11 @@ class BookingsController < ApplicationController
       return
     end
 
-    prepare_timetable_context
     if @booking.valid?
+      prepare_timetable_context
       render :confirm
     else
+      prepare_timetable_context
       render :new, status: :unprocessable_content
     end
   end

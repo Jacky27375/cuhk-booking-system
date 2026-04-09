@@ -131,3 +131,4 @@ Feature: Venue Booking System
     And I select "15:00" from "booking_end_slot"
     And I click "Review Booking"
     Then I should see "Booking duration cannot exceed 4 hours"
+    And the slot "10:00 - 11:00" should not be marked selected

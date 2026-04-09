@@ -199,6 +199,25 @@ RSpec.describe "/bookings", type: :request do
     end
   end
 
+  describe "POST /confirm" do
+    it "shows validation error and does not highlight selected timetable slots for invalid duration" do
+      booking_date = 5.days.from_now.to_date.strftime('%Y-%m-%d')
+
+      post confirm_bookings_path, params: {
+        booking: {
+          venue_id: venue.id,
+          booking_date: booking_date,
+          start_slot: '08:00',
+          end_slot: '13:00'
+        }
+      }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include('Booking duration cannot exceed 4 hours')
+      expect(response.body).not_to match(/timetable-slot-selected[^>]*>\s*08:00 - 09:00/m)
+    end
+  end
+
   describe "PATCH /update" do
     context "with valid parameters" do
       let(:new_attributes) {
