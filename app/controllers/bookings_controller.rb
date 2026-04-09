@@ -241,6 +241,12 @@ class BookingsController < ApplicationController
     end
 
     def send_booking_notification(action, reason: nil)
+      # Keep approval/rejection notifications inside the test process to avoid external emails.
+      if Rails.env.test?
+        send_via_action_mailer(action, reason)
+        return
+      end
+
       sent = if action == :approved
         ResendEmailService.send_booking_approved(@booking)
       elsif action == :rejected

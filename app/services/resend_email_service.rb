@@ -37,7 +37,7 @@ class ResendEmailService
 
       params = {
         from: "#{FROM_NAME} <#{FROM_EMAIL}>",
-        to: [ recipient ],
+        to: [recipient],
         subject: subject,
         html: html_content
       }
