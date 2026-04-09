@@ -242,15 +242,15 @@ class BookingsController < ApplicationController
 
     def send_booking_notification(action, reason: nil)
       sent = if action == :approved
-        SendgridEmailService.send_booking_approved(@booking)
+        ResendEmailService.send_booking_approved(@booking)
       elsif action == :rejected
-        SendgridEmailService.send_booking_rejected(@booking, reason: reason)
+        ResendEmailService.send_booking_rejected(@booking, reason: reason)
       end
 
-      # Fall back to ActionMailer when SendGrid is not configured or fails
+      # Fall back to ActionMailer when Resend is not configured or fails
       send_via_action_mailer(action, reason) unless sent
-    rescue SendgridEmailService::DeliveryError => e
-      Rails.logger.error("SendGrid delivery failed, falling back to ActionMailer: #{e.message}")
+    rescue ResendEmailService::DeliveryError => e
+      Rails.logger.error("Resend delivery failed, falling back to ActionMailer: #{e.message}")
       send_via_action_mailer(action, reason)
     end
 
