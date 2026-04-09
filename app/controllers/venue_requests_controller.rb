@@ -4,7 +4,7 @@ class VenueRequestsController < ApplicationController
   before_action :require_admin_or_staff
   before_action :require_staff, only: [:new, :create]
   before_action :require_admin, only: [:approve, :reject]
-  before_action :set_venue_request, only: [:approve, :reject]
+  before_action :set_venue_request, only: [:show, :approve, :reject]
 
   def index
     base_scope = if current_user.admin?
@@ -22,6 +22,10 @@ class VenueRequestsController < ApplicationController
     @venue_request = VenueRequest.new
   end
 
+  def show
+    @return_status = status_filter_param
+  end
+
   def create
     @venue_request = VenueRequest.new(venue_request_params)
     @venue_request.requester = current_user
@@ -36,32 +40,32 @@ class VenueRequestsController < ApplicationController
 
   def approve
     unless @venue_request.pending?
-      redirect_to venue_requests_path, alert: "Only pending requests can be approved."
+      redirect_to venue_requests_path(status: status_filter_param), alert: "Only pending requests can be approved."
       return
     end
 
     @venue_request.approve!(current_user)
-    redirect_to venue_requests_path, notice: "Venue request approved for #{@venue_request.venue_name}. Venue has been created."
+    redirect_to venue_request_path(@venue_request, status: status_filter_param), notice: "Venue request approved for #{@venue_request.venue_name}. Venue has been created."
   rescue ActiveRecord::RecordInvalid => e
-    redirect_to venue_requests_path, alert: e.record.errors.full_messages.to_sentence.presence || "Venue request could not be approved."
+    redirect_to venue_requests_path(status: status_filter_param), alert: e.record.errors.full_messages.to_sentence.presence || "Venue request could not be approved."
   end
 
   def reject
     reason = params[:rejection_reason].to_s.strip
     if reason.blank?
-      redirect_to venue_requests_path, alert: "Rejection reason cannot be blank."
+      redirect_to venue_request_path(@venue_request, status: status_filter_param), alert: "Rejection reason cannot be blank."
       return
     end
 
     unless @venue_request.pending?
-      redirect_to venue_requests_path, alert: "Only pending requests can be rejected."
+      redirect_to venue_requests_path(status: status_filter_param), alert: "Only pending requests can be rejected."
       return
     end
 
     @venue_request.reject!(current_user, reason: reason)
-    redirect_to venue_requests_path, notice: "Venue request rejected for #{@venue_request.venue_name}. Reason: #{reason}"
+    redirect_to venue_request_path(@venue_request, status: status_filter_param), notice: "Venue request rejected."
   rescue ActiveRecord::RecordInvalid => e
-    redirect_to venue_requests_path, alert: e.record.errors.full_messages.to_sentence.presence || "Venue request could not be rejected."
+    redirect_to venue_requests_path(status: status_filter_param), alert: e.record.errors.full_messages.to_sentence.presence || "Venue request could not be rejected."
   end
 
   private
@@ -73,7 +77,9 @@ class VenueRequestsController < ApplicationController
   end
 
   def set_venue_request
-    @venue_request = VenueRequest.find(params[:id])
+    @venue_request = venue_request_scope.find(params.expect(:id))
+  rescue ActiveRecord::RecordNotFound
+    redirect_to venue_requests_path, alert: "You are not authorized to access this venue request."
   end
 
   def venue_request_params
@@ -109,5 +115,9 @@ class VenueRequestsController < ApplicationController
       "rejected" => scope.rejected.count,
       "all" => scope.count
     }
+  end
+
+  def venue_request_scope
+    current_user.admin? ? VenueRequest : VenueRequest.where(requester: current_user)
   end
 end

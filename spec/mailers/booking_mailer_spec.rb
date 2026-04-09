@@ -29,7 +29,7 @@ RSpec.describe BookingMailer, type: :mailer do
     end
 
     it "sends from the configured from address" do
-      expect(mail.from).to include(ENV.fetch("SENDGRID_FROM_EMAIL", "noreply@csci3100.tylerl.cyou"))
+      expect(mail.from).to include(ENV.fetch("RESEND_FROM_EMAIL", "noreply@csci3100.tylerl.cyou"))
     end
   end
 

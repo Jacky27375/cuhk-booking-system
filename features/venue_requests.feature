@@ -27,7 +27,8 @@ Feature: Venue Request Workflow
     And I am logged in as "admin@link.cuhk.edu.hk" with password "Password1!"
     When I visit the venue requests page
     Then I should see "Lab 201"
-    When I press "Approve"
+    When I click "View"
+    And I press "Approve"
     Then I should see "Venue request approved"
     And a venue named "Lab 201" should exist for "Chung Chi College"
 
@@ -35,10 +36,12 @@ Feature: Venue Request Workflow
     Given "staff@link.cuhk.edu.hk" has submitted a venue request for "Duplicate Room"
     And I am logged in as "admin@link.cuhk.edu.hk" with password "Password1!"
     When I visit the venue requests page
+    And I click "View"
     And I fill in "Rejection reason" with "Not needed"
     And I press "Reject"
     Then I should see "Venue request rejected"
-    And I should see "Reason: Not needed"
+    And I should see "Rejection Reason"
+    And I should see "Not needed"
 
   Scenario: Admin panel links directly to pending venue-request review
     Given "staff@link.cuhk.edu.hk" has submitted a venue request for "Lab 301"

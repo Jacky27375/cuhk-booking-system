@@ -14,6 +14,7 @@ RSpec.describe 'Admin access control', type: :request do
       expect(response.body).to include('Manage Users')
       expect(response.body).to include('Review Pending Requests')
       expect(response.body).to include('/venue_requests?status=pending')
+      expect(response.body).to include('/venue_requests?status=all')
     end
 
     it 'denies staff access and redirects to dashboard' do

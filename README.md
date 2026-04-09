@@ -160,7 +160,7 @@ Strict audit method for implemented features:
 
 | Analytics Dashboard & Utilization Reporting | Sam (80.8%), Jacky (19.2%) | Analytics controller/views, chart rendering, trend/date filtering, and request/BDD coverage. |
 
-| API v1 + SendGrid Email Integration | Joe (RiskyPork) (95.7%), Jacky (4.3%) | API-key auth, v1 endpoints, SendGrid delivery service wiring, and related specs. |
+| API v1 + Resend Email Integration | Joe (RiskyPork) (95.7%), Jacky (4.3%) | API-key auth, v1 endpoints, Resend delivery service wiring, and related specs. |
 
 | Resource Table Sorting & Query Optimization | Jacky (54.5%), Sam (16.5%), Joe (RiskyPork) (16.2%), Tyler (12.8%) | Sortable listings for bookings/venues/equipment and Arel-based sorting refactor. |
 

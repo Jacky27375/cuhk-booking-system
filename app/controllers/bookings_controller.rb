@@ -247,17 +247,13 @@ class BookingsController < ApplicationController
         return
       end
 
-      sent = if action == :approved
+      if action == :approved
         ResendEmailService.send_booking_approved(@booking)
       elsif action == :rejected
         ResendEmailService.send_booking_rejected(@booking, reason: reason)
       end
-
-      # Fall back to ActionMailer when Resend is not configured or fails
-      send_via_action_mailer(action, reason) unless sent
     rescue ResendEmailService::DeliveryError => e
-      Rails.logger.error("Resend delivery failed, falling back to ActionMailer: #{e.message}")
-      send_via_action_mailer(action, reason)
+      Rails.logger.error("Resend delivery failed for booking notification: #{e.message}")
     end
 
     def send_via_action_mailer(action, reason)

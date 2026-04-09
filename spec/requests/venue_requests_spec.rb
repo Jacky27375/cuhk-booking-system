@@ -27,7 +27,7 @@ RSpec.describe 'Venue Requests', type: :request do
       expect(response.body).not_to include('Approved Room')
       expect(response.body).to include('Reviewed By')
       expect(response.body).to include('Reviewed At')
-      expect(response.body).to include('Rejection Reason')
+      expect(response.body).to include('View')
     end
 
     it 'denies student access' do
@@ -55,13 +55,59 @@ RSpec.describe 'Venue Requests', type: :request do
       expect(response.body.index('Pending Room')).to be < response.body.index('Approved Room')
     end
 
-    it 'shows rejected requests and reasons when status=rejected' do
+    it 'shows rejected requests without exposing rejection reasons in the list' do
       get venue_requests_path, params: { status: 'rejected' }
 
       expect(response).to be_successful
+      rejected_request = VenueRequest.find_by!(venue_name: 'Rejected Room')
       expect(response.body).to include('Rejected Room')
-      expect(response.body).to include('Duplicate')
+      expect(response.body).not_to include('Duplicate')
       expect(response.body).not_to include('Pending Room')
+      expect(response.body).to include(venue_request_path(rejected_request, status: 'rejected'))
+    end
+  end
+
+  describe 'GET /venue_requests/:id' do
+    let!(:venue_request) do
+      create(
+        :venue_request,
+        requester: staff_user,
+        tenant: tenant,
+        status: :rejected,
+        reviewed_by: admin_user,
+        reviewed_at: Time.current,
+        rejection_reason: 'Duplicate'
+      )
+    end
+
+    it 'shows rejection reason on detail page for admin' do
+      log_in_as(admin_user)
+      get venue_request_path(venue_request), params: { status: 'rejected' }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Venue Request Details')
+      expect(response.body).to include('Rejection Reason')
+      expect(response.body).to include('Duplicate')
+      expect(response.body).to include(venue_requests_path(status: 'rejected'))
+    end
+
+    it 'allows requester to view their own request' do
+      log_in_as(staff_user)
+      get venue_request_path(venue_request), params: { status: 'all' }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Venue Request Details')
+      expect(response.body).to include('Duplicate')
+      expect(response.body).to include(venue_requests_path(status: 'all'))
+    end
+
+    it 'blocks other staff from viewing the request' do
+      other_staff = create(:user, :staff, tenant: create(:tenant))
+      log_in_as(other_staff)
+      get venue_request_path(venue_request)
+
+      expect(response).to redirect_to(venue_requests_path)
+      expect(flash[:alert]).to eq('You are not authorized to access this venue request.')
     end
   end
 
@@ -101,13 +147,13 @@ RSpec.describe 'Venue Requests', type: :request do
       log_in_as(admin_user)
 
       expect {
-        patch approve_venue_request_path(venue_request)
+        patch approve_venue_request_path(venue_request), params: { status: 'pending' }
       }.to change(Venue, :count).by(1)
 
       venue_request.reload
       expect(venue_request.approved?).to be(true)
       expect(venue_request.reviewed_by).to eq(admin_user)
-      expect(response).to redirect_to(venue_requests_path)
+      expect(response).to redirect_to(venue_request_path(venue_request, status: 'pending'))
       expect(flash[:notice]).to eq("Venue request approved for #{venue_request.venue_name}. Venue has been created.")
     end
 
@@ -123,14 +169,14 @@ RSpec.describe 'Venue Requests', type: :request do
 
     it 'does not re-approve an already reviewed request' do
       log_in_as(admin_user)
-      patch approve_venue_request_path(venue_request)
+      patch approve_venue_request_path(venue_request), params: { status: 'pending' }
       venue_request.reload
 
       expect {
-        patch approve_venue_request_path(venue_request)
+        patch approve_venue_request_path(venue_request), params: { status: 'pending' }
       }.not_to change(Venue, :count)
 
-      expect(response).to redirect_to(venue_requests_path)
+      expect(response).to redirect_to(venue_requests_path(status: 'pending'))
       expect(flash[:alert]).to eq('Only pending requests can be approved.')
     end
   end
@@ -140,21 +186,21 @@ RSpec.describe 'Venue Requests', type: :request do
 
     it 'allows admin to reject with reason' do
       log_in_as(admin_user)
-      patch reject_venue_request_path(venue_request), params: { rejection_reason: 'Not needed' }
+      patch reject_venue_request_path(venue_request), params: { rejection_reason: 'Not needed', status: 'pending' }
 
       venue_request.reload
       expect(venue_request.rejected?).to be(true)
       expect(venue_request.rejection_reason).to eq('Not needed')
-      expect(response).to redirect_to(venue_requests_path)
-      expect(flash[:notice]).to eq("Venue request rejected for #{venue_request.venue_name}. Reason: Not needed")
+      expect(response).to redirect_to(venue_request_path(venue_request, status: 'pending'))
+      expect(flash[:notice]).to eq('Venue request rejected.')
     end
 
     it 'requires a rejection reason' do
       log_in_as(admin_user)
 
-      patch reject_venue_request_path(venue_request), params: { rejection_reason: '   ' }
+      patch reject_venue_request_path(venue_request), params: { rejection_reason: '   ', status: 'pending' }
 
-      expect(response).to redirect_to(venue_requests_path)
+      expect(response).to redirect_to(venue_request_path(venue_request, status: 'pending'))
       expect(flash[:alert]).to eq('Rejection reason cannot be blank.')
       expect(venue_request.reload.status).to eq('pending')
     end
