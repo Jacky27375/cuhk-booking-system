@@ -77,6 +77,7 @@ class RegistrationsController < ApplicationController
       SignupVerificationService.consume_code!(email: @pending_email)
       clear_pending_signup
       reset_session
+      session[:active_session_token] = @user.issue_active_session_token!
       session[:user_id] = @user.id
       redirect_to dashboard_path, notice: "Account created successfully."
     else
