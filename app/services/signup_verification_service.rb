@@ -80,8 +80,13 @@ class SignupVerificationService
       record.resend_count = resend && record.persisted? ? record.resend_count + 1 : 0
       record.save!
 
-      SignupVerificationMailer.with(email: normalized_email, code: code).verification_code.deliver_now
+      delivery = ResendEmailService.send_signup_verification_code(email: normalized_email, code: code)
+      return IssueResult.new(status: :delivery_unavailable) unless delivery
+
       IssueResult.new(status: :sent)
+    rescue ResendEmailService::DeliveryError => e
+      Rails.logger.error("[SignupVerification] Code delivery failed: #{e.message}")
+      IssueResult.new(status: :delivery_failed)
     end
 
     def generate_code

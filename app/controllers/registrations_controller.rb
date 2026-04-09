@@ -40,6 +40,12 @@ class RegistrationsController < ApplicationController
         redirect_to signup_verify_path, notice: "Verification code sent to #{@user.email}."
       when :cooldown
         redirect_to signup_verify_path, alert: "A code was sent recently. Please wait #{issue_result.cooldown_seconds} second(s) before requesting another one."
+      when :delivery_unavailable
+        flash.now[:alert] = "Verification email is unavailable right now. Please try again later."
+        render :new, status: :service_unavailable
+      when :delivery_failed
+        flash.now[:alert] = "Verification email could not be delivered. Please try again."
+        render :new, status: :unprocessable_content
       else
         flash.now[:alert] = "Verification code could not be sent. Please try again."
         render :new, status: :unprocessable_content
@@ -89,6 +95,10 @@ class RegistrationsController < ApplicationController
       redirect_to signup_verify_path, alert: "Please wait #{issue_result.cooldown_seconds} second(s) before requesting another code."
     when :resend_limit
       redirect_to signup_verify_path, alert: "Resend limit reached. Use the latest code in your inbox."
+    when :delivery_unavailable
+      redirect_to signup_verify_path, alert: "Verification email is unavailable right now. Please try again later."
+    when :delivery_failed
+      redirect_to signup_verify_path, alert: "Verification email could not be delivered. Please try again."
     else
       clear_pending_signup
       redirect_to signup_path, alert: "Verification session expired. Please sign up again."

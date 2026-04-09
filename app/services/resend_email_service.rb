@@ -1,9 +1,10 @@
 # Service wrapper for sending emails via the Resend API.
-# Used for booking notification emails (approval/rejection).
+# Used for booking notifications and signup verification delivery.
 #
 # Usage:
 #   ResendEmailService.send_booking_approved(booking)
 #   ResendEmailService.send_booking_rejected(booking, reason: "Conflict")
+#   ResendEmailService.send_signup_verification_code(email: "user@link.cuhk.edu.hk", code: "123456")
 #
 class ResendEmailService
   class DeliveryError < StandardError; end
@@ -24,10 +25,21 @@ class ResendEmailService
       send_email(to: booking.user.email, subject: subject, html_content: body)
     end
 
+    def send_signup_verification_code(email:, code:)
+      # Keep deterministic local/test verification flows without external API calls.
+      if Rails.env.test?
+        return SignupVerificationMailer.with(email:, code:).verification_code.deliver_now
+      end
+
+      subject = "Your CUHK signup verification code"
+      body = signup_verification_email_body(code)
+      send_email(to: email, subject:, html_content: body)
+    end
+
     def send_email(to:, subject:, html_content:)
       api_key = ENV["RESEND_API_KEY"]
       unless api_key.present?
-        Rails.logger.warn("[Resend] RESEND_API_KEY not set — falling back to ActionMailer")
+        Rails.logger.warn("[Resend] RESEND_API_KEY not set — email not sent")
         return nil
       end
 
@@ -82,6 +94,16 @@ class ResendEmailService
         <p><strong>Reason:</strong> #{reason_text}</p>
         #{booking_details_html(booking)}
         <p>Please contact the facility administrator if you have questions.</p>
+      HTML
+    end
+
+    def signup_verification_email_body(code)
+      <<~HTML
+        <p>Hello,</p>
+        <p>Your CUHK Booking System signup verification code is:</p>
+        <p><strong style="font-size: 1.5rem; letter-spacing: 0.12em;">#{code}</strong></p>
+        <p>This code will expire in 10 minutes.</p>
+        <p>If you did not request this, you can ignore this email.</p>
       HTML
     end
 
