@@ -5,7 +5,8 @@ class SessionsController < ApplicationController
   end
 
   def create
-    email = params[:email].to_s.strip.downcase
+    email_input = params[:email_local_part].presence || params[:email]
+    email = User.canonicalize_cuhk_email(email_input)
     user = User.find_by(email: email)
 
     if user&.authenticate(params[:password])
