@@ -63,6 +63,17 @@ RSpec.describe "/venues", type: :request do
       get venues_url
       expect(response.body.index("Alpha Room")).to be < response.body.index("Zulu Room")
     end
+
+    it "shows root staff a request-new-venue action instead of direct creation" do
+      root_staff = create(:user, :root_account, tenant: new_asia_tenant)
+      log_in_as(root_staff)
+
+      get venues_url
+
+      expect(response).to be_successful
+      expect(response.body).to include("Request New Venue")
+      expect(response.body).not_to include(">New Venue<")
+    end
   end
 
   describe "GET /show" do
@@ -100,6 +111,16 @@ RSpec.describe "/venues", type: :request do
       option_texts = Nokogiri::HTML(response.body).css('select#venue_department option').map(&:text)
       expect(option_texts).to eq(['New Asia College'])
     end
+
+    it "redirects root staff to venue request form" do
+      root_staff = create(:user, :root_account, tenant: new_asia_tenant)
+      log_in_as(root_staff)
+
+      get new_venue_url
+
+      expect(response).to redirect_to(new_venue_request_path)
+      expect(flash[:alert]).to eq("Root staff must submit a venue request to add new venues.")
+    end
   end
 
   describe "GET /edit" do
@@ -136,6 +157,20 @@ RSpec.describe "/venues", type: :request do
         venue = Venue.last
         expect(venue.department).to eq('New Asia College')
         expect(venue.tenant).to eq(new_asia_tenant)
+      end
+    end
+
+    context "when root staff tries to create a venue directly" do
+      it "redirects to venue request flow and does not create a venue" do
+        root_staff = create(:user, :root_account, tenant: new_asia_tenant)
+        log_in_as(root_staff)
+
+        expect {
+          post venues_url, params: { venue: { name: 'Root Staff Hall', description: 'Room', department: 'New Asia College' } }
+        }.not_to change(Venue, :count)
+
+        expect(response).to redirect_to(new_venue_request_path)
+        expect(flash[:alert]).to eq("Root staff must submit a venue request to add new venues.")
       end
     end
 

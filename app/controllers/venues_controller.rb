@@ -2,6 +2,7 @@ class VenuesController < ApplicationController
   before_action :set_venue, only: %i[show edit update destroy]
   before_action :require_admin_or_staff, only: %i[new create edit update destroy]
   before_action :ensure_tenant_present_for_manage!, only: %i[new create edit update destroy]
+  before_action :redirect_root_staff_venue_creation_to_requests!, only: %i[new create]
   before_action :prepare_form_options, only: %i[new create edit update]
 
   # GET /venues or /venues.json
@@ -85,6 +86,12 @@ class VenuesController < ApplicationController
       return if current_user.admin? || current_user.tenant.present?
 
       redirect_to venues_path, alert: "Your account is not linked to a tenant."
+    end
+
+    def redirect_root_staff_venue_creation_to_requests!
+      return unless current_user&.root_staff_account?
+
+      redirect_to new_venue_request_path, alert: "Root staff must submit a venue request to add new venues."
     end
 
     def prepare_form_options
