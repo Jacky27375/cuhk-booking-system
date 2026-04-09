@@ -302,9 +302,9 @@ class BookingsController < ApplicationController
       return Date.parse(booking_date_param) if booking_date_param.present?
       return @booking.start_time.to_date if @booking.start_time.present?
 
-      Time.zone.today
+      5.days.from_now.to_date
     rescue ArgumentError
-      Time.zone.today
+      5.days.from_now.to_date
     end
 
     def selected_venue_id
