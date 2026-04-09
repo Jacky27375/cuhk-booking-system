@@ -1,0 +1,53 @@
+<% content_for :title, "User Management" %>
+<% content_for(:page_title, "User Management") %>
+
+<div class="page-actions">
+  <p class="text-muted text-sm"><%= @users.size %> account(s)</p>
+</div>
+
+<div class="card">
+  <table class="resource-grid-table" style="margin:0; border:none; box-shadow:none;">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Role</th>
+        <th>College</th>
+        <th>Root Staff</th>
+        <th>Created</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @users.each do |user| %>
+        <tr>
+          <td><strong><%= user.email %></strong></td>
+          <td><span class="badge badge-role"><%= user.role.humanize %></span></td>
+          <td><%= user.tenant&.name || "-" %></td>
+          <td><%= user.root_staff_account? ? "Yes" : "No" %></td>
+          <td class="text-muted"><%= user.created_at.strftime("%Y-%m-%d") %></td>
+          <td>
+            <div class="btn-group">
+              <% if user.root_staff_account? %>
+                <%= button_to "Reset Root Password",
+                              reset_root_staff_password_admin_user_path(user),
+                              method: :patch,
+                              class: "btn btn-secondary btn-sm",
+                              data: { turbo_confirm: "Generate a new temporary password for #{user.email}?" } %>
+              <% end %>
+
+              <% if user.deletable_by_admin?(current_user) %>
+                <%= button_to "Delete Account",
+                              admin_user_path(user),
+                              method: :delete,
+                              class: "btn btn-danger btn-sm",
+                              data: { turbo_confirm: "Delete #{user.email}?" } %>
+              <% else %>
+                <span class="text-muted text-sm">Protected</span>
+              <% end %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

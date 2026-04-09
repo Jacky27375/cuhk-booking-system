@@ -2,6 +2,8 @@ class AdminController < ApplicationController
   before_action :require_admin
 
   def show
+    @pending_venue_request_count = VenueRequest.pending.count
+    @root_staff_account_count = User.staff.root_accounts.count
   end
 
   private
