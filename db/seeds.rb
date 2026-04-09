@@ -215,11 +215,13 @@ equipments = [
   { name: "Lee Woo Sing College - Basic Sound System", quantity: 6, tenant: "Lee Woo Sing College" }
 ]
 
-bootstrap_password = ENV["BOOTSTRAP_ACCOUNT_PASSWORD"].presence || "Password1!"
+bootstrap_password = ENV["BOOTSTRAP_ACCOUNT_PASSWORD"]
 
-if Rails.env.production? && bootstrap_password == "Password1!"
-  puts "BOOTSTRAP_ACCOUNT_PASSWORD is not set; using the default bootstrap password."
+if Rails.env.production? && bootstrap_password.blank?
+  raise "BOOTSTRAP_ACCOUNT_PASSWORD must be set in production."
 end
+
+bootstrap_password = bootstrap_password.presence || "Password1!"
 
 puts "Ensuring tenants..."
 

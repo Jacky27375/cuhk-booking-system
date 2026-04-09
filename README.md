@@ -120,7 +120,7 @@ The deploy workflow runs automatically after `CI` succeeds on `main`, and can al
 | `RAILS_MASTER_KEY` | Content of `config/master.key` |
 | `POSTGRES_PASSWORD` | Password for the production Postgres container |
 | `SECRET_KEY_BASE` | Required (`openssl rand -hex 64`) |
-| `BOOTSTRAP_ACCOUNT_PASSWORD` | Optional but recommended. Password used when bootstrap admin/root accounts are first created in production. Defaults to `Password1!` if unset. |
+| `BOOTSTRAP_ACCOUNT_PASSWORD` | **Required for production deploys.** Password used when bootstrap admin/root accounts are first created in production. Deploy fails if unset. |
 
 ### 2. Deploy
 

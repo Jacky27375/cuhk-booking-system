@@ -75,6 +75,7 @@ jobs:
           : "${RAILS_MASTER_KEY:?Set RAILS_MASTER_KEY in repository secrets.}"
           : "${SECRET_KEY_BASE:?Set SECRET_KEY_BASE in repository secrets.}"
           : "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in repository secrets.}"
+          : "${BOOTSTRAP_ACCOUNT_PASSWORD:?Set BOOTSTRAP_ACCOUNT_PASSWORD in repository secrets.}"
 
           {
             printf '%s\n' "RAILS_ENV=production"
