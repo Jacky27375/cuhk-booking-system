@@ -21,8 +21,8 @@ module Api
       end
 
       def create
-        unless current_api_user.society_member?
-          render json: { error: "Forbidden", details: ["Only society members can create bookings."] }, status: :forbidden
+        unless current_api_user.student?
+          render json: { error: "Forbidden", details: ["Only students can create bookings."] }, status: :forbidden
           return
         end
 

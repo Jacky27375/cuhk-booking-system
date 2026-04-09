@@ -3,7 +3,7 @@ FactoryBot.define do
     sequence(:email) { |n| "user#{n}@link.cuhk.edu.hk" }
     password { "Password1!" }
     password_confirmation { "Password1!" }
-    role { :society_member }
+    role { :student }
 
     trait :admin do
       role { :admin }
@@ -13,8 +13,14 @@ FactoryBot.define do
       role { :staff }
     end
 
-    trait :society_member do
-      role { :society_member }
+    trait :student do
+      role { :student }
+    end
+
+    trait :root_account do
+      role { :staff }
+      is_root_account { true }
+      association :tenant
     end
 
     trait :with_tenant do

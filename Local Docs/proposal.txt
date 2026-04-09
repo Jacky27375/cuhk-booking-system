@@ -1,0 +1,12 @@
+2.	Selected Topic
+Option A: CUHK Venue & Equipment Booking SaaS – A multi-tenant booking platform enabling CUHK student societies to reserve rooms and equipment from various Colleges and Departments.
+3.	Pain Points
+Currently, venue and equipment booking at CUHK is fragmented across departments, relying on email chains, spreadsheets, or manual sign-up sheets. This leads to double-bookings, lack of transparency on availability, slow approval cycles, and no unified view for student societies managing multiple resource types across different colleges. There is no central system to enforce booking policies or track utilisation.
+4.	Solution Overview
+We will build a Ruby on Rails 8.1.2 SaaS application served by Puma and using SQLite3 for persistence. The app uses the Rails default modern stack—Propshaft for assets, Importmap with Hotwire (Turbo + Stimulus) for interactive, SPA-like navigation—and provides JSON responses where needed via Jbuilder. Each Department or College operates as an independent tenant with its own venues/equipment pool, booking rules, and approval workflow configuration; all tenants share the same codebase while tenant data remains isolated by the application’s multi-tenant design. Student societies authenticate with role-based accounts (Admin/Staff/Society Member) and submit booking requests through a calendar-driven interface. The system performs conflict checks to prevent double-booking and routes requests through the configured approval workflow before confirming reservations. Background processing, caching, and real-time features are supported using Solid Queue, Solid Cache, and Solid Cable. The application is intended to be deployable using Kamal.
+5.	Planned Advanced Features (N1 = 3)
+Feature 1: External API
+Feature 2: Real-time
+Feature 3: Analytics
+6.	Technical Stack
+Framework: Ruby on Rails 8.1.2 | Database: SQLite3 | Web Server: Puma |Testing: RSpec (unit) & Cucumber (BDD) via GitHub Actions | Deployment: Kam | Version Control: GitHub

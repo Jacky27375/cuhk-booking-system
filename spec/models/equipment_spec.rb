@@ -45,7 +45,7 @@ RSpec.describe Equipment, type: :model do
     let!(:shaw_equipment) { Equipment.create!(name: 'Shaw Camera', quantity: 2, tenant: shaw_tenant) }
     let!(:na_equipment) { Equipment.create!(name: 'NA Mic', quantity: 2, tenant: na_tenant) }
 
-    let(:shaw_student) { User.create!(email: "stu.#{Time.now.to_i}@link.cuhk.edu.hk", password: 'Password1!', password_confirmation: 'Password1!', role: :society_member, tenant: shaw_tenant) }
+    let(:shaw_student) { User.create!(email: "stu.#{Time.now.to_i}@link.cuhk.edu.hk", password: 'Password1!', password_confirmation: 'Password1!', role: :student, tenant: shaw_tenant) }
 
     it 'returns equipment for the users college and university shared equipment only' do
       equipments = Equipment.visible_to_student(shaw_student)

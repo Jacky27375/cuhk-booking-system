@@ -9,7 +9,7 @@ Feature: Analytics Dashboard
       | email                    | password   | role           |
       | admin@link.cuhk.edu.hk  | Password1! | admin          |
       | staff@link.cuhk.edu.hk  | Password1! | staff          |
-      | member@link.cuhk.edu.hk | Password1! | society_member |
+      | member@link.cuhk.edu.hk | Password1! | student |
 
   Scenario: Admin can access analytics dashboard
     Given I am logged in as "admin@link.cuhk.edu.hk" with password "Password1!"

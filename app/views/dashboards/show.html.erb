@@ -3,7 +3,7 @@
 <p class="text-muted mb-2">Welcome back, <strong><%= current_user.email %></strong> &mdash; <span class="badge badge-role"><%= current_user.role.humanize.titleize %></span></p>
 
 <div class="dashboard-grid">
-  <% if current_user.society_member? %>
+  <% if current_user.student? %>
     <div class="dash-card">
       <div class="dash-icon">&#128203;</div>
       <h3>My Bookings</h3>
@@ -26,7 +26,7 @@
     <%= link_to "View Equipment &rarr;".html_safe, equipments_path %>
   </div>
 
-  <% unless current_user.society_member? %>
+  <% unless current_user.student? %>
     <div class="dash-card">
       <div class="dash-icon">&#128197;</div>
       <h3>All Bookings</h3>

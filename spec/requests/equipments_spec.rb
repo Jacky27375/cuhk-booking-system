@@ -6,7 +6,7 @@ RSpec.describe 'Equipments', type: :request do
 
   let!(:staff_user) { create(:user, :staff, tenant: tenant_a) }
   let!(:admin_user) { create(:user, :admin, tenant: tenant_a) }
-  let!(:member_user) { create(:user, :society_member, tenant: tenant_a) }
+  let!(:member_user) { create(:user, :student, tenant: tenant_a) }
 
   let!(:tenant_a_equipment) { create(:equipment, tenant: tenant_a, name: 'Projector', quantity: 5) }
   let!(:tenant_b_equipment) { create(:equipment, tenant: tenant_b, name: 'Speaker', quantity: 3) }

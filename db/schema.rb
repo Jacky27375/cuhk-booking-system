@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_06_010002) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_09_000003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -46,7 +46,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_010002) do
     t.date "end_date"
     t.datetime "end_time"
     t.bigint "equipment_id"
-    t.integer "quantity"
+    t.integer "quantity", default: 0
     t.text "rejection_reason"
     t.date "start_date"
     t.datetime "start_time"
@@ -90,14 +90,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_010002) do
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", null: false
+    t.boolean "is_root_account", default: false, null: false
     t.string "password_digest", null: false
     t.integer "role", default: 0, null: false
-    t.bigint "society_id"
-    t.bigint "tenant_id"
+    t.integer "society_id"
+    t.integer "tenant_id"
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["society_id"], name: "index_users_on_society_id"
     t.index ["tenant_id"], name: "index_users_on_tenant_id"
+  end
+
+  create_table "venue_requests", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.text "rejection_reason"
+    t.bigint "requester_id", null: false
+    t.datetime "reviewed_at"
+    t.bigint "reviewed_by_id"
+    t.integer "status", default: 0, null: false
+    t.bigint "tenant_id", null: false
+    t.datetime "updated_at", null: false
+    t.string "venue_name", null: false
+    t.index ["requester_id"], name: "index_venue_requests_on_requester_id"
+    t.index ["reviewed_by_id"], name: "index_venue_requests_on_reviewed_by_id"
+    t.index ["tenant_id"], name: "index_venue_requests_on_tenant_id"
   end
 
   create_table "venues", force: :cascade do |t|
@@ -119,5 +136,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_010002) do
   add_foreign_key "equipment", "tenants"
   add_foreign_key "users", "societies"
   add_foreign_key "users", "tenants"
+  add_foreign_key "venue_requests", "tenants"
+  add_foreign_key "venue_requests", "users", column: "requester_id"
+  add_foreign_key "venue_requests", "users", column: "reviewed_by_id"
   add_foreign_key "venues", "tenants"
 end

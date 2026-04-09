@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe 'Admin access control', type: :request do
   let!(:admin)  { create(:user, :admin) }
   let!(:staff)  { create(:user, :staff) }
-  let!(:member) { create(:user, :society_member) }
+  let!(:member) { create(:user, :student) }
 
   describe 'GET /admin' do
     it 'allows admin access' do

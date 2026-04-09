@@ -4,8 +4,8 @@ Feature: Booking timetable and conflict prevention
 
   Background:
     Given there is a tenant "University"
-    And there is a user "member@link.cuhk.edu.hk" with role "society_member"
-    And there is a user "other@link.cuhk.edu.hk" with role "society_member"
+    And there is a user "member@link.cuhk.edu.hk" with role "student"
+    And there is a user "other@link.cuhk.edu.hk" with role "student"
     And there is a venue "Lecture Hall A"
 
   Scenario: Timetable shows booked and available slots for selected date

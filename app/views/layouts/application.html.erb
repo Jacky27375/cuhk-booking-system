@@ -39,7 +39,7 @@
             <div class="sidebar-section">Main</div>
             <%= nav_link "Dashboard", dashboard_path, icon: "\u{1F3E0}", controllers: %w[dashboards] %>
 
-            <% if current_user.society_member? %>
+            <% if current_user.student? %>
               <%= nav_link "My Bookings", my_bookings_path, icon: "\u{1F4CB}", controllers: [] %>
             <% end %>
 
@@ -47,10 +47,14 @@
             <%= nav_link "Venues", venues_path, icon: "\u{1F3DB}", controllers: %w[venues] %>
             <%= nav_link "Equipment", equipments_path, icon: "\u{1F527}", controllers: %w[equipments] %>
 
-            <% unless current_user.society_member? %>
+            <% unless current_user.student? %>
               <div class="sidebar-section">Management</div>
               <%= nav_link "All Bookings", bookings_path, icon: "\u{1F4C5}", controllers: %w[bookings] %>
               <%= nav_link "Approvals", approval_dashboard_path, icon: "\u2705", controllers: [] %>
+              <%= nav_link "Venue Requests", venue_requests_path, icon: "\u{1F3D7}", controllers: %w[venue_requests] %>
+              <% if current_user.staff? && current_user.root_account? %>
+                <%= nav_link "Staff Accounts", staff_accounts_path, icon: "\u{1F465}", controllers: %w[staff_accounts] %>
+              <% end %>
             <% end %>
 
             <% if current_user.admin? || current_user.staff? %>

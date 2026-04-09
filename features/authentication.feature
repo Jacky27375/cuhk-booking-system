@@ -8,7 +8,7 @@ Feature: User Authentication
       | email              | password   | role           |
       | admin@link.cuhk.edu.hk  | Password1! | admin          |
       | staff@link.cuhk.edu.hk  | Password1! | staff          |
-      | member@link.cuhk.edu.hk | Password1! | society_member |
+      | member@link.cuhk.edu.hk | Password1! | student |
 
   Scenario: Successful login as admin
     Given I am on the login page
@@ -26,13 +26,13 @@ Feature: User Authentication
     Then I should see "Dashboard"
     And I should see "Staff"
 
-  Scenario: Successful login as society member
+  Scenario: Successful login as student
     Given I am on the login page
     When I fill in "Email" with "member@link.cuhk.edu.hk"
     And I fill in "Password" with "Password1!"
     And I press "Sign In"
     Then I should see "Dashboard"
-    And I should see "Society Member"
+    And I should see "Student"
 
   Scenario: Failed login with incorrect password
     Given I am on the login page

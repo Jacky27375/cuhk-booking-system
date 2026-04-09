@@ -37,6 +37,12 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def require_root_account
+    unless current_user&.staff? && current_user&.root_account?
+      redirect_to dashboard_path, alert: "You are not authorized to perform this action."
+    end
+  end
+
   def current_user_department
     current_user&.tenant&.name
   end

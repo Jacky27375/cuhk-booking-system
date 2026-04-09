@@ -13,6 +13,15 @@ Rails.application.routes.draw do
   get "admin",     to: "admin#show"
   get "analytics", to: "analytics#show"
 
+  resources :staff_accounts, only: [:index, :new, :create]
+
+  resources :venue_requests, only: [:index, :new, :create] do
+    member do
+      patch :approve
+      patch :reject
+    end
+  end
+
   resources :bookings do
     member do
       patch :approve
