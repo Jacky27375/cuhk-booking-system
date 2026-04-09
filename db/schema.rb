@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_09_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_09_000004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -88,6 +88,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_000003) do
   end
 
   create_table "users", force: :cascade do |t|
+    t.string "college_scope_slug"
     t.datetime "created_at", null: false
     t.string "email", null: false
     t.boolean "is_root_account", default: false, null: false
@@ -96,6 +97,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_000003) do
     t.integer "society_id"
     t.integer "tenant_id"
     t.datetime "updated_at", null: false
+    t.index ["college_scope_slug"], name: "index_users_on_college_scope_slug"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["society_id"], name: "index_users_on_society_id"
     t.index ["tenant_id"], name: "index_users_on_tenant_id"
