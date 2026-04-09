@@ -91,6 +91,23 @@ RSpec.describe ResendEmailService do
   end
 
   describe ".send_email" do
+    context "when API returns an HTTParty response payload" do
+      let(:response) { double("HTTParty::Response", parsed_response: { id: "email_789" }) }
+
+      before do
+        allow(ENV).to receive(:[]).and_call_original
+        allow(ENV).to receive(:[]).with("RESEND_API_KEY").and_return("re_test_key")
+        allow(ENV).to receive(:fetch).and_call_original
+
+        allow(Resend::Emails).to receive(:send).and_return(response)
+      end
+
+      it "treats symbol-key id responses as success" do
+        result = described_class.send_email(to: "test@link.cuhk.edu.hk", subject: "Test", html_content: "<p>Test</p>")
+        expect(result).to eq(response)
+      end
+    end
+
     context "when API returns an error" do
       before do
         allow(ENV).to receive(:[]).and_call_original

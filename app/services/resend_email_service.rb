@@ -54,9 +54,10 @@ class ResendEmailService
       }
 
       response = Resend::Emails.send(params)
+      response_id = extract_response_id(response)
 
-      if response.is_a?(Hash) && response["id"].present?
-        Rails.logger.info("[Resend] Email sent to #{recipient}: #{subject} (id: #{response['id']})")
+      if response_id.present?
+        Rails.logger.info("[Resend] Email sent to #{recipient}: #{subject} (id: #{response_id})")
       else
         Rails.logger.error("[Resend] Email delivery failed: #{response.inspect}")
         raise DeliveryError, "Resend API error: #{response.inspect}"
@@ -105,6 +106,18 @@ class ResendEmailService
         <p>This code will expire in 10 minutes.</p>
         <p>If you did not request this, you can ignore this email.</p>
       HTML
+    end
+
+    def extract_response_id(response)
+      payload = if response.respond_to?(:parsed_response)
+        response.parsed_response
+      else
+        response
+      end
+
+      return payload["id"] || payload[:id] if payload.is_a?(Hash)
+
+      nil
     end
 
     def booking_details_html(booking)
