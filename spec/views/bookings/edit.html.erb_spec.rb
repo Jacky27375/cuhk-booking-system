@@ -30,5 +30,7 @@ RSpec.describe "bookings/edit", type: :view do
       assert_select "select[name=?]", "booking[start_slot]"
       assert_select "select[name=?]", "booking[end_slot]"
     end
+
+    expect(rendered).to include("End time must be later than start time.")
   end
 end

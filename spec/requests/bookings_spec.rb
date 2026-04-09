@@ -203,6 +203,24 @@ RSpec.describe "/bookings", type: :request do
         expect(response.body).not_to include("error prohibited this booking from being saved")
       end
 
+      it "rejects start/end slot ranges where end is earlier than start" do
+        booking_date = 5.days.from_now.to_date
+
+        expect {
+          post bookings_url, params: {
+            booking: {
+              venue_id: venue.id,
+              booking_date: booking_date.to_s,
+              start_slot: "12:00",
+              end_slot: "10:00"
+            }
+          }
+        }.not_to change(Booking, :count)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include("End time must be after start time")
+      end
+
       it "rejects direct submission with booking_date inside the 5-day lead time" do
         too_soon_date = 4.days.from_now.to_date
 
@@ -225,6 +243,24 @@ RSpec.describe "/bookings", type: :request do
         post bookings_url, params: { booking: invalid_attributes }
         expect(response).to have_http_status(:unprocessable_content)
       end
+    end
+  end
+
+  describe "POST /confirm" do
+    it "shows the same validation error when end slot is earlier than start slot" do
+      booking_date = 5.days.from_now.to_date
+
+      post confirm_bookings_url, params: {
+        booking: {
+          venue_id: venue.id,
+          booking_date: booking_date.to_s,
+          start_slot: "14:00",
+          end_slot: "13:00"
+        }
+      }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include("End time must be after start time")
     end
   end
 
