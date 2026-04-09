@@ -126,6 +126,17 @@ RSpec.describe "/bookings", type: :request do
       get new_booking_url
       expect(response).to be_successful
     end
+
+    it "enforces a minimum booking date in the planner input" do
+      requested_date = 2.days.from_now.to_date
+      minimum_date = 5.days.from_now.to_date
+
+      get new_booking_url, params: { venue_id: venue.id, booking_date: requested_date.to_s }
+
+      expect(response).to be_successful
+      expect(response.body).to match(/name="booking_date"[^>]*min="#{minimum_date}"/)
+      expect(response.body).to match(/name="booking_date"[^>]*value="#{minimum_date}"/)
+    end
   end
 
   describe "GET /edit" do
@@ -190,6 +201,24 @@ RSpec.describe "/bookings", type: :request do
 
         expect(response.body).to include("End time must be after start time")
         expect(response.body).not_to include("error prohibited this booking from being saved")
+      end
+
+      it "rejects direct submission with booking_date inside the 5-day lead time" do
+        too_soon_date = 4.days.from_now.to_date
+
+        expect {
+          post bookings_url, params: {
+            booking: {
+              venue_id: venue.id,
+              booking_date: too_soon_date.to_s,
+              start_slot: "10:00",
+              end_slot: "12:00"
+            }
+          }
+        }.not_to change(Booking, :count)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include("Venue must be booked at least 5 days in advance")
       end
 
       it "renders a response with 422 status (i.e. to display the 'new' template)" do

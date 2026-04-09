@@ -16,6 +16,7 @@ RSpec.describe "bookings/edit", type: :view do
 
   before(:each) do
     assign(:booking_date, booking.start_time.to_date)
+    assign(:minimum_booking_date, Date.current + 5.days)
     assign(:time_slot_options, ["08:00", "08:30", "09:00"])
     assign(:timetable_slots, [])
     assign(:booking, booking)
