@@ -135,6 +135,9 @@ Strict audit method for implemented features:
 
 | Implemented Feature | Contributors (Strict Audit %) | Notes |
 | --- | --- | --- |
+
+|Architecture Desing & Deploy | Joe
+
 | Authentication & Role-Based Access | Jacky (57.2%), Tyler (29.9%), Sam (9.5%), Joe (RiskyPork) (3.4%) | User/session auth flow, role access scenarios, and seed-role foundations plus follow-up refinements. |
 
 | CI, Coverage & Security Quality Gates | Tyler (54.5%), Jacky (43.5%), Joe (RiskyPork) (2.0%) | CI evolution, security scan hardening, and workflow/lint follow-up work. |
