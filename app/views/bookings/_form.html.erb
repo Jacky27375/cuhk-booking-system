@@ -3,7 +3,7 @@
     <%= hidden_field_tag :venue_id, booking.venue_id || params[:venue_id] %>
     <div class="booking-field">
       <%= label_tag :booking_date, "Booking date", class: "booking-label" %>
-      <%= date_field_tag :booking_date, @booking_date, required: true, onchange: "this.form.requestSubmit();" %>
+      <%= date_field_tag :booking_date, @booking_date, required: true, min: booking_date_minimum, onchange: "this.form.requestSubmit();" %>
     </div>
   <% end %>
 

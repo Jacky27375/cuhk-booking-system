@@ -20,10 +20,9 @@
     <%= form.textarea :description, placeholder: "Describe this venue" %>
   </div>
 
-  <% departments = ["University", "Chung Chi College", "New Asia College", "United College", "Shaw College", "Morningside College", "S.H. Ho College", "CW Chu College", "Wu Yee Sun College", "Lee Woo Sing College"] %>
   <div class="form-group">
     <%= form.label :department %>
-    <%= form.select :department, departments, { selected: venue.department.presence || "University" } %>
+    <%= form.select :department, @departments || [], { selected: venue.department.presence || (@departments&.first) } %>
   </div>
 
   <div>

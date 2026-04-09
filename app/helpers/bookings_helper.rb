@@ -1,4 +1,8 @@
 module BookingsHelper
+  def booking_date_minimum
+    5.days.from_now.to_date
+  end
+
   def booking_planner_frame_id
     "booking_planner"
   end

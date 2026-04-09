@@ -1,6 +1,8 @@
 class VenuesController < ApplicationController
   before_action :set_venue, only: %i[show edit update destroy]
   before_action :require_admin_or_staff, only: %i[new create edit update destroy]
+  before_action :ensure_tenant_present_for_manage!, only: %i[new create edit update destroy]
+  before_action :prepare_form_options, only: %i[new create edit update]
 
   # GET /venues or /venues.json
   def index
@@ -22,8 +24,7 @@ class VenuesController < ApplicationController
 
   # POST /venues or /venues.json
   def create
-    @venue = Venue.new(venue_params)
-    apply_staff_tenant_defaults
+    @venue = Venue.new(scoped_venue_params)
 
     respond_to do |format|
       if @venue.save
@@ -38,10 +39,8 @@ class VenuesController < ApplicationController
 
   # PATCH/PUT /venues/1 or /venues/1.json
   def update
-    apply_staff_tenant_defaults
-
     respond_to do |format|
-      if @venue.update(venue_params)
+      if @venue.update(scoped_venue_params)
         format.html { redirect_to @venue, notice: "Venue was successfully updated.", status: :see_other }
         format.json { render :show, status: :ok, location: @venue }
       else
@@ -82,10 +81,27 @@ class VenuesController < ApplicationController
       Venue.visible_to_user(current_user)
     end
 
-    def apply_staff_tenant_defaults
-      return if current_user.admin?
+    def ensure_tenant_present_for_manage!
+      return if current_user.admin? || current_user.tenant.present?
 
-      @venue.tenant = current_user.tenant
+      redirect_to venues_path, alert: "Your account is not linked to a tenant."
+    end
+
+    def prepare_form_options
+      @departments = if current_user.admin?
+        ["University", "Chung Chi College", "New Asia College", "United College", "Shaw College", "Morningside College", "S.H. Ho College", "CW Chu College", "Wu Yee Sun College", "Lee Woo Sing College"]
+      else
+        [current_user.tenant&.name].compact
+      end
+    end
+
+    def scoped_venue_params
+      attrs = venue_params.to_h
+      return attrs if current_user.admin?
+
+      attrs["tenant_id"] = current_user.tenant_id
+      attrs["department"] = current_user.tenant.name
+      attrs
     end
 
     def sort_venues(scope)

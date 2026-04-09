@@ -11,6 +11,7 @@ RSpec.describe "venues/edit", type: :view do
 
   before(:each) do
     assign(:venue, venue)
+    assign(:departments, ["New Asia College"])
   end
 
   it "renders the edit venue form" do
@@ -20,6 +21,7 @@ RSpec.describe "venues/edit", type: :view do
       assert_select "input[name=?]", "venue[name]"
 
       assert_select "textarea[name=?]", "venue[description]"
+      assert_select "select[name=?] option", "venue[department]", count: 1
     end
   end
 end

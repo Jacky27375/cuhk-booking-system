@@ -11,6 +11,7 @@ RSpec.describe "/venues", type: :request do
 
   let(:science_tenant) { create(:tenant, name: "Science Faculty") }
   let(:arts_tenant) { create(:tenant, name: "Arts Faculty") }
+  let(:new_asia_tenant) { create(:tenant, name: "New Asia College") }
 
   let(:admin) { FactoryBot.create(:user, :admin) }
 
@@ -88,6 +89,17 @@ RSpec.describe "/venues", type: :request do
       get new_venue_url
       expect(response).to be_successful
     end
+
+    it "limits staff to their own college department" do
+      staff = create(:user, :staff, tenant: new_asia_tenant)
+      log_in_as(staff)
+
+      get new_venue_url
+
+      expect(response).to be_successful
+      option_texts = Nokogiri::HTML(response.body).css('select#venue_department option').map(&:text)
+      expect(option_texts).to eq(['New Asia College'])
+    end
   end
 
   describe "GET /edit" do
@@ -109,6 +121,21 @@ RSpec.describe "/venues", type: :request do
       it "redirects to the created venue" do
         post venues_url, params: { venue: valid_attributes }
         expect(response).to redirect_to(venue_url(Venue.last))
+      end
+    end
+
+    context "when staff tries to assign another college" do
+      it "forces the venue into the staff tenant" do
+        staff = create(:user, :staff, tenant: new_asia_tenant)
+        log_in_as(staff)
+
+        expect {
+          post venues_url, params: { venue: { name: 'Staff Hall', description: 'Room', department: 'University' } }
+        }.to change(Venue, :count).by(1)
+
+        venue = Venue.last
+        expect(venue.department).to eq('New Asia College')
+        expect(venue.tenant).to eq(new_asia_tenant)
       end
     end
 
@@ -144,6 +171,20 @@ RSpec.describe "/venues", type: :request do
         patch venue_url(venue), params: { venue: new_attributes }
         venue.reload
         expect(response).to redirect_to(venue_url(venue))
+      end
+    end
+
+    context "when staff tries to move a venue to another college" do
+      it "keeps the venue scoped to the staff tenant" do
+        staff = create(:user, :staff, tenant: new_asia_tenant)
+        venue = create(:venue, tenant: new_asia_tenant, department: new_asia_tenant.name)
+        log_in_as(staff)
+
+        patch venue_url(venue), params: { venue: { name: 'Updated Staff Hall', department: 'University' } }
+
+        expect(response).to redirect_to(venue_url(venue))
+        expect(venue.reload.department).to eq('New Asia College')
+        expect(venue.tenant).to eq(new_asia_tenant)
       end
     end
 

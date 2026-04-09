@@ -3,6 +3,16 @@ require 'rails_helper'
 RSpec.describe 'Equipments', type: :request do
   let!(:tenant_a) { create(:tenant) }
   let!(:tenant_b) { create(:tenant) }
+  let!(:university_tenant) { create(:tenant, name: 'University', slug: 'university') }
+  let!(:chung_chi_tenant) { create(:tenant, name: 'Chung Chi College', slug: 'chung-chi-college') }
+  let!(:new_asia_tenant) { create(:tenant, name: 'New Asia College', slug: 'new-asia-college') }
+  let!(:united_tenant) { create(:tenant, name: 'United College', slug: 'united-college') }
+  let!(:shaw_tenant) { create(:tenant, name: 'Shaw College', slug: 'shaw-college') }
+  let!(:morningside_tenant) { create(:tenant, name: 'Morningside College', slug: 'morningside-college') }
+  let!(:sh_ho_tenant) { create(:tenant, name: 'S.H. Ho College', slug: 's-h-ho-college') }
+  let!(:cw_chu_tenant) { create(:tenant, name: 'CW Chu College', slug: 'cw-chu-college') }
+  let!(:wu_yee_sun_tenant) { create(:tenant, name: 'Wu Yee Sun College', slug: 'wu-yee-sun-college') }
+  let!(:lee_woo_sing_tenant) { create(:tenant, name: 'Lee Woo Sing College', slug: 'lee-woo-sing-college') }
 
   let!(:staff_user) { create(:user, :staff, tenant: tenant_a) }
   let!(:admin_user) { create(:user, :admin, tenant: tenant_a) }
@@ -93,6 +103,19 @@ RSpec.describe 'Equipments', type: :request do
       expect(response).to redirect_to(equipment_path(Equipment.last))
     end
 
+    it 'allows admin to create equipment for a selected college or University tenant' do
+      log_in_as(admin_user)
+
+      expect do
+        post equipments_path, params: {
+          equipment: { name: 'Venue Speaker', quantity: 4, tenant_id: new_asia_tenant.id }
+        }
+      end.to change(Equipment, :count).by(1)
+
+      expect(response).to redirect_to(equipment_path(Equipment.last))
+      expect(Equipment.last.tenant).to eq(new_asia_tenant)
+    end
+
     it 'denies society members' do
       log_in_as(member_user)
 
@@ -103,6 +126,29 @@ RSpec.describe 'Equipments', type: :request do
       expect(response).to redirect_to(equipments_path)
       follow_redirect!
       expect(response.body).to include('You are not authorized')
+    end
+  end
+
+  describe 'GET /equipments/new' do
+    it 'shows admin the CUHK tenant options (University + all colleges)' do
+      log_in_as(admin_user)
+
+      get new_equipment_path
+
+      expect(response).to have_http_status(:ok)
+      option_texts = Nokogiri::HTML(response.body).css('select#equipment_tenant_id option').map(&:text).reject { |text| text == 'Select a tenant' }
+      expect(option_texts).to match_array([
+        'University',
+        'Chung Chi College',
+        'New Asia College',
+        'United College',
+        'Shaw College',
+        'Morningside College',
+        'S.H. Ho College',
+        'CW Chu College',
+        'Wu Yee Sun College',
+        'Lee Woo Sing College'
+      ])
     end
   end
 
@@ -121,6 +167,15 @@ RSpec.describe 'Equipments', type: :request do
 
       expect(response).to redirect_to(equipments_path)
       expect(tenant_a_equipment.reload.quantity).to eq(5)
+    end
+
+    it 'does not allow staff to update equipment in another tenant' do
+      log_in_as(staff_user)
+
+      patch equipment_path(tenant_b_equipment), params: { equipment: { quantity: 9 } }
+
+      expect(response).to have_http_status(:not_found)
+      expect(tenant_b_equipment.reload.quantity).to eq(3)
     end
   end
 

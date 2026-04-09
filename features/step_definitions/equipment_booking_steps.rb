@@ -26,6 +26,11 @@ When('I visit the equipment page') do
   visit equipments_path
 end
 
+When('I visit the equipment borrow page for {string}') do |name|
+  equipment = Equipment.find_by!(name: name)
+  visit borrow_form_equipment_path(equipment)
+end
+
 When('I borrow {int} {string} from {string} to {string}') do |qty, name, start_date, end_date|
   equipment = Equipment.find_by!(name: name)
   visit borrow_form_equipment_path(equipment)
@@ -71,6 +76,20 @@ end
 Then('my booking should show status {string}') do |status|
   visit my_bookings_path
   expect(page).to have_content(status)
+end
+
+Then('the equipment start date input should have a minimum date {int} days from now') do |days|
+  expected_date = (Date.current + days.days).strftime('%Y-%m-%d')
+  start_date_input = find('input[name="booking[start_date]"]', visible: :all)
+
+  expect(start_date_input[:min]).to eq(expected_date)
+end
+
+Then('the equipment end date input should have a minimum date {int} days from now') do |days|
+  expected_date = (Date.current + days.days).strftime('%Y-%m-%d')
+  end_date_input = find('input[name="booking[end_date]"]', visible: :all)
+
+  expect(end_date_input[:min]).to eq(expected_date)
 end
 
 When('I borrow {int} {string} from {int} days from now to {int} days from now') do |qty, name, start_days, end_days|

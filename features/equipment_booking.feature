@@ -41,6 +41,11 @@ Feature: Equipment Booking
     When I attempt to borrow 1 "Projector" from 4 days from now to 5 days from now
     Then I should see "Equipment must be booked at least 5 days in advance"
 
+  Scenario: Equipment borrow form blocks dates before the lead-time minimum
+    When I visit the equipment borrow page for "Projector"
+    Then the equipment start date input should have a minimum date 5 days from now
+    And the equipment end date input should have a minimum date 5 days from now
+
   # Constraint: Equipment can be booked for at most 7 days
   Scenario: Student can borrow equipment for up to 7 days
     When I borrow 1 "Projector" from 5 days from now to 12 days from now

@@ -1,4 +1,17 @@
 class EquipmentsController < ApplicationController
+  EQUIPMENT_TENANT_NAMES = [
+    "University",
+    "Chung Chi College",
+    "New Asia College",
+    "United College",
+    "Shaw College",
+    "Morningside College",
+    "S.H. Ho College",
+    "CW Chu College",
+    "Wu Yee Sun College",
+    "Lee Woo Sing College"
+  ].freeze
+
   before_action :set_equipment, only: [:show, :edit, :update, :destroy]
   before_action :require_staff_or_admin, only: [:new, :create, :edit, :update, :destroy]
   before_action :require_student_for_borrow!, only: [:borrow_form, :borrow]
@@ -14,7 +27,7 @@ class EquipmentsController < ApplicationController
   def new
     if current_user.admin?
       @equipment = Equipment.new
-      @tenants = Tenant.all
+      @tenants = admin_tenant_options
     else
       @equipment = current_user.tenant.equipment.new
     end
@@ -24,7 +37,7 @@ class EquipmentsController < ApplicationController
     if current_user.admin?
       @equipment = Equipment.new(equipment_params)
       @equipment.tenant ||= current_user.tenant
-      @tenants = Tenant.all
+      @tenants = admin_tenant_options
     else
       @equipment = current_user.tenant.equipment.new(equipment_params)
     end
@@ -86,6 +99,7 @@ class EquipmentsController < ApplicationController
     Equipment.visible_to_user(current_user)
   end
 
+
   def require_staff_or_admin
     return if current_user.admin? || current_user.staff?
 
@@ -135,5 +149,9 @@ class EquipmentsController < ApplicationController
     order_expr = @sort_column == "name" ? equipments[:name] : equipments[:quantity]
 
     scope.order(direction == :asc ? order_expr.asc : order_expr.desc)
+  end
+
+  def admin_tenant_options
+    @admin_tenant_options ||= Tenant.where(name: EQUIPMENT_TENANT_NAMES).order(:name)
   end
 end
