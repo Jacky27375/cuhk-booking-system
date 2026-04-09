@@ -33,6 +33,10 @@ class RegistrationsController < ApplicationController
   end
 
   def signup_tenants
+    tenants = Tenant.where.not(id: Tenant.university_tenant_ids).order(:name)
+    return tenants if tenants.exists?
+
+    DefaultIdentityBootstrap.ensure_college_tenants!
     Tenant.where.not(id: Tenant.university_tenant_ids).order(:name)
   end
 

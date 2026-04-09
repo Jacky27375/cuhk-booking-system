@@ -7,6 +7,10 @@ class SessionsController < ApplicationController
   def create
     email = params[:email].to_s.strip.downcase
     user = User.find_by(email: email)
+    if user.blank?
+      DefaultIdentityBootstrap.ensure_seed_account_for!(email)
+      user = User.find_by(email: email)
+    end
 
     if user&.authenticate(params[:password])
       reset_session
