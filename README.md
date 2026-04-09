@@ -102,6 +102,13 @@ If you ran `rails db:seed`, the development database includes the following acco
 
 Student accounts can be created via the signup page (students select their college during registration).
 
+### Production bootstrap fallback
+
+The deployment entrypoint runs `db:prepare` but does not run `db:seed`. To keep first-run production usable:
+
+- Visiting `/signup` auto-creates the default college tenant list when no college tenants exist yet.
+- Logging in with the documented default admin/root staff emails auto-creates those accounts (and required tenants) when they are missing.
+
 ## Deployment (Azure VM)
 
 Production URL: [https://csci3100.tylerl.cyou](https://csci3100.tylerl.cyou)
