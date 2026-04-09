@@ -5,7 +5,7 @@ Before('@equipment_booking') do
   User.find_or_create_by!(email: 'student@link.cuhk.edu.hk') do |u|
     u.password = 'Password1!'
     u.password_confirmation = 'Password1!'
-    u.role = :society_member
+    u.role = :student
     u.tenant = tenant
   end
 end

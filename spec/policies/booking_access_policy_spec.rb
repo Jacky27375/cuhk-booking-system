@@ -4,7 +4,7 @@ RSpec.describe BookingAccessPolicy do
   let(:science_tenant) { create(:tenant, name: 'Science Faculty') }
   let(:arts_tenant) { create(:tenant, name: 'Arts Faculty') }
   let(:science_staff) { create(:user, :staff, tenant: science_tenant) }
-  let(:science_member) { create(:user, :society_member, tenant: science_tenant) }
+  let(:science_member) { create(:user, :student, tenant: science_tenant) }
 
   describe '.venue_accessible?' do
     it 'allows access to a venue in the same tenant' do

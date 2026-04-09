@@ -38,7 +38,7 @@ RSpec.describe Venue, type: :model do
     let!(:shaw_venue) { create(:venue, name: 'Lecture Theatre', tenant: shaw_tenant) }
     let!(:na_venue) { create(:venue, name: 'Yali Lounge', tenant: na_tenant) }
 
-    let(:shaw_student) { create(:user, role: :society_member, tenant: shaw_tenant) }
+    let(:shaw_student) { create(:user, role: :student, tenant: shaw_tenant) }
 
     it 'returns venues for the users college and university shared venues only' do
       venues = Venue.visible_to_student(shaw_student)

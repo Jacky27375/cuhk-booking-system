@@ -7,7 +7,7 @@ Feature: Venue Booking System
     Given there is a tenant "University"
     And there is a user "admin@link.cuhk.edu.hk" with role "admin"
     And there is a user "staff@link.cuhk.edu.hk" with role "staff"
-    And there is a user "member@link.cuhk.edu.hk" with role "society_member"
+    And there is a user "member@link.cuhk.edu.hk" with role "student"
 
   Scenario: Admin can create a new venue
     Given I am logged in as "admin@link.cuhk.edu.hk"

@@ -6,12 +6,9 @@ class RegistrationsController < ApplicationController
     @tenants = Tenant.order(:name)
   end
 
-  ALLOWED_SIGNUP_ROLES = %w[society_member staff].freeze
-
   def create
     @user = User.new(registration_params)
-    role = params.dig(:user, :role)
-    @user.role = ALLOWED_SIGNUP_ROLES.include?(role) ? role : :society_member
+    @user.role = :student
     @tenants = Tenant.order(:name)
 
     if @user.save

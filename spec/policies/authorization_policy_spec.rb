@@ -15,7 +15,7 @@ RSpec.describe AuthorizationPolicy do
     end
 
     it 'returns false for society members' do
-      user = create(:user, :society_member)
+      user = create(:user, :student)
 
       expect(described_class.admin_or_staff?(user)).to be(false)
     end

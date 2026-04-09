@@ -390,19 +390,19 @@ class BookingsController < ApplicationController
     end
 
     def require_student_for_edit!
-      return if current_user.society_member?
+      return if current_user.student?
 
       redirect_to bookings_path, alert: "Staff and admin cannot edit bookings."
     end
 
     def require_student_for_my!
-      return if current_user.society_member?
+      return if current_user.student?
 
       redirect_to dashboard_path, alert: "Only students can access My Bookings."
     end
 
     def require_student_for_booking_create!
-      return if current_user.society_member?
+      return if current_user.student?
 
       redirect_to dashboard_path, alert: "Staff and admin cannot create bookings."
     end

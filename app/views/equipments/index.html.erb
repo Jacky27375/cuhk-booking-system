@@ -28,7 +28,7 @@
             <td>
               <div class="btn-group">
                 <%= link_to "View", equipment_path(equipment), class: "btn btn-outline btn-sm" %>
-                <% if current_user.society_member? %>
+                <% if current_user.student? %>
                   <%= link_to "Borrow", borrow_form_equipment_path(equipment), class: "btn btn-primary btn-sm" %>
                 <% end %>
                 <% if current_user.admin? || current_user.staff? %>

@@ -80,22 +80,27 @@ bundle exec bundler-audit check --update
 
 If you ran `rails db:seed`, the development database includes the following accounts:
 
+**Admin:**
+
 | Role | Email | Password |
 |------|-------|----------|
 | **Admin** | `admin@link.cuhk.edu.hk` | `Password1!` |
-| **Staff** | `staff@link.cuhk.edu.hk` | `Password1!` |
-| **Society Member** | `member@link.cuhk.edu.hk` | `Password1!` |
 
-Additional cross-tenant test accounts are also created by seeds:
+**Root Staff Accounts (one per college, can create other staff):**
 
-| Role | Tenant | Email | Password |
-|------|--------|-------|----------|
-| **Staff** | Shaw College | `staff.shaw@link.cuhk.edu.hk` | `Password1!` |
-| **Staff** | New Asia College | `staff.newasia@link.cuhk.edu.hk` | `Password1!` |
-| **Staff** | Wu Yee Sun College | `staff.wys@link.cuhk.edu.hk` | `Password1!` |
-| **Society Member** | Shaw College | `member.shaw@link.cuhk.edu.hk` | `Password1!` |
-| **Society Member** | New Asia College | `member.newasia@link.cuhk.edu.hk` | `Password1!` |
-| **Society Member** | Wu Yee Sun College | `member.wys@link.cuhk.edu.hk` | `Password1!` |
+| College | Email | Password |
+|---------|-------|----------|
+| Chung Chi College | `staff_root_chungchi@link.cuhk.edu.hk` | `Password1!` |
+| New Asia College | `staff_root_newasia@link.cuhk.edu.hk` | `Password1!` |
+| United College | `staff_root_united@link.cuhk.edu.hk` | `Password1!` |
+| Shaw College | `staff_root_shaw@link.cuhk.edu.hk` | `Password1!` |
+| Morningside College | `staff_root_morningside@link.cuhk.edu.hk` | `Password1!` |
+| S.H. Ho College | `staff_root_shho@link.cuhk.edu.hk` | `Password1!` |
+| CW Chu College | `staff_root_cwchu@link.cuhk.edu.hk` | `Password1!` |
+| Wu Yee Sun College | `staff_root_wuyeesun@link.cuhk.edu.hk` | `Password1!` |
+| Lee Woo Sing College | `staff_root_leewoosin@link.cuhk.edu.hk` | `Password1!` |
+
+Student accounts can be created via the signup page (students select their college during registration).
 
 ## Deployment (Azure VM)
 

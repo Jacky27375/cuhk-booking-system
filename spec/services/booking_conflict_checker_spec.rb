@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe BookingConflictChecker do
   let(:tenant) { create(:tenant, name: 'Science Faculty') }
-  let(:user) { create(:user, :society_member, tenant: tenant) }
+  let(:user) { create(:user, :student, tenant: tenant) }
   let(:venue) { create(:venue, tenant: tenant, department: tenant.name) }
 
   it 'detects an overlapping booking' do

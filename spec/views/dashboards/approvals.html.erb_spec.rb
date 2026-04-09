@@ -4,7 +4,7 @@ RSpec.describe "dashboards/approvals", type: :view do
   before(:each) do
     tenant = create(:tenant, name: "Science Faculty")
     venue = create(:venue, name: "Room 101", department: tenant.name, tenant: tenant)
-    user = create(:user, :society_member, tenant: tenant)
+    user = create(:user, :student, tenant: tenant)
 
     booking_1 = create(:booking,
                venue: venue,

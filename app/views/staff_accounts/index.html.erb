@@ -1,0 +1,36 @@
+<% content_for :title, "Staff Accounts" %>
+<% content_for(:page_title, "Staff Accounts") %>
+
+<div class="page-actions">
+  <p class="text-muted text-sm"><%= @staff_users.size %> staff account(s) in <%= current_user.tenant.name %></p>
+  <span class="spacer"></span>
+  <%= link_to "New Staff Account", new_staff_account_path, class: "btn btn-primary btn-sm" %>
+</div>
+
+<% if @staff_users.any? %>
+  <div class="card">
+    <table class="resource-grid-table" style="margin:0; border:none; box-shadow:none;">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Root Account</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @staff_users.each do |user| %>
+          <tr>
+            <td><strong><%= user.email %></strong></td>
+            <td><%= user.root_account? ? "Yes" : "No" %></td>
+            <td class="text-muted"><%= user.created_at.strftime("%Y-%m-%d") %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="empty-state">
+    <h3>No staff accounts yet</h3>
+    <p>Create staff accounts for your college.</p>
+  </div>
+<% end %>

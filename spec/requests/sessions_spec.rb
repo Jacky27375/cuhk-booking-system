@@ -54,7 +54,7 @@ RSpec.describe 'Sessions', type: :request do
 
     it 'hides Booking link for society member dashboard' do
       member_tenant = create(:tenant, name: 'University', slug: 'university')
-      member = create(:user, :society_member, tenant: member_tenant)
+      member = create(:user, :student, tenant: member_tenant)
 
       log_in_as(member)
       get dashboard_path

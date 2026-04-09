@@ -1,7 +1,6 @@
 Given('the following users exist:') do |table|
   table.hashes.each do |hash|
     role_name = hash['role']
-    role_name = 'society_member' if role_name == 'student'
     role = role_name.to_sym
 
     tenant = Tenant.find_by(name: "Science Faculty") || create(:tenant, name: "Science Faculty")

@@ -1,0 +1,55 @@
+<% content_for :title, "Venue Requests" %>
+<% content_for(:page_title, "Venue Requests") %>
+
+<div class="page-actions">
+  <p class="text-muted text-sm"><%= @venue_requests.size %> request(s)</p>
+  <span class="spacer"></span>
+  <% if current_user.staff? %>
+    <%= link_to "New Venue Request", new_venue_request_path, class: "btn btn-primary btn-sm" %>
+  <% end %>
+</div>
+
+<% if @venue_requests.any? %>
+  <div class="card">
+    <table class="resource-grid-table" style="margin:0; border:none; box-shadow:none;">
+      <thead>
+        <tr>
+          <th>Venue Name</th>
+          <th>Description</th>
+          <% if current_user.admin? %><th>Requested By</th><% end %>
+          <th>College</th>
+          <th>Status</th>
+          <% if current_user.admin? %><th>Actions</th><% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% @venue_requests.each do |request| %>
+          <tr>
+            <td><strong><%= request.venue_name %></strong></td>
+            <td class="text-muted"><%= request.description %></td>
+            <% if current_user.admin? %><td><%= request.requester.email %></td><% end %>
+            <td><span class="badge badge-role"><%= request.tenant.name %></span></td>
+            <td><%= status_badge(request.status) %></td>
+            <% if current_user.admin? %>
+              <td>
+                <% if request.pending? %>
+                  <div class="btn-group">
+                    <%= button_to "Approve", approve_venue_request_path(request), method: :patch, class: "btn btn-primary btn-sm", data: { turbo_confirm: "Approve this venue request?" } %>
+                    <%= button_to "Reject", reject_venue_request_path(request), method: :patch, class: "btn btn-danger btn-sm", data: { turbo_confirm: "Reject this venue request?" } %>
+                  </div>
+                <% elsif request.rejected? && request.rejection_reason.present? %>
+                  <span class="text-muted text-sm"><%= request.rejection_reason %></span>
+                <% end %>
+              </td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="empty-state">
+    <h3>No venue requests</h3>
+    <p>No venue requests have been submitted yet.</p>
+  </div>
+<% end %>

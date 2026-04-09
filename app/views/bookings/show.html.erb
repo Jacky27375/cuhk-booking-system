@@ -48,7 +48,7 @@
   </div>
   <div class="card-footer">
     <div class="btn-group">
-      <% if current_user&.society_member? %>
+      <% if current_user&.student? %>
         <%= link_to "Back to My Bookings", my_bookings_path, class: "btn btn-secondary btn-sm" %>
       <% else %>
         <%= link_to "Back to All Bookings", bookings_path, class: "btn btn-secondary btn-sm" %>

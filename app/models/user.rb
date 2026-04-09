@@ -7,9 +7,15 @@ class User < ApplicationRecord
   has_many :approval_steps, foreign_key: :actor_id, inverse_of: :actor, dependent: :restrict_with_exception
   has_many :api_keys, dependent: :destroy
 
-  enum :role, { society_member: 0, staff: 1, admin: 2 }
+  enum :role, { student: 0, staff: 1, admin: 2 }
 
   belongs_to :tenant, optional: true
+
+  scope :root_accounts, -> { where(is_root_account: true) }
+
+  def root_account?
+    is_root_account
+  end
 
   CUHK_EMAIL_REGEX = /\A[a-zA-Z0-9._%+-]+@link\.cuhk\.edu\.hk\z/i
 

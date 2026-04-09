@@ -51,16 +51,16 @@ RSpec.describe User, type: :model do
       expect(build(:user, :staff)).to be_staff
     end
 
-    it 'defines society_member role' do
-      expect(build(:user, :society_member)).to be_society_member
+    it 'defines student role' do
+      expect(build(:user, :student)).to be_student
     end
 
-    it 'defaults to society_member' do
-      expect(User.new).to be_society_member
+    it 'defaults to student' do
+      expect(User.new).to be_student
     end
 
     it 'can list all roles' do
-      expect(User.roles.keys).to contain_exactly('society_member', 'staff', 'admin')
+      expect(User.roles.keys).to contain_exactly('student', 'staff', 'admin')
     end
   end
 

@@ -6,7 +6,7 @@ Feature: Booking Approval Workflow
   Background:
     Given the following users exist:
       | email                 | password  | role    |
-      | student@link.cuhk.edu.hk   | password1 | society_member |
+      | student@link.cuhk.edu.hk   | password1 | student |
       | staff@link.cuhk.edu.hk | password1 | staff   |
     And the following venues exist:
       | name     | department      |

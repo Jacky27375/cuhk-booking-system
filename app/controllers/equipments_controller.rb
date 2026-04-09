@@ -100,7 +100,7 @@ class EquipmentsController < ApplicationController
   end
 
   def require_student_for_borrow!
-    return if current_user.society_member?
+    return if current_user.student?
 
     redirect_to dashboard_path, alert: "Staff and admin cannot create bookings."
   end
