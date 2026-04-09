@@ -1,0 +1,78 @@
+<% content_for :title, "Venue Request Details" %>
+<% content_for(:page_title, "Venue Request Details") %>
+
+<div class="page-actions">
+  <p class="text-muted text-sm">Reviewing request for <strong><%= @venue_request.venue_name %></strong></p>
+  <span class="spacer"></span>
+  <%= link_to "Back to Requests", venue_requests_path(status: @return_status), class: "btn btn-secondary btn-sm" %>
+</div>
+
+<div class="card mb-2">
+  <table class="resource-grid-table" style="margin:0; border:none; box-shadow:none;">
+    <tbody>
+      <tr>
+        <th>Venue Name</th>
+        <td><strong><%= @venue_request.venue_name %></strong></td>
+      </tr>
+      <tr>
+        <th>Description</th>
+        <td><%= @venue_request.description.presence || "-" %></td>
+      </tr>
+      <tr>
+        <th>College</th>
+        <td><span class="badge badge-role"><%= @venue_request.tenant.name %></span></td>
+      </tr>
+      <tr>
+        <th>Status</th>
+        <td><%= status_badge(@venue_request.status) %></td>
+      </tr>
+      <% if current_user.admin? %>
+        <tr>
+          <th>Requested By</th>
+          <td><%= @venue_request.requester.email %></td>
+        </tr>
+      <% end %>
+      <tr>
+        <th>Requested At</th>
+        <td class="text-muted"><%= @venue_request.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+      </tr>
+      <tr>
+        <th>Reviewed By</th>
+        <td><%= @venue_request.reviewed_by&.email || "-" %></td>
+      </tr>
+      <tr>
+        <th>Reviewed At</th>
+        <td class="text-muted"><%= @venue_request.reviewed_at&.strftime("%Y-%m-%d %H:%M") || "-" %></td>
+      </tr>
+      <% if @venue_request.rejected? && @venue_request.rejection_reason.present? %>
+        <tr>
+          <th>Rejection Reason</th>
+          <td><%= @venue_request.rejection_reason %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<% if current_user.admin? && @venue_request.pending? %>
+  <div class="card">
+    <div class="card-body">
+      <h3 class="mb-2">Review Actions</h3>
+      <div class="btn-group mb-2">
+        <%= button_to "Approve",
+                      approve_venue_request_path(@venue_request, status: @return_status),
+                      method: :patch,
+                      class: "btn btn-primary btn-sm",
+                      data: { turbo_confirm: "Approve this venue request?" } %>
+      </div>
+
+      <%= form_with url: reject_venue_request_path(@venue_request, status: @return_status), method: :patch, local: true do |f| %>
+        <div class="form-group">
+          <%= f.label :rejection_reason, "Rejection reason" %>
+          <%= f.text_field :rejection_reason, required: true, placeholder: "Reason for rejection" %>
+        </div>
+        <%= f.submit "Reject", class: "btn btn-danger btn-sm", data: { turbo_confirm: "Reject this venue request?" } %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
