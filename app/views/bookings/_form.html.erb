@@ -41,6 +41,7 @@
     <div class="booking-field">
       <%= label_tag "booking_end_slot", "End time", class: "booking-label" %>
       <%= select_tag "booking[end_slot]", options_for_select(@time_slot_options, booking.end_time&.strftime('%H:%M')), include_blank: "Select end time", id: "booking_end_slot" %>
+      <p class="text-muted text-sm">End time must be later than start time.</p>
     </div>
 
     <div class="booking-actions">
