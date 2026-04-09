@@ -13,6 +13,8 @@ class User < ApplicationRecord
 
   scope :root_accounts, -> { where(is_root_account: true) }
 
+  before_validation :sync_college_scope_slug_from_tenant, if: :staff_with_tenant?
+
   def root_account?
     is_root_account
   end
@@ -25,6 +27,24 @@ class User < ApplicationRecord
                               message: "must be a valid @link.cuhk.edu.hk address" }
   validates :password, length: { minimum: 8 }, if: -> { new_record? || password.present? }
   validates :password_confirmation, presence: true, if: :new_record?
+  validates :college_scope_slug, presence: true, if: :staff_with_tenant?
+  validate :college_scope_slug_matches_tenant_slug, if: :staff_with_tenant?
 
   normalizes :email, with: ->(email) { email.strip.downcase }
+
+  private
+
+  def staff_with_tenant?
+    staff? && tenant.present?
+  end
+
+  def sync_college_scope_slug_from_tenant
+    self.college_scope_slug = tenant.slug
+  end
+
+  def college_scope_slug_matches_tenant_slug
+    return if college_scope_slug == tenant.slug
+
+    errors.add(:college_scope_slug, "must match the tenant scope")
+  end
 end

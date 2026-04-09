@@ -13,6 +13,7 @@ class StaffAccountsController < ApplicationController
     @user = User.new(staff_account_params)
     @user.role = :staff
     @user.tenant = current_user.tenant
+    @user.college_scope_slug = current_user.college_scope_slug.presence || current_user.tenant&.slug
 
     if @user.save
       redirect_to staff_accounts_path, notice: "Staff account created successfully."
