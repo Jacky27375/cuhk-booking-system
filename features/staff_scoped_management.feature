@@ -9,16 +9,25 @@ Feature: Staff scoped management and booking lead time
       | New Asia College  |
       | University        |
     And a root staff account "staff_root_newasia@link.cuhk.edu.hk" exists for "New Asia College"
+    And a regular staff "staff_newasia@link.cuhk.edu.hk" exists for "New Asia College"
     And a student "member@link.cuhk.edu.hk" exists for "New Asia College"
     And there is a venue "Lecture Hall A"
 
   Scenario: Staff venue form is limited to their college
-    Given I am logged in as "staff_root_newasia@link.cuhk.edu.hk" with password "Password1!"
+    Given I am logged in as "staff_newasia@link.cuhk.edu.hk" with password "Password1!"
     When I visit the venues page
     And I click "New Venue"
     Then the venue department dropdown should include only:
       | New Asia College |
     And the venue department dropdown should not include "University"
+
+  Scenario: Root staff is directed to request new venues
+    Given I am logged in as "staff_root_newasia@link.cuhk.edu.hk" with password "Password1!"
+    When I visit the venues page
+    Then I should see link "Request New Venue"
+    When I visit the new venue page
+    Then I should see "Root staff must submit a venue request to add new venues."
+    And I should see "New Venue Request"
 
   Scenario: Booking date picker blocks dates inside the lead-time window
     Given I am logged in as "member@link.cuhk.edu.hk" with password "Password1!"

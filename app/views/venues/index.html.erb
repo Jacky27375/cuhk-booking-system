@@ -4,8 +4,10 @@
 <div class="page-actions">
   <p class="text-muted text-sm"><%= @venues.size %> venue(s) found</p>
   <span class="spacer"></span>
-  <% if current_user&.admin? || current_user&.staff? %>
+  <% if current_user&.admin? || (current_user&.staff? && !current_user&.root_account?) %>
     <%= link_to "New Venue", new_venue_path, class: "btn btn-primary btn-sm" %>
+  <% elsif current_user&.root_staff_account? %>
+    <%= link_to "Request New Venue", new_venue_request_path, class: "btn btn-primary btn-sm" %>
   <% end %>
 </div>
 

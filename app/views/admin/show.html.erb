@@ -2,6 +2,22 @@
 
 <div class="dashboard-grid">
   <div class="dash-card">
+    <div class="dash-icon">&#127963;</div>
+    <h3>Venue Requests</h3>
+    <p><%= @pending_venue_request_count %> pending request(s) need review</p>
+    <%= link_to "Review Pending Requests &rarr;".html_safe, venue_requests_path(status: :pending) %>
+    <br>
+    <%= link_to "View All Requests &rarr;".html_safe, venue_requests_path %>
+  </div>
+
+  <div class="dash-card">
+    <div class="dash-icon">&#128101;</div>
+    <h3>User Management</h3>
+    <p>Delete accounts and reset root staff passwords (<%= @root_staff_account_count %> root staff)</p>
+    <%= link_to "Manage Users &rarr;".html_safe, admin_users_path %>
+  </div>
+
+  <div class="dash-card">
     <div class="dash-icon">&#9989;</div>
     <h3>Approval Dashboard</h3>
     <p>Review and approve pending booking requests</p>

@@ -35,8 +35,17 @@ Feature: Venue Request Workflow
     Given "staff@link.cuhk.edu.hk" has submitted a venue request for "Duplicate Room"
     And I am logged in as "admin@link.cuhk.edu.hk" with password "Password1!"
     When I visit the venue requests page
+    And I fill in "Rejection reason" with "Not needed"
     And I press "Reject"
     Then I should see "Venue request rejected"
+    And I should see "Reason: Not needed"
+
+  Scenario: Admin panel links directly to pending venue-request review
+    Given "staff@link.cuhk.edu.hk" has submitted a venue request for "Lab 301"
+    And I am logged in as "admin@link.cuhk.edu.hk" with password "Password1!"
+    When I visit the admin panel
+    Then I should see "Review Pending Requests"
+    And I should see "1 pending request(s) need review"
 
   Scenario: Student cannot access venue requests
     Given a student "student@link.cuhk.edu.hk" exists for "Chung Chi College"

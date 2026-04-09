@@ -24,6 +24,10 @@ When('I visit the new equipment page') do
   visit new_equipment_path
 end
 
+When('I visit the new venue page') do
+  visit new_venue_path
+end
+
 Then('the equipment tenant dropdown should include only:') do |table|
   expected_names = table.raw.flatten
   select_field = find('select#equipment_tenant_id', visible: :all)
