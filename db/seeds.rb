@@ -216,6 +216,7 @@ equipments = [
 ]
 
 bootstrap_password = ENV["BOOTSTRAP_ACCOUNT_PASSWORD"]
+synchronize_bootstrap_password = Rails.env.production?
 
 if Rails.env.production? && bootstrap_password.blank?
   raise "BOOTSTRAP_ACCOUNT_PASSWORD must be set in production."
@@ -268,7 +269,7 @@ admin = User.find_or_initialize_by(email: "admin@link.cuhk.edu.hk")
 admin.role = :admin
 admin.tenant = tenants["University"]
 
-if admin.new_record? || admin.password_digest.blank?
+if synchronize_bootstrap_password || admin.new_record? || admin.password_digest.blank?
   admin.password = bootstrap_password
   admin.password_confirmation = bootstrap_password
 end
@@ -282,7 +283,7 @@ root_staff_emails.each do |college_name, email|
   user.is_root_account = true
   user.tenant = tenants.fetch(college_name)
 
-  if user.new_record? || user.password_digest.blank?
+  if synchronize_bootstrap_password || user.new_record? || user.password_digest.blank?
     user.password = bootstrap_password
     user.password_confirmation = bootstrap_password
   end
