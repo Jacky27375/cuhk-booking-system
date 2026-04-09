@@ -3,13 +3,19 @@ class RegistrationsController < ApplicationController
 
   def new
     @user = User.new
-    @tenants = Tenant.order(:name)
+    @tenants = signup_tenants
   end
 
   def create
     @user = User.new(registration_params)
     @user.role = :student
-    @tenants = Tenant.order(:name)
+    @tenants = signup_tenants
+
+    if university_tenant_selected?(@user.tenant_id)
+      @user.errors.add(:tenant, "must be a college")
+      render :new, status: :unprocessable_content
+      return
+    end
 
     if @user.save
       reset_session
@@ -24,5 +30,15 @@ class RegistrationsController < ApplicationController
 
   def registration_params
     params.require(:user).permit(:email, :password, :password_confirmation, :tenant_id)
+  end
+
+  def signup_tenants
+    Tenant.where.not(id: Tenant.university_tenant_ids).order(:name)
+  end
+
+  def university_tenant_selected?(tenant_id)
+    return false if tenant_id.blank?
+
+    Tenant.university_tenant_ids.where(id: tenant_id).exists?
   end
 end
