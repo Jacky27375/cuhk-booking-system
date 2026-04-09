@@ -30,7 +30,7 @@ class BookingsController < ApplicationController
       @booking.venue_id = params[:venue_id]
     end
 
-    selected_date = booking_date_param
+    selected_date = selected_booking_date
     start_slot = params.dig(:booking, :start_slot)
     end_slot = params.dig(:booking, :end_slot)
     if selected_date.present? && start_slot.present?
@@ -62,6 +62,8 @@ class BookingsController < ApplicationController
       return
     end
 
+    return unless validate_booking_date_lead_time!(template: :new)
+
     prepare_timetable_context
     if @booking.valid?
       render :confirm
@@ -82,6 +84,8 @@ class BookingsController < ApplicationController
       render :new, status: :unprocessable_content
       return
     end
+
+    return unless validate_booking_date_lead_time!(template: :new)
 
     respond_to do |format|
       if @booking.save
@@ -106,6 +110,8 @@ class BookingsController < ApplicationController
       render :edit, status: :unprocessable_content
       return
     end
+
+    return unless validate_booking_date_lead_time!(template: :edit)
 
     respond_to do |format|
       if @booking.update(attrs)
@@ -287,17 +293,43 @@ class BookingsController < ApplicationController
 
     def prepare_timetable_context
       @booking_date = selected_booking_date
+      @minimum_booking_date = minimum_booking_date
       @time_slot_options = build_time_slot_options
       @timetable_slots = build_timetable_slots
     end
 
     def selected_booking_date
-      return Date.parse(booking_date_param) if booking_date_param.present?
+      requested_date = parsed_booking_date
+      return [requested_date, minimum_booking_date].max if requested_date.present?
       return @booking.start_time.to_date if @booking.start_time.present?
 
-      Time.zone.today
+      minimum_booking_date
+    end
+
+    def parsed_booking_date
+      return nil unless booking_date_param.present?
+
+      Date.parse(booking_date_param)
     rescue ArgumentError
-      Time.zone.today
+      nil
+    end
+
+    def minimum_booking_date
+      5.days.from_now.to_date
+    end
+
+    def booking_date_before_minimum?
+      requested_date = parsed_booking_date
+      requested_date.present? && requested_date < minimum_booking_date
+    end
+
+    def validate_booking_date_lead_time!(template:)
+      return true unless booking_date_before_minimum?
+
+      @booking.errors.add(:base, "Venue must be booked at least 5 days in advance")
+      prepare_timetable_context
+      render template, status: :unprocessable_content
+      false
     end
 
     def selected_venue_id
