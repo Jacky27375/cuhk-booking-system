@@ -18,6 +18,14 @@ Feature: User Authentication
     Then I should see "Dashboard"
     And I should see "Admin"
 
+  Scenario: Successful login with local-part only
+    Given I am on the login page
+    When I fill in "Email" with "admin"
+    And I fill in "Password" with "Password1!"
+    And I press "Sign In"
+    Then I should see "Dashboard"
+    And I should see "Admin"
+
   Scenario: Successful login as staff
     Given I am on the login page
     When I fill in "Email" with "staff@link.cuhk.edu.hk"

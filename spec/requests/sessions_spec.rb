@@ -8,6 +8,7 @@ RSpec.describe 'Sessions', type: :request do
       get login_path
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Sign In')
+      expect(response.body).to include('@link.cuhk.edu.hk')
     end
   end
 
@@ -18,6 +19,11 @@ RSpec.describe 'Sessions', type: :request do
       expect(user.reload.active_session_token).to be_present
       follow_redirect!
       expect(response.body).to include('Dashboard')
+    end
+
+    it 'logs in with local-part identifier' do
+      post login_path, params: { email_local_part: user.email.split('@').first, password: 'Password1!' }
+      expect(response).to redirect_to(dashboard_path)
     end
 
     it 'blocks concurrent login attempts for the same account' do

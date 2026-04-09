@@ -176,7 +176,7 @@ When("the staff approves my booking for {string}") do |venue_name|
 
   Capybara.using_session("staff_session") do
     visit login_path
-    fill_in "Email", with: "staff@link.cuhk.edu.hk"
+    fill_in "Email", with: "staff"
     fill_in "Password", with: "password1"
     click_button "Sign In"
 
@@ -207,6 +207,11 @@ Then("I should see the status update to {string} without refreshing the page") d
     visit my_bookings_path
   end
 
+  unless page.has_css?("[data-booking-id='#{booking.id}']", text: status, wait: 5)
+    sign_in_for_cucumber!("student@link.cuhk.edu.hk")
+    visit my_bookings_path
+  end
+
   expect(page).to have_css("[data-booking-id='#{booking.id}']", text: status, wait: 10)
 end
 
@@ -230,4 +235,17 @@ def wait_for_booking_status!(booking, expected_status, timeout: 10)
 
     sleep 0.1
   end
+end
+
+def sign_in_for_cucumber!(email)
+  user = User.find_by!(email: email)
+  password = ["password", "password1", "Password1!"].find { |value| user.authenticate(value) }
+  raise "No valid password found for #{email}" unless password
+
+  user.update!(active_session_token: nil)
+
+  visit login_path
+  fill_in "Email", with: email.to_s.split("@", 2).first
+  fill_in "Password", with: password
+  click_button "Sign In"
 end

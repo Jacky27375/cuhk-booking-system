@@ -17,6 +17,8 @@ RSpec.describe 'Registrations', type: :request do
       expect(response.body).to include('Chung Chi College')
       expect(response.body).to include('New Asia College')
       expect(response.body).not_to include('University')
+      expect(response.body).to include('@link.cuhk.edu.hk')
+      expect(response.body).to include('Generate strong password')
     end
   end
 
@@ -64,6 +66,19 @@ RSpec.describe 'Registrations', type: :request do
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include('Tenant must be one of the eligible CUHK colleges')
+    end
+
+    it 'accepts email local part input and appends CUHK domain' do
+      local_part_params = valid_params.deep_merge(user: {
+        email: nil,
+        email_local_part: '1155209296'
+      })
+
+      post signup_path, params: local_part_params
+
+      expect(response).to redirect_to(signup_verify_path)
+      expect(flash[:notice]).to include('1155209296@link.cuhk.edu.hk')
+      expect(SignupVerificationCode.find_by(email: '1155209296@link.cuhk.edu.hk')).to be_present
     end
   end
 
