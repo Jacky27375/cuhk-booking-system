@@ -25,3 +25,27 @@ Feature: Student registration
     When I submit registration with tenant "University"
     Then I should see "Tenant must be one of the eligible CUHK colleges"
     And no user should exist with email "blocked@link.cuhk.edu.hk"
+
+  Scenario: Student completes signup after email code verification
+    When I am on the registration page
+    And I fill in "CUHK Email" with "verified@link.cuhk.edu.hk"
+    And I fill in "Password" with "Password1!"
+    And I fill in "Confirm Password" with "Password1!"
+    And I select "Chung Chi College" from "College"
+    And I press "Send Verification Code"
+    Then I should see "Verification code sent to verified@link.cuhk.edu.hk."
+    When I enter the latest signup verification code
+    And I press "Verify and Create Account"
+    Then I should see "Account created successfully."
+
+  Scenario: Invalid verification code blocks account creation
+    When I am on the registration page
+    And I fill in "CUHK Email" with "invalidcode@link.cuhk.edu.hk"
+    And I fill in "Password" with "Password1!"
+    And I fill in "Confirm Password" with "Password1!"
+    And I select "New Asia College" from "College"
+    And I press "Send Verification Code"
+    And I fill in "Verification Code" with "000000"
+    And I press "Verify and Create Account"
+    Then I should see "Invalid verification code. Attempts remaining:"
+    And no user should exist with email "invalidcode@link.cuhk.edu.hk"

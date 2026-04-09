@@ -1,0 +1,39 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <h1>Verify Your Email</h1>
+      <p>Enter the 6-digit code sent to <strong><%= @pending_email %></strong></p>
+    </div>
+
+    <% if flash.now[:alert] %>
+      <div class="alert"><%= flash.now[:alert] %></div>
+    <% end %>
+
+    <%= form_with url: signup_verify_code_path, method: :post, data: { turbo: false } do |f| %>
+      <div class="form-group">
+        <%= f.label :verification_code, "Verification Code" %>
+        <%= f.text_field :verification_code,
+            required: true,
+            autofocus: true,
+            maxlength: 6,
+            pattern: "\\d{6}",
+            inputmode: "numeric",
+            autocomplete: "one-time-code",
+            placeholder: "123456" %>
+      </div>
+
+      <div>
+        <%= f.submit "Verify and Create Account", class: "btn-primary" %>
+      </div>
+    <% end %>
+
+    <div class="auth-footer">
+      <%= form_with url: signup_resend_code_path, method: :post, data: { turbo: false }, class: "inline" do |f| %>
+        <%= f.submit "Resend code", class: "btn btn-secondary btn-sm" %>
+      <% end %>
+      <div class="mt-1">
+        Need to update your details? <%= link_to "Back to signup", signup_path %>
+      </div>
+    </div>
+  </div>
+</div>

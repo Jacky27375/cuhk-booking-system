@@ -53,3 +53,11 @@ end
 Then('no user should exist with email {string}') do |email|
   expect(User.where(email: email)).to be_empty
 end
+
+When('I enter the latest signup verification code') do
+  body = ActionMailer::Base.deliveries.last&.body&.encoded.to_s
+  code = body[/\b\d{6}\b/]
+  raise "No signup verification code email found." if code.blank?
+
+  fill_in "Verification Code", with: code
+end

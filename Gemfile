@@ -22,6 +22,8 @@ gem "bcrypt", "~> 3.1.22"
 
 # Resend for transactional email delivery
 gem "resend", "~> 0.17"
+# SendGrid Web API client used by legacy notification paths and tests
+gem "sendgrid-ruby", "~> 6.7"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]

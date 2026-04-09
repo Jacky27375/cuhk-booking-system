@@ -7,6 +7,9 @@ Rails.application.routes.draw do
 
   get  "signup", to: "registrations#new"
   post "signup", to: "registrations#create"
+  get  "signup/verify", to: "registrations#verify", as: :signup_verify
+  post "signup/verify", to: "registrations#verify_code", as: :signup_verify_code
+  post "signup/resend_code", to: "registrations#resend_code", as: :signup_resend_code
 
   get "dashboard", to: "dashboards#show"
   get "approval_dashboard", to: "dashboards#approvals"
@@ -23,7 +26,7 @@ Rails.application.routes.draw do
 
   resources :staff_accounts, only: [:index, :new, :create]
 
-  resources :venue_requests, only: [:index, :new, :create] do
+  resources :venue_requests, only: [:index, :show, :new, :create] do
     member do
       patch :approve
       patch :reject
