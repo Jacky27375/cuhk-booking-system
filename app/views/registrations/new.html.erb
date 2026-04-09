@@ -58,25 +58,6 @@
             Generate strong password
           </button>
         </div>
-        <%= f.password_field :password,
-                             required: true,
-                             placeholder: "Create a password",
-                             autocomplete: "new-password",
-                             data: {
-                               registration_form_target: "password",
-                               action: "input->registration-form#updateRules"
-                             } %>
-        <ul class="password-rules">
-          <li class="password-rule pending" data-registration-form-target="minLengthRule">
-            At least 8 characters
-          </li>
-          <li class="password-rule pending" data-registration-form-target="confirmationRule">
-            Matches confirmation password
-          </li>
-        </ul>
-        <p class="password-rules-summary" data-registration-form-target="rulesSummary">
-          Please satisfy all password requirements.
-        </p>
         <div class="generated-password-panel" data-registration-form-target="generatedPanel" hidden>
           <span>Generated password:</span>
           <code data-registration-form-target="generatedPassword"></code>
@@ -87,6 +68,27 @@
           </button>
           <span class="copy-feedback" data-registration-form-target="copyFeedback"></span>
         </div>
+        <%= f.password_field :password,
+                             required: true,
+                             placeholder: "Create a password",
+                             autocomplete: "new-password",
+                             data: {
+                                registration_form_target: "password",
+                                action: "input->registration-form#updateRules"
+                              } %>
+        <p class="password-rules-summary pending"
+           data-registration-form-target="rulesSummary"
+           aria-live="polite">
+          Please satisfy password requirements.
+        </p>
+        <ul class="password-rules">
+          <li class="password-rule pending" data-registration-form-target="minLengthRule">
+            At least 8 characters
+          </li>
+          <li class="password-rule pending" data-registration-form-target="confirmationRule">
+            Matches confirmation password
+          </li>
+        </ul>
       </div>
 
       <div class="form-group">

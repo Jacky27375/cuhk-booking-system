@@ -19,6 +19,10 @@ export default class extends Controller {
   ]
 
   connect() {
+    if (this.hasGeneratedPanelTarget) {
+      this.generatedPanelTarget.hidden = true
+    }
+
     this.updateRules()
   }
 
@@ -32,11 +36,7 @@ export default class extends Controller {
     this.applyRuleState(this.minLengthRuleTarget, hasMinimumLength)
     this.applyRuleState(this.confirmationRuleTarget, confirmationMatches)
 
-    if (hasMinimumLength && confirmationMatches) {
-      this.rulesSummaryTarget.textContent = "Password requirements satisfied."
-    } else {
-      this.rulesSummaryTarget.textContent = "Please satisfy all password requirements."
-    }
+    this.applySummaryState(hasMinimumLength && confirmationMatches)
   }
 
   generatePassword(event) {
@@ -73,6 +73,12 @@ export default class extends Controller {
   applyRuleState(ruleNode, passed) {
     ruleNode.classList.toggle("passed", passed)
     ruleNode.classList.toggle("pending", !passed)
+  }
+
+  applySummaryState(passed) {
+    this.rulesSummaryTarget.classList.toggle("passed", passed)
+    this.rulesSummaryTarget.classList.toggle("pending", !passed)
+    this.rulesSummaryTarget.textContent = passed ? "All password requirements satisfied." : "Please satisfy password requirements."
   }
 
   buildPassword() {

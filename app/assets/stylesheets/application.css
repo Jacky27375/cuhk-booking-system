@@ -192,9 +192,12 @@ p { margin-bottom: 0.5rem; }
   display: flex;
   align-items: stretch;
   width: 100%;
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 
-.domain-email-input input {
+.auth-card .form-group .domain-email-input input {
+  border-right: 0;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
@@ -204,7 +207,7 @@ p { margin-bottom: 0.5rem; }
   align-items: center;
   padding: 0 0.8rem;
   border: 1.5px solid var(--gray-300);
-  border-left: 0;
+  border-left: 1.5px solid var(--gray-300);
   border-top-right-radius: var(--radius);
   border-bottom-right-radius: var(--radius);
   background: var(--gray-100);
@@ -227,12 +230,25 @@ p { margin-bottom: 0.5rem; }
 }
 
 .password-rules {
-  margin: 0.55rem 0 0;
-  padding-left: 1.1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.25rem;
 }
 
 .password-rule {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   font-size: 0.82rem;
+}
+
+.password-rule::before {
+  content: "\2022";
+  font-size: 1rem;
+  line-height: 1;
+  color: currentColor;
 }
 
 .password-rule.pending {
@@ -243,14 +259,27 @@ p { margin-bottom: 0.5rem; }
   color: #166534;
 }
 
+.password-rule.passed::before {
+  content: "\2713";
+  font-weight: 700;
+}
+
 .password-rules-summary {
-  margin-top: 0.4rem;
+  margin: 0.45rem 0 0.35rem;
   font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.password-rules-summary.pending {
   color: #9a3412;
 }
 
+.password-rules-summary.passed {
+  color: #166534;
+}
+
 .generated-password-panel {
-  margin-top: 0.55rem;
+  margin: 0.3rem 0 0.45rem;
   padding: 0.6rem 0.75rem;
   border: 1px dashed var(--warning);
   border-radius: var(--radius);
@@ -259,6 +288,10 @@ p { margin-bottom: 0.5rem; }
   align-items: center;
   gap: 0.55rem;
   flex-wrap: wrap;
+}
+
+.generated-password-panel[hidden] {
+  display: none;
 }
 
 .generated-password-panel code {
