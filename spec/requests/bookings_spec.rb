@@ -426,6 +426,23 @@ RSpec.describe "/bookings", type: :request do
       expect(booking.approval_steps.last.action).to eq("approve")
     end
 
+    it "allows staff to approve equipment booking even when legacy dates are invalid" do
+      equipment = create(:equipment, tenant: science_tenant)
+      booking = build(:equipment_booking,
+                      user: create(:user, tenant: science_tenant),
+                      equipment: equipment,
+                      status: :pending,
+                      start_date: 1.day.from_now.to_date,
+                      end_date: Date.current)
+      booking.save!(validate: false)
+
+      patch approve_booking_path(booking)
+
+      expect(response).to redirect_to(approval_dashboard_path)
+      expect(booking.reload.status).to eq("approved")
+      expect(booking.approval_steps.last.action).to eq("approve")
+    end
+
     it "rejects approval for bookings outside staff tenant" do
       foreign_venue = create(:venue, department: arts_tenant.name, tenant: arts_tenant)
       booking = create(:booking, venue: foreign_venue, user: create(:user, tenant: arts_tenant), status: :pending)
@@ -599,35 +616,77 @@ RSpec.describe "/bookings", type: :request do
   end
 
   describe "PATCH /bookings/:id/mark_returned" do
-    it "allows users to return approved equipment bookings" do
+    it "blocks students from marking equipment as returned" do
       equipment = create(:equipment, tenant: tenant)
       booking = create(:equipment_booking, user: user, equipment: equipment, status: :approved)
 
       patch mark_returned_booking_path(booking)
 
-      expect(response).to redirect_to(my_bookings_path)
-      expect(booking.reload.status).to eq("returned")
+      expect(response).to redirect_to(root_path)
+      expect(flash[:alert]).to eq("You are not authorized to perform this action.")
+      expect(booking.reload.status).to eq("approved")
     end
 
-    it "blocks returning venue bookings" do
-      booking = create(:booking, user: user, venue: venue, status: :approved)
+    it "allows admins to return approved equipment bookings" do
+      admin = create(:user, :admin)
+      equipment = create(:equipment, tenant: tenant)
+      booking = create(:equipment_booking, user: user, equipment: equipment, status: :approved)
+      log_in_as(admin)
 
       patch mark_returned_booking_path(booking)
 
-      expect(response).to redirect_to(my_bookings_path)
+      expect(response).to redirect_to(bookings_path)
+      expect(booking.reload.status).to eq("returned")
+    end
+
+    it "allows staff to return approved equipment bookings in their tenant" do
+      staff = create(:user, :staff, tenant: tenant)
+      equipment = create(:equipment, tenant: tenant)
+      booking = create(:equipment_booking, user: user, equipment: equipment, status: :approved)
+      log_in_as(staff)
+
+      patch mark_returned_booking_path(booking)
+
+      expect(response).to redirect_to(bookings_path)
+      expect(booking.reload.status).to eq("returned")
+    end
+
+    it "blocks admins returning venue bookings" do
+      admin = create(:user, :admin)
+      booking = create(:booking, user: user, venue: venue, status: :approved)
+      log_in_as(admin)
+
+      patch mark_returned_booking_path(booking)
+
+      expect(response).to redirect_to(bookings_path)
       expect(flash[:alert]).to include("can only be marked as returned")
       expect(booking.reload.status).to eq("approved")
     end
 
-    it "blocks returning equipment bookings that are not approved or borrowed" do
+    it "blocks admins returning equipment bookings that are not approved" do
+      admin = create(:user, :admin)
       equipment = create(:equipment, tenant: tenant)
       booking = create(:equipment_booking, user: user, equipment: equipment, status: :pending)
+      log_in_as(admin)
 
       patch mark_returned_booking_path(booking)
 
-      expect(response).to redirect_to(my_bookings_path)
+      expect(response).to redirect_to(bookings_path)
       expect(flash[:alert]).to include("cannot transition from pending to returned")
       expect(booking.reload.status).to eq("pending")
+    end
+
+    it "blocks admins returning borrowed equipment bookings" do
+      admin = create(:user, :admin)
+      equipment = create(:equipment, tenant: tenant)
+      booking = create(:equipment_booking, user: user, equipment: equipment, status: :borrowed)
+      log_in_as(admin)
+
+      patch mark_returned_booking_path(booking)
+
+      expect(response).to redirect_to(bookings_path)
+      expect(flash[:alert]).to include("cannot transition from borrowed to returned")
+      expect(booking.reload.status).to eq("borrowed")
     end
   end
 end

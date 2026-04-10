@@ -155,6 +155,13 @@ RSpec.describe Booking, type: :model do
       expect { booking.mark_returned! }.to raise_error(ActiveRecord::RecordInvalid)
       expect(booking.reload.status).to eq('pending')
     end
+
+    it 'does not allow borrowed equipment bookings to be marked as returned' do
+      booking = create(:equipment_booking, status: :borrowed)
+
+      expect { booking.mark_returned! }.to raise_error(ActiveRecord::RecordInvalid)
+      expect(booking.reload.status).to eq('borrowed')
+    end
   end
 
   describe '#cancelable_by_owner?' do

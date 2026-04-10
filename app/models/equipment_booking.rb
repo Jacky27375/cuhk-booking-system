@@ -8,8 +8,8 @@ class EquipmentBooking < Booking
   validates :start_date, :end_date, presence: true
   validate :equipment_accessible_by_user
   validate :equipment_quantity_available
-  validate :advance_booking_limit
-  validate :booking_duration_limit
+  validate :advance_booking_limit, if: :validate_booking_dates?
+  validate :booking_duration_limit, if: :validate_booking_dates?
 
   private
 
@@ -50,5 +50,9 @@ class EquipmentBooking < Booking
     if duration_days > 7
       errors.add(:base, "Equipment booking duration cannot exceed 7 days")
     end
+  end
+
+  def validate_booking_dates?
+    new_record? || will_save_change_to_start_date? || will_save_change_to_end_date?
   end
 end

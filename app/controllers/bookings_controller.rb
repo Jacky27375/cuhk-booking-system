@@ -6,7 +6,7 @@ class BookingsController < ApplicationController
   before_action :require_student_for_my!, only: %i[my cancel]
   before_action :require_student_for_booking_create!, only: %i[new confirm create]
   before_action :set_booking, only: %i[show edit update destroy approve reject mark_returned cancel]
-  before_action :require_admin_or_staff, only: %i[index approve reject]
+  before_action :require_admin_or_staff, only: %i[index approve reject mark_returned]
 
   # GET /bookings or /bookings.json
   def index
@@ -167,9 +167,9 @@ class BookingsController < ApplicationController
 
   def mark_returned
     @booking.mark_returned!
-    redirect_to my_bookings_path, notice: "Equipment returned successfully."
+    redirect_back fallback_location: bookings_path, notice: "Equipment returned successfully."
   rescue ActiveRecord::RecordInvalid => e
-    redirect_to my_bookings_path, alert: booking_transition_error_message(e, "Booking could not be marked as returned.")
+    redirect_back fallback_location: bookings_path, alert: booking_transition_error_message(e, "Booking could not be marked as returned.")
   end
 
   # DELETE /bookings/1 or /bookings/1.json
@@ -284,6 +284,7 @@ class BookingsController < ApplicationController
 
     def unauthorized_booking_redirect_path
       return approval_dashboard_path if action_name.in?(["approve", "reject"])
+      return bookings_path if action_name == "mark_returned"
 
       current_user.admin? || current_user.staff? ? bookings_path : my_bookings_path
     end

@@ -111,8 +111,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_192339) do
     t.boolean "is_root_account", default: false, null: false
     t.string "password_digest", null: false
     t.integer "role", default: 0, null: false
-    t.integer "society_id"
-    t.integer "tenant_id"
+    t.bigint "society_id"
+    t.bigint "tenant_id"
     t.datetime "updated_at", null: false
     t.index ["active_session_token"], name: "index_users_on_active_session_token", unique: true
     t.index ["college_scope_slug"], name: "index_users_on_college_scope_slug"

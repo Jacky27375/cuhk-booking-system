@@ -3,7 +3,7 @@ class Booking < ApplicationRecord
   APPROVABLE_FROM_STATUSES = %w[pending under_review].freeze
   REJECTABLE_FROM_STATUSES = %w[pending under_review].freeze
   CANCELLABLE_FROM_STATUSES = %w[pending under_review approved].freeze
-  RETURNABLE_EQUIPMENT_STATUSES = %w[approved borrowed].freeze
+  RETURNABLE_EQUIPMENT_STATUSES = %w[approved].freeze
   NON_BLOCKING_VENUE_STATUSES = %w[rejected cancelled].freeze
 
   belongs_to :user

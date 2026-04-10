@@ -20,8 +20,10 @@ module ApplicationHelper
     link_to "#{label}#{direction_label}".html_safe, params_hash
   end
 
-  def nav_link(label, path, icon: "", controllers: [])
-    active = controllers.include?(controller_name)
+  def nav_link(label, path, icon: "", controllers: [], actions: [])
+    matches_controller = controllers.include?(controller_name)
+    matches_action = actions.empty? || actions.include?(action_name)
+    active = current_page?(path) || (matches_controller && matches_action)
     css = "sidebar-link#{active ? ' active' : ''}"
     link_to path, class: css do
       content_tag(:span, icon, class: "nav-icon") + content_tag(:span, label)

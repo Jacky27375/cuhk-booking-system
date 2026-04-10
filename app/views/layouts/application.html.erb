@@ -37,10 +37,10 @@
 
           <nav class="sidebar-nav">
             <div class="sidebar-section">Main</div>
-            <%= nav_link "Dashboard", dashboard_path, icon: "\u{1F3E0}", controllers: %w[dashboards] %>
+            <%= nav_link "Dashboard", dashboard_path, icon: "\u{1F3E0}", controllers: %w[dashboards], actions: %w[show] %>
 
             <% if current_user.student? %>
-              <%= nav_link "My Bookings", my_bookings_path, icon: "\u{1F4CB}", controllers: [] %>
+              <%= nav_link "My Bookings", my_bookings_path, icon: "\u{1F4CB}", controllers: %w[bookings], actions: %w[my] %>
             <% end %>
 
             <div class="sidebar-section">Resources</div>
@@ -50,7 +50,7 @@
             <% unless current_user.student? %>
               <div class="sidebar-section">Management</div>
               <%= nav_link "All Bookings", bookings_path, icon: "\u{1F4C5}", controllers: %w[bookings] %>
-              <%= nav_link "Approvals", approval_dashboard_path, icon: "\u2705", controllers: [] %>
+              <%= nav_link "Approvals", approval_dashboard_path, icon: "\u2705", controllers: %w[dashboards], actions: %w[approvals] %>
               <%= nav_link "Venue Requests", venue_requests_path, icon: "\u{1F3D7}", controllers: %w[venue_requests] %>
               <% if current_user.staff? && current_user.root_account? %>
                 <%= nav_link "Staff Accounts", staff_accounts_path, icon: "\u{1F465}", controllers: %w[staff_accounts] %>

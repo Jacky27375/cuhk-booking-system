@@ -81,9 +81,6 @@
                     <% if booking.cancelable_by_owner? %>
                       <%= button_to "Cancel Booking", cancel_booking_path(booking), method: :patch, class: "btn btn-warning btn-sm", data: { turbo: false, turbo_confirm: "Cancel this booking?" } %>
                     <% end %>
-                    <% if booking.returnable? %>
-                      <%= button_to "Mark as Returned", mark_returned_booking_path(booking), method: :patch, class: "btn btn-success btn-sm", data: { turbo: false } %>
-                    <% end %>
                   </div>
                 </td>
               </tr>

@@ -66,6 +66,9 @@
               <td class="text-muted text-sm"><%= booking.rejected? ? (booking.rejection_reason.presence || "No reason provided") : "" %></td>
               <td>
                 <%= link_to "View", booking_path(booking), class: "btn btn-outline btn-sm" %>
+                <% if booking.returnable? %>
+                  <%= button_to "Marked as Return", mark_returned_booking_path(booking), method: :patch, class: "btn btn-success btn-sm", data: { turbo: false } %>
+                <% end %>
               </td>
             </tr>
           <% end %>
