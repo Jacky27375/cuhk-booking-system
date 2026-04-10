@@ -10,6 +10,7 @@ Given('the following users exist:') do |table|
     user.password_confirmation = hash['password']
     user.role = role
     user.tenant = tenant
+    user.active_session_token = nil
     user.save!
   end
 end
@@ -36,8 +37,11 @@ Then('I should see {string} only once') do |text|
 end
 
 Given('I am logged in as {string} with password {string}') do |email, password|
+  user = User.find_by(email: email)
+  user&.update!(active_session_token: nil)
+
   visit login_path
-  fill_in 'Email', with: email
+  fill_in 'Email', with: email.to_s.split("@", 2).first
   fill_in 'Password', with: password
   click_button 'Sign In'
 end

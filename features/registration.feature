@@ -28,7 +28,7 @@ Feature: Student registration
 
   Scenario: Student completes signup after email code verification
     When I am on the registration page
-    And I fill in "CUHK Email" with "verified@link.cuhk.edu.hk"
+    And I fill in "CUHK Email" with "verified"
     And I fill in "Password" with "Password1!"
     And I fill in "Confirm Password" with "Password1!"
     And I select "Chung Chi College" from "College"
@@ -40,7 +40,7 @@ Feature: Student registration
 
   Scenario: Invalid verification code blocks account creation
     When I am on the registration page
-    And I fill in "CUHK Email" with "invalidcode@link.cuhk.edu.hk"
+    And I fill in "CUHK Email" with "invalidcode"
     And I fill in "Password" with "Password1!"
     And I fill in "Confirm Password" with "Password1!"
     And I select "New Asia College" from "College"

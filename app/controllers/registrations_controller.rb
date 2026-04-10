@@ -22,7 +22,7 @@ class RegistrationsController < ApplicationController
   end
 
   def create
-    @user = User.new(registration_params)
+    @user = User.new(registration_attributes)
     @user.role = :student
 
     unless registration_tenant_ids.include?(@user.tenant_id)
@@ -77,6 +77,7 @@ class RegistrationsController < ApplicationController
       SignupVerificationService.consume_code!(email: @pending_email)
       clear_pending_signup
       reset_session
+      session[:active_session_token] = @user.issue_active_session_token!
       session[:user_id] = @user.id
       redirect_to dashboard_path, notice: "Account created successfully."
     else
@@ -120,7 +121,14 @@ class RegistrationsController < ApplicationController
   end
 
   def registration_params
-    params.require(:user).permit(:email, :password, :password_confirmation, :tenant_id)
+    params.require(:user).permit(:email, :email_local_part, :password, :password_confirmation, :tenant_id)
+  end
+
+  def registration_attributes
+    attrs = registration_params.to_h
+    email_input = attrs.delete("email_local_part").presence || attrs["email"]
+    attrs["email"] = User.canonicalize_cuhk_email(email_input)
+    attrs
   end
 
   def pending_signup_payload

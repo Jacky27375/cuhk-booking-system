@@ -9,10 +9,36 @@
       <div class="alert"><%= flash[:alert] %></div>
     <% end %>
 
-    <%= form_with url: login_path, method: :post, data: { turbo: false } do |f| %>
+    <% login_local_part_value = params[:email_local_part].presence || params[:email].to_s.split("@", 2).first %>
+
+    <%= form_with url: login_path,
+                  method: :post,
+                  data: {
+                    turbo: false,
+                    controller: "domain-lock-email",
+                    domain_lock_email_domain_value: User::CUHK_EMAIL_DOMAIN
+                  } do |f| %>
       <div class="form-group">
-        <%= f.label :email, "Email" %>
-        <%= f.email_field :email, required: true, autofocus: true, placeholder: "you@link.cuhk.edu.hk" %>
+        <%= f.label :email_local_part, "Email" %>
+        <div class="domain-email-input">
+          <%= f.text_field :email_local_part,
+                           value: login_local_part_value,
+                           required: true,
+                           autofocus: true,
+                           autocomplete: "username",
+                           pattern: "[^@\\s]+",
+                           title: "Enter your CUHK account local part only.",
+                           placeholder: "e.g. 1155209296",
+                           data: {
+                             domain_lock_email_target: "localPart",
+                             action: "input->domain-lock-email#sanitize input->domain-lock-email#updatePreview"
+                           } %>
+          <span class="domain-email-suffix">@link.cuhk.edu.hk</span>
+        </div>
+        <p class="form-hint">
+          Sign in with your student ID/local part.
+          Full email: <strong data-domain-lock-email-target="fullPreview"></strong>
+        </p>
       </div>
 
       <div class="form-group">

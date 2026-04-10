@@ -18,7 +18,7 @@ Given('I am logged in as a {string} of {string}') do |role, tenant_name|
   )
 
   visit '/login'
-  fill_in 'Email', with: @current_user.email
+  fill_in 'Email', with: @current_user.email.to_s.split("@", 2).first
   fill_in 'Password', with: 'Password1!'
   click_button 'Sign In'
 end

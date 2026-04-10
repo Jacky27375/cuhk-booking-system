@@ -8,6 +8,7 @@ RSpec.describe 'Sessions', type: :request do
       get login_path
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Sign In')
+      expect(response.body).to include('@link.cuhk.edu.hk')
     end
   end
 
@@ -15,8 +16,33 @@ RSpec.describe 'Sessions', type: :request do
     it 'logs in with valid credentials and redirects to dashboard' do
       post login_path, params: { email: user.email, password: 'Password1!' }
       expect(response).to redirect_to(dashboard_path)
+      expect(user.reload.active_session_token).to be_present
       follow_redirect!
       expect(response.body).to include('Dashboard')
+    end
+
+    it 'logs in with local-part identifier' do
+      post login_path, params: { email_local_part: user.email.split('@').first, password: 'Password1!' }
+      expect(response).to redirect_to(dashboard_path)
+    end
+
+    it 'blocks concurrent login attempts for the same account' do
+      browser_one = ActionDispatch::Integration::Session.new(Rails.application)
+      browser_two = ActionDispatch::Integration::Session.new(Rails.application)
+
+      browser_one.post login_path, params: { email: user.email, password: 'Password1!' }
+      expect(browser_one.status).to eq(302)
+      expect(browser_one.response.headers['Location']).to end_with(dashboard_path)
+      existing_token = user.reload.active_session_token
+      expect(existing_token).to be_present
+
+      browser_two.post login_path, params: { email: user.email, password: 'Password1!' }
+      expect(browser_two.status).to eq(409)
+      expect(browser_two.response.body).to include('already logged in on another device')
+      expect(user.reload.active_session_token).to eq(existing_token)
+
+      browser_one.get dashboard_path
+      expect(browser_one.status).to eq(200)
     end
 
     it 'rejects invalid credentials' do
@@ -35,8 +61,19 @@ RSpec.describe 'Sessions', type: :request do
   describe 'DELETE /logout' do
     it 'logs out the user and redirects to login' do
       log_in_as(user)
+      expect(user.reload.active_session_token).to be_present
+
       delete logout_path
       expect(response).to redirect_to(login_path)
+      expect(user.reload.active_session_token).to be_nil
+    end
+
+    it 'allows login again after logout releases lock' do
+      log_in_as(user)
+      delete logout_path
+
+      post login_path, params: { email: user.email, password: 'Password1!' }
+      expect(response).to redirect_to(dashboard_path)
     end
   end
 
@@ -50,6 +87,14 @@ RSpec.describe 'Sessions', type: :request do
       log_in_as(user)
       get dashboard_path
       expect(response).to have_http_status(:ok)
+    end
+
+    it 'invalidates stale sessions after session token changes' do
+      log_in_as(user)
+      user.update!(active_session_token: SecureRandom.hex(32))
+
+      get dashboard_path
+      expect(response).to redirect_to(login_path)
     end
 
     it 'hides Booking link for society member dashboard' do
