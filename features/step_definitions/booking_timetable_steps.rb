@@ -62,23 +62,25 @@ Then('the slot {string} should not be marked selected') do |label|
 end
 
 Then('the {string} options should include:') do |field_label, table|
-  options = find_field(field_label).all('option').map(&:text)
+  field_id = field_label == 'Start time' ? 'booking_start_slot' : 'booking_end_slot'
+  options = find("##{field_id}", visible: :all).all('option').map(&:text)
   table.raw.flatten.each do |expected_option|
     expect(options).to include(expected_option)
   end
 end
 
 Then('the {string} options should not include:') do |field_label, table|
-  options = find_field(field_label).all('option').map(&:text)
+  field_id = field_label == 'Start time' ? 'booking_start_slot' : 'booking_end_slot'
+  options = find("##{field_id}", visible: :all).all('option').map(&:text)
   table.raw.flatten.each do |unexpected_option|
     expect(options).not_to include(unexpected_option)
   end
 end
 
 Then('the end time picker should be disabled') do
-  expect(find('#booking_end_slot')).to be_disabled
+  expect(find('#booking_end_slot', visible: :all)).to be_disabled
 end
 
 Then('the end time picker should be enabled') do
-  expect(find('#booking_end_slot')).not_to be_disabled
+  expect(find('#booking_end_slot', visible: :all)).not_to be_disabled
 end

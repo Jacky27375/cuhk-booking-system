@@ -52,7 +52,7 @@
 
     <div class="booking-field">
       <%= label_tag "booking_end_slot", "End time", class: "booking-label" %>
-      <%= select_tag "booking[end_slot]", options_for_select(@end_slot_options, booking.end_time&.strftime('%H:%M')), include_blank: "Select end time", id: "booking_end_slot", data: { booking_time_target: "endSelect" } %>
+      <%= select_tag "booking[end_slot]", options_for_select(@end_slot_options, booking.end_time&.strftime('%H:%M')), include_blank: "Select end time", id: "booking_end_slot", disabled: booking.start_time.blank?, data: { booking_time_target: "endSelect" } %>
     </div>
 
     <div class="booking-actions">
