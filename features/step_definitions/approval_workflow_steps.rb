@@ -37,6 +37,32 @@ Given("{string} has a pending booking for {string} on a date {int} days in the f
   )
 end
 
+Given("{string} has a pending booking for {string} {int} days in the past") do |email, venue_name, days|
+  user = User.find_by!(email: email)
+  venue = Venue.find_by!(name: venue_name)
+  date = (Date.current - days.days).strftime("%Y-%m-%d")
+
+  future_date = (Date.current + 5.days).strftime("%Y-%m-%d")
+  booking = create(
+    :booking,
+    user: user,
+    venue: venue,
+    start_time: Time.zone.parse("#{future_date} 13:00"),
+    end_time: Time.zone.parse("#{future_date} 15:00"),
+    status: :pending
+  )
+
+  booking.update_columns(
+    start_time: Time.zone.parse("#{date} 10:00"),
+    end_time: Time.zone.parse("#{date} 12:00"),
+    status: Booking.statuses[:pending],
+    rejection_reason: nil,
+    updated_at: Time.current
+  )
+
+  @current_booking = booking
+end
+
 Given("tenant {string} uses two-step approval") do |tenant_name|
   tenant = Tenant.find_by!(name: tenant_name)
   tenant.update!(approval_mode: :two_step)
@@ -73,10 +99,19 @@ When("I approve the booking for {string} on a date {int} days in the future") do
   step "I approve the booking for \"#{venue_name}\" on \"#{date}\""
 end
 
+When("I run the expired booking rejection job") do
+  ExpirePendingVenueBookingsJob.perform_now
+end
+
 Then("the booking status should be {string}") do |status|
   booking = @current_booking || Booking.last
   normalized_status = status.downcase.tr(" ", "_")
   expect(booking.reload.status).to eq(normalized_status)
+end
+
+Then("the booking rejection reason should be {string}") do |reason|
+  booking = @current_booking || Booking.last
+  expect(booking.reload.rejection_reason).to eq(reason)
 end
 
 Then("{string} should receive a confirmation email") do |email|
@@ -215,6 +250,10 @@ Then("I should not be on the approval dashboard page") do
 end
 
 Then("I should not see the booking for {string}") do |venue_name|
+  expect(page).not_to have_content(venue_name)
+end
+
+Then("I should not see the pending booking for {string}") do |venue_name|
   expect(page).not_to have_content(venue_name)
 end
 

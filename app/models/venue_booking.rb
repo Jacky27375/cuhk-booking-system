@@ -1,6 +1,16 @@
 class VenueBooking < Booking
+  EXPIRED_PENDING_REJECTION_REASON = "Booking date has passed".freeze
+
   def self.model_name
     Booking.model_name
+  end
+
+  def self.reject_expired_pending!(at: Time.current)
+    pending
+      .where("end_time < ?", at)
+      .find_each do |booking|
+        booking.reject!(EXPIRED_PENDING_REJECTION_REASON)
+      end
   end
 
   validates :venue, presence: true
@@ -51,7 +61,7 @@ class VenueBooking < Booking
   end
 
   def advance_booking_limit
-    return unless start_time.present?
+    return unless start_time.present? && pending?
 
     # Booking must be at least 5 days in advance
     if start_time.to_date < 5.days.from_now.to_date
