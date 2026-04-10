@@ -26,6 +26,18 @@ root_staff_emails = {
   "Lee Woo Sing College" => "staff_root_leewoosin@link.cuhk.edu.hk"
 }
 
+demo_student_emails = {
+  "Chung Chi College" => "demo_student_chungchi@link.cuhk.edu.hk",
+  "New Asia College" => "demo_student_newasia@link.cuhk.edu.hk",
+  "United College" => "demo_student_united@link.cuhk.edu.hk",
+  "Shaw College" => "demo_student_shaw@link.cuhk.edu.hk",
+  "Morningside College" => "demo_student_morningside@link.cuhk.edu.hk",
+  "S.H. Ho College" => "demo_student_shho@link.cuhk.edu.hk",
+  "CW Chu College" => "demo_student_cwchu@link.cuhk.edu.hk",
+  "Wu Yee Sun College" => "demo_student_wuyeesun@link.cuhk.edu.hk",
+  "Lee Woo Sing College" => "demo_student_leewoosin@link.cuhk.edu.hk"
+}
+
 venues = [
   { name: "Room G04 Pommerenke Student Centre", description: "Pommerenke Student Centre (Music Room)", department: "University" },
   { name: "Room G05 Pommerenke Student Centre", description: "Pommerenke Student Centre (Piano-practice Rooms)", department: "University" },
@@ -262,12 +274,6 @@ equipments.each do |equipment_attrs|
   end
 end
 
-Venue.find_or_create_by!(name: "University Room") do |v|
-  v.description = "University shared resource room accessible by all college students"
-  v.department = "University"
-  v.tenant = tenants["University"]
-end
-
 puts "Ensuring admin account..."
 admin = User.find_or_initialize_by(email: "admin@link.cuhk.edu.hk")
 admin.role = :admin
@@ -281,6 +287,7 @@ end
 admin.save!
 
 puts "Ensuring root staff accounts..."
+root_staff_users = {}
 root_staff_emails.each do |college_name, email|
   user = User.find_or_initialize_by(email: email)
   user.role = :staff
@@ -293,8 +300,140 @@ root_staff_emails.each do |college_name, email|
   end
 
   user.save!
+  root_staff_users[college_name] = user
 end
 
+puts "Ensuring demo student accounts..."
+demo_students = {}
+demo_student_emails.each do |college_name, email|
+  student = User.find_or_initialize_by(email: email)
+  student.role = :student
+  student.is_root_account = false
+  student.tenant = tenants.fetch(college_name)
+
+  if reset_bootstrap_accounts_once || student.new_record? || student.password_digest.blank?
+    student.password = bootstrap_password
+    student.password_confirmation = bootstrap_password
+  end
+
+  student.save!
+  demo_students[college_name] = student
+end
+
+puts "Ensuring demo bookings..."
+seed_rng = Random.new(20260410)
+seeded_venue_bookings = []
+seeded_equipment_bookings = []
+booking_statuses = %w[pending approved rejected under_review cancelled]
+
+demo_students.values.each_with_index do |student, index|
+  visible_venues = Venue.visible_to_student(student).order(:id).to_a
+  visible_equipment = Equipment.visible_to_student(student).order(:id).to_a
+
+  next if visible_venues.empty? || visible_equipment.empty?
+
+  venue_record = visible_venues.sample(random: seed_rng)
+  equipment_record = visible_equipment.sample(random: seed_rng)
+
+  start_date = (5 + index + seed_rng.rand(0..5)).days.from_now.to_date
+  start_hour = 8 + ((index * 2) % 10)
+  duration_hours = 1 + seed_rng.rand(0..3)
+  start_time = Time.zone.local(start_date.year, start_date.month, start_date.day, start_hour, 0, 0)
+  end_time = start_time + duration_hours.hours
+  venue_status = booking_statuses.sample(random: seed_rng)
+  equipment_status = booking_statuses.sample(random: seed_rng)
+
+  venue_booking = VenueBooking.find_or_initialize_by(
+    venue: venue_record,
+    user: student,
+    start_time: start_time,
+    end_time: end_time
+  )
+  venue_booking.status = venue_status
+  venue_booking.rejection_reason = venue_status == "rejected" ? "Seeded demo booking" : nil
+  venue_booking.save!
+  seeded_venue_bookings << venue_booking
+
+  equipment_start_date = start_date
+  equipment_end_date = equipment_start_date + seed_rng.rand(0..3).days
+
+  equipment_booking = EquipmentBooking.find_or_initialize_by(
+    equipment: equipment_record,
+    user: student,
+    start_date: equipment_start_date,
+    end_date: equipment_end_date
+  )
+  equipment_booking.quantity = 1
+  equipment_booking.status = equipment_status
+  equipment_booking.rejection_reason = equipment_status == "rejected" ? "Seeded demo booking" : nil
+  equipment_booking.save!
+  seeded_equipment_bookings << equipment_booking
+end
+
+puts "Ensuring demo venue requests..."
+venue_request_statuses = %w[pending approved rejected]
+equipment_request_statuses = %w[pending rejected]
+seeded_venue_requests = []
+root_staff_users.each do |college_name, requester|
+  [
+    {
+      venue_name: "#{college_name} Requested Venue #{seed_rng.rand(1000..9999)}",
+      description: "Seeded NEW VENUE request for #{college_name} by #{requester.email}",
+      statuses: venue_request_statuses
+    },
+    {
+      venue_name: "#{college_name} Equipment Request #{seed_rng.rand(1000..9999)}",
+      description: "Seeded NEW EQUIPMENT request for #{college_name} by #{requester.email}",
+      statuses: equipment_request_statuses
+    }
+  ].each do |request_attrs|
+    status = request_attrs[:statuses].sample(random: seed_rng)
+
+    venue_request = VenueRequest.find_or_initialize_by(
+      requester: requester,
+      tenant: requester.tenant,
+      venue_name: request_attrs[:venue_name]
+    )
+    venue_request.description = request_attrs[:description]
+    venue_request.status = status
+
+    if status == "pending"
+      venue_request.reviewed_by = nil
+      venue_request.reviewed_at = nil
+      venue_request.rejection_reason = nil
+    else
+      venue_request.reviewed_by = admin
+      venue_request.reviewed_at = Time.current
+      venue_request.rejection_reason = status == "rejected" ? "Seeded rejection reason" : nil
+    end
+
+    venue_request.save!
+    seeded_venue_requests << venue_request
+  end
+end
+
+puts "Verifying seed state..."
+expected_tenant_count = colleges.count + 1
+expected_seed_users = [admin.email, *root_staff_emails.values, *demo_student_emails.values]
+expected_demo_student_count = demo_student_emails.count
+expected_venue_request_count = root_staff_emails.count * 2
+
+checks = [
+  ["tenants", Tenant.count, expected_tenant_count],
+  ["venues", Venue.count, venues.count],
+  ["equipment records", Equipment.count, equipments.count],
+  ["seed users", User.where(email: expected_seed_users).count, expected_seed_users.count],
+  ["demo students", User.where(email: demo_student_emails.values).count, expected_demo_student_count],
+  ["seeded venue bookings", VenueBooking.where(user: demo_students.values).count, seeded_venue_bookings.count],
+  ["seeded equipment bookings", EquipmentBooking.where(user: demo_students.values).count, seeded_equipment_bookings.count],
+  ["seeded staff requests", VenueRequest.where(requester: root_staff_users.values).count, expected_venue_request_count]
+]
+
+checks.each do |label, actual, expected|
+  raise "Seed verification failed for #{label}: expected #{expected}, got #{actual}" unless actual == expected
+end
+
+puts "Seed verification passed: #{expected_tenant_count} tenants, #{venues.count} venues, #{equipments.count} equipment items, #{seeded_venue_bookings.count} demo-student venue bookings, #{seeded_equipment_bookings.count} demo-student equipment bookings, #{expected_venue_request_count} staff request records (venue and equipment-themed)."
 puts "Seed data ensured successfully."
 
 unless Rails.env.production?
@@ -304,6 +443,11 @@ unless Rails.env.production?
   puts ""
   puts "Root Staff Accounts (one per college):"
   root_staff_emails.each do |college_name, email|
+    puts "  #{college_name}: #{email} / #{bootstrap_password}"
+  end
+  puts ""
+  puts "Demo Student Accounts (one per college):"
+  demo_student_emails.each do |college_name, email|
     puts "  #{college_name}: #{email} / #{bootstrap_password}"
   end
 end

@@ -26,14 +26,9 @@ You need the following installed to run this project:
 3. **Database Setup**
    Ensure your local PostgreSQL server is running. You can use the default `postgres` user.
    
-   Create the development databases and load the schema:
+   Reset, recreate, and seed the development database in one step:
    ```bash
-   rails db:create db:prepare
-   ```
-
-   Seed the database with dummy user accounts for testing:
-   ```bash
-   rails db:seed
+   bundle exec rails reset
    ```
 
 4. **Start the server**
@@ -78,7 +73,15 @@ bundle exec bundler-audit check --update
 
 ### Seed Data (Login details)
 
-If you ran `rails db:seed`, the development database includes the following bootstrap accounts:
+If you ran `bundle exec rails reset` or `rails db:seed`, the development database includes:
+
+- 10 tenants total: University plus the 9 CUHK colleges listed in `db/seeds.rb`
+- All seeded venues and equipment records defined in `db/seeds.rb`
+- Deterministic demo venue/equipment booking records owned by demo student accounts (one per college)
+- Deterministic staff-submitted request records for both new venue requests and equipment-themed requests
+- Bootstrap accounts listed below
+
+The seed run also prints a verification summary and fails fast if the expected tenant, resource, user, or booking counts do not match.
 
 **Admin:**
 
@@ -101,6 +104,22 @@ If you ran `rails db:seed`, the development database includes the following boot
 | Lee Woo Sing College | `staff_root_leewoosin@link.cuhk.edu.hk` | `Password1!` |
 
 Student accounts can be created via the signup page (students select their college during registration).
+
+**Demo Student Accounts (one per college):**
+
+| College | Email | Password |
+|---------|-------|----------|
+| Chung Chi College | `demo_student_chungchi@link.cuhk.edu.hk` | `Password1!` |
+| New Asia College | `demo_student_newasia@link.cuhk.edu.hk` | `Password1!` |
+| United College | `demo_student_united@link.cuhk.edu.hk` | `Password1!` |
+| Shaw College | `demo_student_shaw@link.cuhk.edu.hk` | `Password1!` |
+| Morningside College | `demo_student_morningside@link.cuhk.edu.hk` | `Password1!` |
+| S.H. Ho College | `demo_student_shho@link.cuhk.edu.hk` | `Password1!` |
+| CW Chu College | `demo_student_cwchu@link.cuhk.edu.hk` | `Password1!` |
+| Wu Yee Sun College | `demo_student_wuyeesun@link.cuhk.edu.hk` | `Password1!` |
+| Lee Woo Sing College | `demo_student_leewoosin@link.cuhk.edu.hk` | `Password1!` |
+
+Seeded booking demo records are owned by the demo student accounts above. Staff-submitted request demo records are created by seeded root staff accounts. The seeded demo data is intended for smoke testing and TA demos, not long-term content.
 
 In production Docker deploys, startup now runs `db:seed` as well. This keeps college tenants, venue/equipment seed records, and bootstrap admin/root accounts present even on a fresh or previously unseeded database.
 
