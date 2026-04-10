@@ -50,6 +50,25 @@ Feature: Venue Request Workflow
     Then I should see "Review Pending Requests"
     And I should see "1 pending request(s) need review"
 
+  Scenario: Admin sees all pending staff venue requests on approval dashboard
+    Given the following college tenants exist:
+      | name         |
+      | Arts Faculty |
+    And a root staff account "staff_arts@link.cuhk.edu.hk" exists for "Arts Faculty"
+    And "staff@link.cuhk.edu.hk" has submitted a venue request for "Lab 401"
+    And "staff_arts@link.cuhk.edu.hk" has submitted a venue request for "Art Studio 12"
+    And I am logged in as "admin@link.cuhk.edu.hk" with password "Password1!"
+    When I visit the approval dashboard
+    Then I should see "Pending Staff Venue Requests"
+    And I should see "Lab 401"
+    And I should see "Art Studio 12"
+
+  Scenario: Staff approval dashboard does not show pending venue requests
+    Given "staff@link.cuhk.edu.hk" has submitted a venue request for "Lab 402"
+    And I am logged in as "staff@link.cuhk.edu.hk" with password "Password1!"
+    When I visit the approval dashboard
+    Then I should not see "Pending Staff Venue Requests"
+
   Scenario: Student cannot access venue requests
     Given a student "student@link.cuhk.edu.hk" exists for "Chung Chi College"
     And I am logged in as "student@link.cuhk.edu.hk" with password "Password1!"
