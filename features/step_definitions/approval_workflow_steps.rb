@@ -12,6 +12,8 @@ Given("{string} has a pending booking for {string} on {string}") do |email, venu
   start_time = Time.zone.parse("#{date} 10:00")
   end_time = Time.zone.parse("#{date} 12:00")
 
+  Booking.where(venue: venue, start_time: start_time.beginning_of_day..start_time.end_of_day).delete_all
+
   create(
     :booking,
     user: user,
@@ -26,12 +28,15 @@ Given("{string} has a pending booking for {string} on a date {int} days in the f
   user = User.find_by!(email: email)
   venue = Venue.find_by!(name: venue_name)
   date = (Date.current + days.days).strftime("%Y-%m-%d")
+  start_time = Time.zone.parse("#{date} 10:00")
+
+  Booking.where(venue: venue, start_time: start_time.beginning_of_day..start_time.end_of_day).delete_all
 
   create(
     :booking,
     user: user,
     venue: venue,
-    start_time: Time.zone.parse("#{date} 10:00"),
+    start_time: start_time,
     end_time: Time.zone.parse("#{date} 12:00"),
     status: :pending
   )
@@ -43,11 +48,13 @@ Given("{string} has a pending booking for {string} {int} days in the past") do |
   date = (Date.current - days.days).strftime("%Y-%m-%d")
 
   future_date = (Date.current + 5.days).strftime("%Y-%m-%d")
+  future_start_time = Time.zone.parse("#{future_date} 13:00")
+  Booking.where(venue: venue, start_time: future_start_time.beginning_of_day..future_start_time.end_of_day).delete_all
   booking = create(
     :booking,
     user: user,
     venue: venue,
-    start_time: Time.zone.parse("#{future_date} 13:00"),
+    start_time: future_start_time,
     end_time: Time.zone.parse("#{future_date} 15:00"),
     status: :pending
   )

@@ -8,6 +8,12 @@ class DashboardsController < ApplicationController
     @bookings = Booking.awaiting_approval
                        .includes(:venue, :equipment, :user, approval_steps: :actor)
 
+    @pending_venue_requests = if current_user.admin?
+      VenueRequest.pending.includes(:requester, :tenant).order(created_at: :desc)
+    else
+      VenueRequest.none
+    end
+
     if current_user.staff?
       scoped_ids = Booking.for_tenant(current_user.tenant).select(:id)
       @bookings = @bookings.where(id: scoped_ids)
