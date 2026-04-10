@@ -47,6 +47,25 @@ end
 
 When('I select {string} from {string}') do |option, dropdown|
   select option, from: dropdown
+
+  # In non-JS runs, selecting start time does not dynamically repopulate end-time options.
+  # Revisit the new booking page with start_slot so server-side filtering can populate end slots.
+  next unless dropdown.in?(['booking_start_slot', 'Start time'])
+  next if Capybara.current_driver == Capybara.javascript_driver
+  next unless page.current_path == new_booking_path
+
+  booking_date = find("input[name='booking[booking_date]']", visible: :all).value.presence ||
+                 find_field('booking_date').value.presence
+  venue_id = find("input[name='booking[venue_id]']", visible: :all).value.presence ||
+             find("input[name='venue_id']", visible: :all).value.presence
+
+  params = {
+    booking_date: booking_date,
+    venue_id: venue_id,
+    booking: { start_slot: option }
+  }.compact
+
+  visit "#{new_booking_path}?#{params.to_query}"
 end
 
 When('I fill in {string} with a date {int} days in the future') do |field, days|

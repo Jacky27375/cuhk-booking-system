@@ -120,7 +120,7 @@ Feature: Venue Booking System
     When I click "Submit Booking"
     Then I should see "Booking was successfully created."
 
-  Scenario: Member cannot book a venue for more than 4 hours
+  Scenario: Member cannot select an end time beyond 4 hours
     Given there is a venue "Lecture Hall A"
     And I am logged in as "member@link.cuhk.edu.hk"
     When I visit the venues page
@@ -128,7 +128,10 @@ Feature: Venue Booking System
     And I click "Book Venue"
     And I fill in "booking_date" with a date 5 days in the future
     And I select "10:00" from "booking_start_slot"
-    And I select "15:00" from "booking_end_slot"
-    And I click "Review Booking"
-    Then I should see "Booking duration cannot exceed 4 hours"
-    And the slot "10:00 - 11:00" should not be marked selected
+    Then the "booking_end_slot" options should include:
+      | 11:00 |
+      | 12:00 |
+      | 13:00 |
+      | 14:00 |
+    And the "booking_end_slot" options should not include:
+      | 15:00 |
