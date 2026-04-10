@@ -1,17 +1,20 @@
 When('I open the booking page for {string} on {string}') do |venue_name, date|
   venue = Venue.find_by!(name: venue_name)
   visit new_booking_path(venue_id: venue.id, booking_date: date)
+  expect(page).to have_selector('#booking_start_slot', visible: :all)
 end
 
 When('I open the booking page for {string} on a date {int} days in the future') do |venue_name, days|
   venue = Venue.find_by!(name: venue_name)
   date = (Date.current + days.days).strftime('%Y-%m-%d')
   visit new_booking_path(venue_id: venue.id, booking_date: date)
+  expect(page).to have_selector('#booking_start_slot', visible: :all)
 end
 
 When('I open the edit booking page for my booking on {string}') do |date|
   booking = Booking.joins(:user).where(users: { email: 'member@link.cuhk.edu.hk' }).where(start_time: Time.zone.parse("#{date} 00:00:00")..Time.zone.parse("#{date} 23:59:59")).first!
   visit edit_booking_path(booking, booking_date: date)
+  expect(page).to have_selector('#booking_start_slot', visible: :all)
 end
 
 When('I open the edit booking page for my booking on a date {int} days in the future') do |days|
@@ -19,6 +22,7 @@ When('I open the edit booking page for my booking on a date {int} days in the fu
   email = @current_user_email || 'member@link.cuhk.edu.hk'
   booking = Booking.joins(:user).where(users: { email: email }).where(start_time: Time.zone.parse("#{date} 00:00:00")..Time.zone.parse("#{date} 23:59:59")).first!
   visit edit_booking_path(booking, booking_date: date)
+  expect(page).to have_selector('#booking_start_slot', visible: :all)
 end
 
 Then('I should see timetable date {string}') do |date|

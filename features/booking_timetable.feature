@@ -17,7 +17,6 @@ Feature: Booking timetable and conflict prevention
     And the slot "10:00 - 11:00" should be marked unavailable
     And the slot "11:00 - 12:00" should be marked available
 
-  @javascript
   Scenario: Unavailable start time options are hidden
     Given there is a booking for "Lecture Hall A" by "other@link.cuhk.edu.hk" from 5 days in the future at "08:00" to 5 days in the future at "10:00"
     And I am logged in as "member@link.cuhk.edu.hk"
@@ -29,7 +28,6 @@ Feature: Booking timetable and conflict prevention
       | 08:00 |
       | 09:00 |
 
-  @javascript
   Scenario: End time appears only after start time and only shows valid slots
     Given there is a venue "Room B"
     And there is a booking for "Room B" by "other@link.cuhk.edu.hk" from 5 days in the future at "12:00" to 5 days in the future at "13:00"
