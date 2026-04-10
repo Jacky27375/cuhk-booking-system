@@ -324,7 +324,7 @@ puts "Ensuring demo bookings..."
 seed_rng = Random.new(20260410)
 seeded_venue_bookings = []
 seeded_equipment_bookings = []
-booking_statuses = %w[pending approved rejected under_review cancelled]
+booking_statuses = %w[pending approved rejected cancelled]
 
 demo_students.values.each_with_index do |student, index|
   visible_venues = Venue.visible_to_student(student).order(:id).to_a
@@ -372,7 +372,7 @@ end
 
 puts "Ensuring demo venue requests..."
 venue_request_statuses = %w[pending approved rejected]
-equipment_request_statuses = %w[pending rejected]
+equipment_request_statuses = %w[pending approved rejected]
 seeded_venue_requests = []
 root_staff_users.each do |college_name, requester|
   [
