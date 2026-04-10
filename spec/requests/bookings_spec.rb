@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'nokogiri'
 
 RSpec.describe "/bookings", type: :request do
   let(:tenant) { create(:tenant, name: "University", slug: "university") }
@@ -125,6 +126,60 @@ RSpec.describe "/bookings", type: :request do
     it "renders a successful response" do
       get new_booking_url
       expect(response).to be_successful
+    end
+
+    it "excludes unavailable start slots" do
+      booking_date = 5.days.from_now.to_date
+      other_user = create(:user, tenant: tenant, email: "other-student@link.cuhk.edu.hk")
+      create(
+        :booking,
+        venue: venue,
+        user: other_user,
+        start_time: Time.zone.parse("#{booking_date} 08:00:00"),
+        end_time: Time.zone.parse("#{booking_date} 10:00:00")
+      )
+
+      get new_booking_url, params: { venue_id: venue.id, booking_date: booking_date.to_s }
+
+      document = Nokogiri::HTML(response.body)
+      start_options = document.css('select#booking_start_slot option').map { |node| node['value'] }.reject(&:blank?)
+
+      expect(start_options).not_to include('08:00', '09:00')
+      expect(start_options).to include('10:00')
+    end
+
+    it "shows no end slot options until a start slot is chosen" do
+      booking_date = 5.days.from_now.to_date
+
+      get new_booking_url, params: { venue_id: venue.id, booking_date: booking_date.to_s }
+
+      document = Nokogiri::HTML(response.body)
+      end_options = document.css('select#booking_end_slot option').map { |node| node['value'] }.reject(&:blank?)
+
+      expect(end_options).to be_empty
+    end
+
+    it "limits end slot options to valid non-overlapping ranges up to 4 hours" do
+      booking_date = 5.days.from_now.to_date
+      other_user = create(:user, tenant: tenant, email: "another-student@link.cuhk.edu.hk")
+      create(
+        :booking,
+        venue: venue,
+        user: other_user,
+        start_time: Time.zone.parse("#{booking_date} 12:00:00"),
+        end_time: Time.zone.parse("#{booking_date} 13:00:00")
+      )
+
+      get new_booking_url, params: {
+        venue_id: venue.id,
+        booking_date: booking_date.to_s,
+        booking: { start_slot: '10:00' }
+      }
+
+      document = Nokogiri::HTML(response.body)
+      end_options = document.css('select#booking_end_slot option').map { |node| node['value'] }.reject(&:blank?)
+
+      expect(end_options).to contain_exactly('11:00', '12:00')
     end
   end
 

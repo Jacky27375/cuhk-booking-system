@@ -17,14 +17,41 @@ Feature: Booking timetable and conflict prevention
     And the slot "10:00 - 11:00" should be marked unavailable
     And the slot "11:00 - 12:00" should be marked available
 
-  Scenario: Booking outside business hours is rejected
-    Given I am logged in as "member@link.cuhk.edu.hk"
+  @javascript
+  Scenario: Unavailable start time options are hidden
+    Given there is a booking for "Lecture Hall A" by "other@link.cuhk.edu.hk" from 5 days in the future at "08:00" to 5 days in the future at "10:00"
+    And I am logged in as "member@link.cuhk.edu.hk"
     When I open the booking page for "Lecture Hall A" on a date 5 days in the future
-    And I select "08:00" from "Start time"
-    And I select "08:00" from "End time"
-    And I click "Review Booking"
-    And I should not see "error prohibited this booking from being saved"
-    Then I should see "must be after start time"
+    Then the "Start time" options should include:
+      | 10:00 |
+      | 11:00 |
+    And the "Start time" options should not include:
+      | 08:00 |
+      | 09:00 |
+
+  @javascript
+  Scenario: End time appears only after start time and only shows valid slots
+    Given there is a venue "Room B"
+    And there is a booking for "Room B" by "other@link.cuhk.edu.hk" from 5 days in the future at "12:00" to 5 days in the future at "13:00"
+    And I am logged in as "member@link.cuhk.edu.hk"
+    When I open the booking page for "Room B" on a date 5 days in the future
+    Then the end time picker should be disabled
+    When I select "10:00" from "Start time"
+    Then the end time picker should be enabled
+    And the "End time" options should include:
+      | 11:00 |
+      | 12:00 |
+    And the "End time" options should not include:
+      | 13:00 |
+      | 14:00 |
+    When I select "19:00" from "Start time"
+    Then the "End time" options should include:
+      | 20:00 |
+      | 21:00 |
+      | 22:00 |
+    And the "End time" options should not include:
+      | 23:00 |
+
 
   Scenario: Booking with non hourly increments is rejected
     Given I am logged in as "member@link.cuhk.edu.hk"
@@ -33,18 +60,6 @@ Feature: Booking timetable and conflict prevention
     And I should not see "09:30"
     And I should see "09:00"
     And I should see "10:00"
-
-  Scenario: Overlapping booking is rejected
-    Given there is a booking for "Lecture Hall A" by "other@link.cuhk.edu.hk" from 5 days in the future at "10:00" to 5 days in the future at "11:00"
-    And I am logged in as "member@link.cuhk.edu.hk"
-    When I open the booking page for "Lecture Hall A" on a date 5 days in the future
-    And I select "10:00" from "Start time"
-    And I select "12:00" from "End time"
-    And I click "Review Booking"
-    And I should not see "error prohibited this booking from being saved"
-    Then I should see "conflicts with an existing booking"
-    And the slot "10:00 - 11:00" should be marked unavailable
-    And the slot "10:00 - 11:00" should not be marked selected
 
   Scenario: Selected slot is highlighted on edit page
     Given there is a booking for "Lecture Hall A" by "member@link.cuhk.edu.hk" from 5 days in the future at "12:00" to 5 days in the future at "13:00"

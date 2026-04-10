@@ -290,7 +290,9 @@ class BookingsController < ApplicationController
 
     def prepare_timetable_context
       @booking_date = selected_booking_date
-      @time_slot_options = build_time_slot_options
+      @start_slot_options = build_start_slot_options
+      @end_slot_options = build_end_slot_options(selected_start_slot)
+      @unavailable_ranges_for_slots = unavailable_ranges_for_slots
       @timetable_slots = build_timetable_slots
     end
 
@@ -340,7 +342,7 @@ class BookingsController < ApplicationController
 
     def build_timetable_slots
       day_start, day_end = day_bounds
-      existing_bookings = bookings_for_selected_day.to_a
+      existing_bookings = existing_day_bookings
       chosen_range = selected_range
 
       slots = []
@@ -375,17 +377,65 @@ class BookingsController < ApplicationController
       slots
     end
 
-    def build_time_slot_options
+    def build_start_slot_options
+      selected_start = selected_start_slot
       options = []
       cursor = Time.zone.local(@booking_date.year, @booking_date.month, @booking_date.day, TIMETABLE_START_HOUR, 0, 0)
       day_end = Time.zone.local(@booking_date.year, @booking_date.month, @booking_date.day, TIMETABLE_END_HOUR, 0, 0)
 
-      while cursor <= day_end
-        options << cursor.strftime("%H:%M")
+      while cursor < day_end
+        slot_start = cursor
+        slot_end = slot_start + 1.hour
+        slot_label = slot_start.strftime("%H:%M")
+
+        if slot_label == selected_start || slot_available_for_range?(slot_start, slot_end)
+          options << slot_label
+        end
+
         cursor += 1.hour
       end
 
       options
+    end
+
+    def build_end_slot_options(start_slot)
+      return [] if start_slot.blank?
+
+      day_end = Time.zone.local(@booking_date.year, @booking_date.month, @booking_date.day, TIMETABLE_END_HOUR, 0, 0)
+      start_at = combine_date_and_slot(@booking_date, start_slot)
+      return [] unless start_at
+
+      options = []
+      max_end_at = [start_at + 4.hours, day_end].min
+      cursor = start_at + 1.hour
+
+      while cursor <= max_end_at
+        options << cursor.strftime("%H:%M") if slot_available_for_range?(start_at, cursor)
+        cursor += 1.hour
+      end
+
+      options
+    end
+
+    def selected_start_slot
+      return nil unless @booking.start_time.present?
+      return nil unless @booking.start_time.to_date == @booking_date
+
+      @booking.start_time.strftime("%H:%M")
+    end
+
+    def existing_day_bookings
+      @existing_day_bookings ||= bookings_for_selected_day.to_a
+    end
+
+    def unavailable_ranges_for_slots
+      existing_day_bookings.reject { |booking| booking.id == @booking.id }
+    end
+
+    def slot_available_for_range?(range_start, range_end)
+      unavailable_ranges_for_slots.none? do |booking|
+        overlap?(range_start, range_end, booking.start_time, booking.end_time)
+      end
     end
 
     def booking_transition_error_message(error, fallback_message)
