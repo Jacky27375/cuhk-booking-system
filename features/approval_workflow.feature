@@ -58,6 +58,16 @@ Feature: Booking Approval Workflow
     And I click "Cancel Booking"
     Then the booking for "Room 101" on a date 5 days in the future should remain "Cancelled"
 
+  Scenario: Pending booking is automatically rejected after its booking date passes
+    Given I am logged in as "staff@link.cuhk.edu.hk"
+    And there is a venue "Expired Room"
+    And "student@link.cuhk.edu.hk" has a pending booking for "Expired Room" 1 days in the past
+    When I run the expired booking rejection job
+    Then the booking status should be "Rejected"
+    And the booking rejection reason should be "Booking date has passed"
+    When I visit the approval dashboard
+    Then I should not see the pending booking for "Expired Room"
+
   @javascript
   Scenario: Student is notified in real-time when booking is approved
     Given I am logged in as "student@link.cuhk.edu.hk"
