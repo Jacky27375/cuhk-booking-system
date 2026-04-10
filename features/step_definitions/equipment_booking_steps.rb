@@ -8,6 +8,13 @@ Before('@equipment_booking') do
     u.role = :student
     u.tenant = tenant
   end
+
+  User.find_or_create_by!(email: 'staff@link.cuhk.edu.hk') do |u|
+    u.password = 'Password1!'
+    u.password_confirmation = 'Password1!'
+    u.role = :staff
+    u.tenant = tenant
+  end
 end
 
 Given('the following equipment exists:') do |table|
@@ -60,10 +67,11 @@ end
 
 When('I mark the {string} as returned') do |name|
   equipment = Equipment.find_by!(name: name)
-  visit my_bookings_path
-  booking = Booking.find_by!(equipment: equipment)
-  within("#booking_#{booking.id}") do
-    click_button "Mark as Returned"
+  visit bookings_path
+  within("#bookings-equipment-table") do
+    within("tr", text: equipment.name) do
+      click_button "Marked as Return"
+    end
   end
 end
 
@@ -76,6 +84,16 @@ end
 Then('my booking should show status {string}') do |status|
   visit my_bookings_path
   expect(page).to have_content(status)
+end
+
+Then('the booking for {string} should show status {string} in all bookings') do |name, status|
+  equipment = Equipment.find_by!(name: name)
+  visit bookings_path
+  within("#bookings-equipment-table") do
+    within("tr", text: equipment.name) do
+      expect(page).to have_content(status)
+    end
+  end
 end
 
 Then('the equipment start date input should have a minimum date {int} days from now') do |days|

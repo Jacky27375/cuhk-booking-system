@@ -26,11 +26,12 @@ Feature: Equipment Booking
     When I borrow 5 "Laptop" from 5 days from now to 6 days from now
     Then I should see "Not enough units available"
 
-  Scenario: Student returns equipment
+  Scenario: Staff returns equipment
     Given I have an approved loan of 1 "Projector" ending today
+    And I am logged in as "staff@link.cuhk.edu.hk" with password "Password1!"
     When I mark the "Projector" as returned
     Then the available count for "Projector" should be restored
-    And my booking should show status "Returned"
+    And the booking for "Projector" should show status "Returned" in all bookings
 
   # Constraint: Equipment can only be booked at least 5 days in advance
   Scenario: Student can borrow equipment exactly 5 days in advance
