@@ -5,7 +5,9 @@ RSpec.describe "bookings/new", type: :view do
     assign(:venues, [create(:venue, name: "Room 101", department: "Science Faculty")])
     assign(:booking_date, Date.current)
     assign(:booking_date_minimum, 5.days.from_now.to_date)
-    assign(:time_slot_options, ["08:00", "08:30", "09:00"])
+    assign(:start_slot_options, ["08:00", "09:00"])
+    assign(:end_slot_options, [])
+    assign(:unavailable_ranges_for_slots, [])
     assign(:timetable_slots, [])
     assign(:booking, Booking.new(
       venue: nil,
