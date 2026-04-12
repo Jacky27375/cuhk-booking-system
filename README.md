@@ -1,207 +1,187 @@
 # CUHK Booking System
 
-A room and facility booking system for CUHK departments and student societies.
+[![CI](https://github.com/Jacky27375/cuhk-booking-system/actions/workflows/ci.yml/badge.svg)](https://github.com/Jacky27375/cuhk-booking-system/actions/workflows/ci.yml)
 
-## Local Setup
+CUHK Booking System is **Option A** from the CSCI3100 Spring 2026 project spec (`CSCI3100_2026Spring_Project_v2.md`): a multi-tenant SaaS for booking venues and equipment across CUHK colleges, with conflict detection and approval workflows.
+
+## 1. Spec Alignment (Project v2)
+
+This repository aligns with the key spec requirements:
+
+- **SaaS + multi-tenant architecture** (college/university scoped resources and authorization)
+- **Core feature coverage** (booking conflict checks + approval workflow)
+- **Testing stack required by spec** (`RSpec` + `Cucumber`) integrated in GitHub Actions
+- **Public cloud deployment** (Azure VM deployment workflow + `/up` health check)
+
+## 2. Tech Stack
+
+- **Ruby:** `3.4.8` (`.ruby-version`)
+- **Rails:** `~> 8.1.2` (`Gemfile`)
+- **Database:** PostgreSQL (multi-db roles: `primary`, `cache`, `queue`, `cable`)
+- **Frontend:** ERB + Turbo + Stimulus
+- **Realtime:** ActionCable
+- **Testing:** RSpec, Cucumber, SimpleCov
+
+## 3. Local Development Setup
 
 ### Prerequisites
 
-You need the following installed to run this project:
-- **Ruby** (`3.4.8` or compatible)
-- **PostgreSQL** (running locally on default port 5432)
+- Ruby `3.4.8`
+- PostgreSQL running locally (defaults from `config/database.yml`: host `127.0.0.1`, port `5432`, user `postgres`, password `postgres`)
 
-### Getting Started
+### Start locally
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository_url>
-   cd cuhk-booking-system
-   ```
-
-2. **Install dependencies**
-   ```bash
-   bundle install
-   ```
-
-3. **Database Setup**
-   Ensure your local PostgreSQL server is running. You can use the default `postgres` user.
-   
-   Reset, recreate, and seed the development database in one step:
-   ```bash
-   bundle exec rails reset
-   ```
-
-4. **Start the server**
-   ```bash
-   bundle exec rails server
-   ```
-   The app will be available at [http://localhost:3000](http://localhost:3000).
-
-## Testing
-
-This project uses RSpec for unit testing and Cucumber for BDD/system testing.
-
-To check test coverage directly from GitHub Actions:
-[![Rspec/Cucumber CI](https://github.com/Jacky27375/cuhk-booking-system/actions/workflows/ci.yml/badge.svg)](https://github.com/Jacky27375/cuhk-booking-system/actions/workflows/ci.yml)
-
-*(You can download the full HTML coverage reports for both RSpec and Cucumber from the **Artifacts** section of the latest CI build in GitHub Actions).*
-
-Before running tests, ensure your test database is setup:
 ```bash
-rails db:create db:prepare RAILS_ENV=test
+git clone <repository_url>
+cd cuhk-booking-system
+bin/setup --skip-server
+bin/dev
 ```
 
-**Run unit tests (RSpec):**
+The app is available at: `http://localhost:3000`
+
+### Reset + reseed demo data
+
 ```bash
-bundle exec rspec
+bin/rails reset
 ```
 
-**Run integration/feature tests (Cucumber):**
+`bin/rails reset` maps to `db:reset` and reseeds the project demo dataset.
+
+## 4. Test and Quality Commands
+
+Before running test suites:
+
 ```bash
-bundle exec cucumber
+RAILS_ENV=test bin/rails db:create db:prepare
 ```
 
-**Run rubocop_auto_corrector (automatically fix code style issues):**
-```bash
-bundle exec rubocop_auto_corrector
-```
+| Purpose | Command |
+| --- | --- |
+| RSpec suite | `bundle exec rspec` |
+| Cucumber suite | `bundle exec cucumber` |
+| Rails test suite | `bin/rails test` |
+| RuboCop | `bin/rubocop` |
+| Brakeman | `bin/brakeman --no-pager` |
+| Bundler audit | `bin/bundler-audit` |
+| Importmap audit | `bin/importmap audit` |
+| Local CI script | `bin/ci` |
+| Match GitHub CI checks locally | `bin/rubocop && bin/brakeman --no-pager && bin/bundler-audit && bin/importmap audit && bundle exec rspec && bundle exec cucumber` |
 
-**Run bundler audit (security vulnerability check):**
-```bash
-bundle exec bundler-audit check --update
-```
+## 5. Seed Data and Demo Accounts
 
-### Cucumber Journey Trace Matrix
+Running `bin/rails reset` or `bin/rails db:seed` ensures:
 
-The following canonical journeys are covered by stable Cucumber scenarios:
+- 10 tenants total (**9 colleges + University**)
+- Seeded venue and equipment records from `db/seeds.rb`
+- Seeded demo bookings (one venue booking + one equipment booking per demo student)
+- Seeded staff-submitted request records (venue and equipment-themed)
+- Bootstrap admin/root/demo user accounts
 
-| Journey ID | Canonical journey | Scenario coverage | Expected outcome |
-| --- | --- | --- | --- |
-| J-01 | Authentication and role access | [features/authentication.feature](features/authentication.feature) scenarios: `Successful login as admin`, `Successful login as staff`, `Successful login as student`, `Failed login with incorrect password`, `Failed login with non-existent email`, `User logs out`, `Unauthenticated user is redirected to login`; [features/role_access.feature](features/role_access.feature) scenarios: `Admin can access admin panel`, `Admin dashboard hides My Bookings link`, `Admin cannot access My Bookings page directly`, `Admin cannot edit a booking` | Users can sign in and are blocked from unauthorized areas. |
-| J-02 | Venue booking slot selection and validation | [features/booking_timetable.feature](features/booking_timetable.feature) scenarios: `Timetable shows booked and available slots for selected date`, `Unavailable start time options are hidden`, `End time appears only after start time and only shows valid slots`, `Booking with non hourly increments is rejected`, `Selected slot is highlighted on edit page` | Available slots are shown first, invalid times stay hidden or rejected, and the selected slot remains visible during edits. |
-| J-03 | Booking approval lifecycle | [features/approval_workflow.feature](features/approval_workflow.feature) scenarios: `Staff sees pending booking requests`, `Staff approves a booking`, `Two-step tenant requires two approvals before final approval`, `Staff cannot manage bookings from another department`, `Staff cannot approve another department booking via direct request`, `Society member cannot access approval dashboard`, `Society member can cancel own pending booking`, `Pending booking is automatically rejected after its booking date passes`, `Student is notified in real-time when booking is approved` | Staff can review and act on bookings, unauthorized users are blocked, expired pending bookings are auto-rejected, and approvals trigger notifications. |
-| J-04 | Venue request submission and admin review | [features/venue_requests.feature](features/venue_requests.feature) scenarios: `Staff can submit a venue request`, `Admin can approve a venue request`, `Admin can reject a venue request`, `Admin panel links directly to pending venue-request review`, `Admin sees all pending staff venue requests on approval dashboard`, `Staff approval dashboard does not show pending venue requests`, `Student cannot access venue requests` | Staff can submit requests, admins can review and see all pending requests, and non-admin users do not see the admin request queue. |
+### Seed password behavior
 
-Each journey above has at least one positive scenario and, where it matters, a stable negative-path check.
+- **Development/Test:** `DEV_BOOTSTRAP_ACCOUNT_PASSWORD` if set, otherwise `Password1!`
+- **Production:** `BOOTSTRAP_ACCOUNT_PASSWORD` is required
 
-### Seed Data (Login details)
+### Login accounts
 
-If you ran `bundle exec rails reset` or `rails db:seed`, the development database includes:
-
-- 10 tenants total: University plus the 9 CUHK colleges listed in `db/seeds.rb`
-- All seeded venues and equipment records defined in `db/seeds.rb`
-- Deterministic demo venue/equipment booking records owned by demo student accounts (one per college)
-- Deterministic staff-submitted request records for both new venue requests and equipment-themed requests
-- Bootstrap accounts listed below
-
-The seed run also prints a verification summary and fails fast if the expected tenant, resource, user, or booking counts do not match.
-
-**Admin:**
+**Admin**
 
 | Role | Email | Password |
-|------|-------|----------|
-| **Admin** | `admin@link.cuhk.edu.hk` | `Password1!` |
-
-**Root Staff Accounts (one per college, can create other staff):**
-
-| College | Email | Password |
-|---------|-------|----------|
-| Chung Chi College | `staff_root_chungchi@link.cuhk.edu.hk` | `Password1!` |
-| New Asia College | `staff_root_newasia@link.cuhk.edu.hk` | `Password1!` |
-| United College | `staff_root_united@link.cuhk.edu.hk` | `Password1!` |
-| Shaw College | `staff_root_shaw@link.cuhk.edu.hk` | `Password1!` |
-| Morningside College | `staff_root_morningside@link.cuhk.edu.hk` | `Password1!` |
-| S.H. Ho College | `staff_root_shho@link.cuhk.edu.hk` | `Password1!` |
-| CW Chu College | `staff_root_cwchu@link.cuhk.edu.hk` | `Password1!` |
-| Wu Yee Sun College | `staff_root_wuyeesun@link.cuhk.edu.hk` | `Password1!` |
-| Lee Woo Sing College | `staff_root_leewoosin@link.cuhk.edu.hk` | `Password1!` |
-
-Student accounts can be created via the signup page (students select their college during registration).
-
-**Demo Student Accounts (one per college):**
-
-| College | Email | Password |
-|---------|-------|----------|
-| Chung Chi College | `demo_student_chungchi@link.cuhk.edu.hk` | `Password1!` |
-| New Asia College | `demo_student_newasia@link.cuhk.edu.hk` | `Password1!` |
-| United College | `demo_student_united@link.cuhk.edu.hk` | `Password1!` |
-| Shaw College | `demo_student_shaw@link.cuhk.edu.hk` | `Password1!` |
-| Morningside College | `demo_student_morningside@link.cuhk.edu.hk` | `Password1!` |
-| S.H. Ho College | `demo_student_shho@link.cuhk.edu.hk` | `Password1!` |
-| CW Chu College | `demo_student_cwchu@link.cuhk.edu.hk` | `Password1!` |
-| Wu Yee Sun College | `demo_student_wuyeesun@link.cuhk.edu.hk` | `Password1!` |
-| Lee Woo Sing College | `demo_student_leewoosin@link.cuhk.edu.hk` | `Password1!` |
-
-Seeded booking demo records are owned by the demo student accounts above. Staff-submitted request demo records are created by seeded root staff accounts. The seeded demo data is intended for smoke testing and TA demos, not long-term content.
-
-In production Docker deploys, startup now runs `db:seed` as well. This keeps college tenants, venue/equipment seed records, and bootstrap admin/root accounts present even on a fresh or previously unseeded database.
-
-## Deployment (Azure VM)
-
-Production URL: [https://csci3100.tylerl.cyou](https://csci3100.tylerl.cyou)
-
-CI remains in `.github/workflows/ci.yml`, and CD is configured in `.github/workflows/deploy-azure.yml`.
-The deploy workflow runs automatically after `CI` succeeds on `main`, and can also be triggered manually from GitHub Actions.
-
-### 1. Add required GitHub repository secrets
-
-| Secret | Value |
-| --- | --- |
-| `AZURE_VM_HOST` | Azure VM public IP or DNS name |
-| `AZURE_VM_SSH_KEY` | Full private key content from `azure.pem` |
-| `RAILS_MASTER_KEY` | Content of `config/master.key` |
-| `POSTGRES_PASSWORD` | Password for the production Postgres container |
-| `SECRET_KEY_BASE` | Required (`openssl rand -hex 64`) |
-| `BOOTSTRAP_ACCOUNT_PASSWORD` | **Required for production deploys.** Password used when bootstrap admin/root accounts are created in production. Deploy fails if unset. |
-| `RESET_BOOTSTRAP_ACCOUNTS_ONCE` | Optional one-time switch. Set to `true` for a single deploy to reset bootstrap admin/root passwords to `BOOTSTRAP_ACCOUNT_PASSWORD`, then unset it. |
-
-### 2. Deploy
-
-1. Merge/push to `main` (deploy runs after CI passes), or run **CD - Azure VM** manually in GitHub Actions.
-2. The workflow uploads the repository to `/opt/cuhk-booking-system`, builds containers on the VM, and starts them with `deploy/docker-compose.azure.yml`.
-3. It keeps recent releases and rolls back to the previous release automatically if health checks fail.
-
-## Feature Ownership (Git History Summary)
-
-Strict audit method for implemented features:
-- Uses non-merge commits only.
-- Uses line-impact weighting (added + deleted lines) over each feature's mapped files.
-- Identity normalization: Joe = RiskyPork, Sam = Ga8riel520.
-- Dependabot contributions are excluded from percentages.
-
-| Implemented Feature | Contributors (Strict Audit %) | Notes |
 | --- | --- | --- |
-|Architecture Desing & Deploy | Joe
-| Authentication & Role-Based Access | Jacky (57.2%), Tyler (29.9%), Sam (9.5%), Joe (RiskyPork) (3.4%) | User/session auth flow, role access scenarios, and seed-role foundations plus follow-up refinements. |
-| CI, Coverage & Security Quality Gates | Tyler (54.5%), Jacky (43.5%), Joe (RiskyPork) (2.0%) | CI evolution, security scan hardening, and workflow/lint follow-up work. |
-| Azure Deployment Pipeline & Health Checks | Tyler (57.9%), Jacky (41.0%), Joe (RiskyPork) (1.1%) | Azure CD pipeline, deployment compose wiring, diagnostics, and `/up` health-check support. |
-| Venue Booking, Timetable & Conflict Handling | Jacky (73.7%), Joe (RiskyPork) (16.6%), Tyler (8.4%), Sam (1.3%) | Venue CRUD, timetable/slot UX, conflict checks, and booking confirmation flow with later hardening. |
-| Multi-Tenant Isolation & Authorization Policies | Jacky (72.9%), Joe (RiskyPork) (26.9%), Sam (0.4%) | Policy/query authorization and tenant visibility controls with shared-resource scoping hardening. |
-| Equipment Booking & Inventory Flow | Sam (56.2%), Jacky (30.0%), Joe (RiskyPork) (7.8%), Tyler (6.0%) | Equipment domain and borrow flow with validation/lifecycle refinements. |
-| Approval Workflow & Lifecycle Transitions | Joe (RiskyPork) (56.4%), Tyler (21.0%), Jacky (20.6%), Sam (2.2%) | Approval dashboard, state transitions, and workflow tests/mail hooks with two-step and cancellation extensions. |
-| Realtime Booking Status Updates (ActionCable) | Joe (RiskyPork) (81.3%), Jacky (18.7%) | Channel/stream status broadcasting for user bookings with frontend status handling. |
-| Analytics Dashboard & Utilization Reporting | Sam (80.8%), Jacky (19.2%) | Analytics controller/views, chart rendering, trend/date filtering, and request/BDD coverage. |
-| API v1 + Resend Email Integration | Joe (RiskyPork) (95.7%), Jacky (4.3%) | API-key auth, v1 endpoints, Resend delivery service wiring, and related specs. |
-| Resource Table Sorting & Query Optimization | Jacky (54.5%), Sam (16.5%), Joe (RiskyPork) (16.2%), Tyler (12.8%) | Sortable listings for bookings/venues/equipment and Arel-based sorting refactor. |
+| Admin | `admin@link.cuhk.edu.hk` | `Password1!` (unless overridden by bootstrap env vars above) |
 
-### Future Ownership (Planning)
+**Root staff + demo student (one per college)**
 
-| Future Work Item | Planned Primary | Planned Secondary | Notes |
+| College | Root staff email | Demo student email |
+| --- | --- | --- |
+| Chung Chi College | `staff_root_chungchi@link.cuhk.edu.hk` | `demo_student_chungchi@link.cuhk.edu.hk` |
+| New Asia College | `staff_root_newasia@link.cuhk.edu.hk` | `demo_student_newasia@link.cuhk.edu.hk` |
+| United College | `staff_root_united@link.cuhk.edu.hk` | `demo_student_united@link.cuhk.edu.hk` |
+| Shaw College | `staff_root_shaw@link.cuhk.edu.hk` | `demo_student_shaw@link.cuhk.edu.hk` |
+| Morningside College | `staff_root_morningside@link.cuhk.edu.hk` | `demo_student_morningside@link.cuhk.edu.hk` |
+| S.H. Ho College | `staff_root_shho@link.cuhk.edu.hk` | `demo_student_shho@link.cuhk.edu.hk` |
+| CW Chu College | `staff_root_cwchu@link.cuhk.edu.hk` | `demo_student_cwchu@link.cuhk.edu.hk` |
+| Wu Yee Sun College | `staff_root_wuyeesun@link.cuhk.edu.hk` | `demo_student_wuyeesun@link.cuhk.edu.hk` |
+| Lee Woo Sing College | `staff_root_leewoosin@link.cuhk.edu.hk` | `demo_student_leewoosin@link.cuhk.edu.hk` |
+
+Student self-registration is also available on `/signup` and is restricted to the college allow-list in `RegistrationsController`.
+
+## 6. API v1 Quick Reference
+
+Authentication:
+
+- `Authorization: Bearer <api_key>` header (preferred), or
+- `api_key` request parameter (fallback)
+
+API routes (`config/routes.rb`):
+
+- `GET /api/v1/venues`
+- `GET /api/v1/venues/:id`
+- `GET /api/v1/equipment`
+- `GET /api/v1/equipment/:id`
+- `GET /api/v1/bookings`
+- `GET /api/v1/bookings/:id`
+- `POST /api/v1/bookings`
+
+Role scoping is consistent with web behavior:
+
+- Admin: all records
+- Staff: tenant-scoped records
+- Student: own bookings only
+
+## 7. Implemented Features and Ownership
+
+Ownership is summarized from repository contribution history (aliases used in history: **Joe = RiskyPork**, **Sam = Ga8riel520**).
+
+| Implemented feature | Primary | Secondary | Evidence |
 | --- | --- | --- | --- |
-| Stabilize realtime approval @javascript scenarios | Joe | Tyler | Remaining work logs flag ActionCable/session timing instability; scenario synchronization still needs hardening. Tracking issue: [#40](https://github.com/Jacky27375/cuhk-booking-system/issues/40). |
-| Final submission hardening run (full regression + production smoke evidence) | Sam | Tyler | Remaining runbook items include complete regression execution and production smoke-test evidence capture before final submission. Tracking issue: [#41](https://github.com/Jacky27375/cuhk-booking-system/issues/41). |
-| README rubric traceability polish (coverage screenshot + concise mapping) | Tyler | Sam | Spec alignment can be improved by adding explicit coverage screenshot evidence and concise rubric-to-implementation traceability. Tracking issue: [#42](https://github.com/Jacky27375/cuhk-booking-system/issues/42). |
-| Documentation consistency pass (README vs real behavior) | TBD | TBD | Verify setup/testing/deploy commands and required deployment secrets match current repository behavior exactly. Tracking issue: [#43](https://github.com/Jacky27375/cuhk-booking-system/issues/43). |
-| Multi-tenant authorization edge-case regression pass | TBD | TBD | Re-test cross-tenant/cross-department isolation across booking and approval flows after recent merges. Tracking issue: [#44](https://github.com/Jacky27375/cuhk-booking-system/issues/44). |
-| Staff dashboard realtime auto-update on new submissions | TBD | TBD | Initial team plan includes live updates for staff approval dashboard when new bookings arrive; current realtime wiring is focused on user booking status updates. Tracking issue: [#45](https://github.com/Jacky27375/cuhk-booking-system/issues/45). |
-| Process audit evidence & contribution balance checkpoint | TBD | TBD | Add a final process-audit checkpoint to verify regular commit cadence and balanced per-member contribution evidence before submission. Tracking issue: [#46](https://github.com/Jacky27375/cuhk-booking-system/issues/46). |
-| Cucumber key-user-journey coverage closure | TBD | TBD | Build a traceable checklist showing each required end-to-end user journey is covered by Cucumber scenarios and remains green in CI. Tracking issue: [#47](https://github.com/Jacky27375/cuhk-booking-system/issues/47). |
-| Final submission artifact lock (Repo URL + SaaS URL + README evidence) | TBD | TBD | Add a release gate confirming Phase 2 submission artifacts are complete and cross-validated (repository link, live URL, video, README evidence). Tracking issue: [#48](https://github.com/Jacky27375/cuhk-booking-system/issues/48). |
-| Concurrency-safe reservation enforcement | TBD | TBD | Harden venue/equipment reservation paths against race conditions with transaction/locking strategy and concurrent-request tests. Tracking issue: [#49](https://github.com/Jacky27375/cuhk-booking-system/issues/49). |
-| Web/API authorization parity regression suite | TBD | TBD | Ensure API v1 and web controllers enforce identical tenant/role authorization behavior via shared policy checks and regression tests. Tracking issue: [#50](https://github.com/Jacky27375/cuhk-booking-system/issues/50). |
-| Idempotent lifecycle actions for approval/cancel flows | TBD | TBD | Prevent duplicate transitions when approve/reject/cancel actions are retried, double-submitted, or race concurrently. Tracking issue: [#51](https://github.com/Jacky27375/cuhk-booking-system/issues/51). |
-| Deterministic seed/reset runbook for TA demo reproducibility | TBD | TBD | Provide a single reset-and-seed flow that consistently generates all tenants, roles, resources, and booking states needed for demos. Tracking issue: [#52](https://github.com/Jacky27375/cuhk-booking-system/issues/52). |
-| Timezone and boundary-condition booking tests | TBD | TBD | Add explicit tests for timezone-sensitive behavior, slot boundary edges, date rollover, and adjacent-time conflict handling. Tracking issue: [#53](https://github.com/Jacky27375/cuhk-booking-system/issues/53). |
-| Async email delivery via Solid Queue jobs | TBD | TBD | Team plan targets background email delivery; current approval notification path still sends synchronously (`deliver_now`). Tracking issue: [#54](https://github.com/Jacky27375/cuhk-booking-system/issues/54). |
-| Non-blocking warning cleanup | TBD | TBD | Resolve remaining runtime/tooling warnings (for example Ruby `fiddle`) as final submission polish. Tracking issue: [#55](https://github.com/Jacky27375/cuhk-booking-system/issues/55). |
-| Demo rehearsal + final 5-minute video deliverable | TBD | TBD | Prepare and capture the required narrated end-to-end demo flow for final submission. Tracking issue: [#56](https://github.com/Jacky27375/cuhk-booking-system/issues/56). |
+| Architecture design and deploy baseline | Joe | — | `Dockerfile`, `deploy/docker-compose.azure.yml`, `.github/workflows/deploy-azure.yml` |
+| Authentication and role-based access | Jacky | Tyler | `SessionsController`, `ApplicationController`, `features/authentication.feature`, `features/role_access.feature` |
+| CI, coverage, and security quality gates | Tyler | Jacky | `.github/workflows/ci.yml`, `bin/ci`, security/lint commands in `bin/*` |
+| Azure deployment pipeline and health checks | Tyler | Jacky | `.github/workflows/deploy-azure.yml`, `deploy/docker-compose.azure.yml`, `config/routes.rb` (`/up`) |
+| Venue booking timetable and conflict handling | Jacky | Joe | `BookingsController` timetable flow, `VenueBooking`, `BookingConflictChecker` |
+| Multi-tenant isolation and authorization policies | Jacky | Joe | `Venue.visible_to_user`, `Equipment.visible_to_user`, `BookingScopeQuery`, `BookingAccessPolicy` |
+| Equipment booking and inventory flow | Sam | Jacky | `EquipmentBooking`, `Equipment#available_quantity`, `features/equipment_booking.feature` |
+| Approval workflow and lifecycle transitions | Joe | Tyler | `DashboardsController#approvals`, `BookingsController#approve/#reject`, `ApprovalStep`, `features/approval_workflow.feature` |
+| Realtime booking status updates (ActionCable) | Joe | Jacky | `BookingStatusChannel`, `Booking#broadcast_status_change`, `booking_status_controller.js` |
+| Analytics dashboard and utilization reporting | Sam | Jacky | `AnalyticsController`, `app/views/analytics/show.html.erb`, Chart.js integration |
+| API v1 and Resend email integration | Joe | Jacky | `Api::V1::*Controller`, `ApiAuthenticatable`, `ResendEmailService` |
+| Resource table sorting and query optimization | Jacky | Sam | sorting branches in `BookingsController`/`VenuesController`/`DashboardsController` |
+
+## 8. Coverage Evidence (SimpleCov)
+
+SimpleCov is enabled with `minimum_coverage 80` in `.simplecov`.
+
+After running test suites, coverage artifacts are available at:
+
+- Local HTML report: `coverage/index.html`
+- Local Cobertura XML: `coverage/coverage.xml`
+- GitHub Actions artifact: `merged-coverage-report`
+
+For submission packaging, capture the screenshot directly from `coverage/index.html` after your latest full test run.
+
+## 9. Deployment (Azure VM)
+
+Production URL: `https://csci3100.tylerl.cyou`
+
+- CI workflow: `.github/workflows/ci.yml`
+- CD workflow: `.github/workflows/deploy-azure.yml`
+- Runtime compose file: `deploy/docker-compose.azure.yml`
+
+### Required GitHub repository secrets
+
+| Secret | Required | Notes |
+| --- | --- | --- |
+| `AZURE_VM_HOST` | Yes | VM public IP or DNS |
+| `AZURE_VM_SSH_KEY` | Yes | Private key content for SSH |
+| `RAILS_MASTER_KEY` | Yes | Must match `config/credentials.yml.enc` |
+| `SECRET_KEY_BASE` | Yes | Generate with `openssl rand -hex 64` |
+| `POSTGRES_PASSWORD` | Yes | Production Postgres password |
+| `BOOTSTRAP_ACCOUNT_PASSWORD` | Yes | Required by `db/seeds` in production |
+| `RESEND_API_KEY` | Optional | Required only for live Resend delivery |
+| `RESET_BOOTSTRAP_ACCOUNTS_ONCE` | Optional | One-time password reset switch for bootstrap accounts |
+
+### Deployment behavior
+
+The CD workflow deploys to `/opt/cuhk-booking-system`, starts containers with Docker Compose, and health-checks `GET /up`. On failed health checks, it rolls back to the previous release automatically.
