@@ -148,7 +148,7 @@ Ownership is summarized from repository contribution history (aliases used in hi
 
 | Implemented feature | Primary | Secondary | Evidence |
 | --- | --- | --- | --- |
-| Architecture design and deploy baseline | Joe | — | `Dockerfile`, `deploy/docker-compose.azure.yml`, `.github/workflows/deploy-azure.yml` |
+| Architecture design | Joe | — |  |
 | Authentication and role-based access | Jacky | Tyler | `SessionsController`, `ApplicationController`, `features/authentication.feature`, `features/role_access.feature` |
 | CI, coverage, and security quality gates | Tyler | Jacky | `.github/workflows/ci.yml`, `bin/ci`, security/lint commands in `bin/*` |
 | Azure deployment pipeline and health checks | Tyler | Jacky | `.github/workflows/deploy-azure.yml`, `deploy/docker-compose.azure.yml`, `config/routes.rb` (`/up`) |
