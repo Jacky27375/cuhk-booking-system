@@ -31,24 +31,26 @@ RSpec.describe VenueBooking, type: :model do
   end
 
   it 'rejects expired pending venue bookings' do
+    future_date = 6.days.from_now.to_date
     expired_booking = create(
       :booking,
       user: user,
       venue: venue,
-      start_time: Time.zone.parse('2026-04-15 10:00:00'),
-      end_time: Time.zone.parse('2026-04-15 12:00:00'),
+      start_time: Time.zone.local(future_date.year, future_date.month, future_date.day, 10, 0, 0),
+      end_time: Time.zone.local(future_date.year, future_date.month, future_date.day, 12, 0, 0),
       status: :pending
     )
 
+    expired_date = 1.day.ago.to_date
     expired_booking.update_columns(
-      start_time: Time.zone.parse('2026-04-09 10:00:00'),
-      end_time: Time.zone.parse('2026-04-09 12:00:00'),
+      start_time: Time.zone.local(expired_date.year, expired_date.month, expired_date.day, 10, 0, 0),
+      end_time: Time.zone.local(expired_date.year, expired_date.month, expired_date.day, 12, 0, 0),
       status: Booking.statuses[:pending],
       rejection_reason: nil,
       updated_at: Time.current
     )
 
-    described_class.reject_expired_pending!(at: Time.zone.parse('2026-04-10 00:00:00'))
+    described_class.reject_expired_pending!(at: Time.current)
 
     expect(expired_booking.reload.status).to eq('rejected')
     expect(expired_booking.rejection_reason).to eq('Booking date has passed')
