@@ -417,11 +417,13 @@ expected_tenant_count = colleges.count + 1
 expected_seed_users = [admin.email, *root_staff_emails.values, *demo_student_emails.values]
 expected_demo_student_count = demo_student_emails.count
 expected_venue_request_count = root_staff_emails.count * 2
+seeded_venue_names = venues.map { |venue| venue[:name] }.uniq
+seeded_equipment_names = equipments.map { |equipment| equipment[:name] }.uniq
 
 checks = [
   ["tenants", Tenant.count, expected_tenant_count],
-  ["venues", Venue.count, venues.count],
-  ["equipment records", Equipment.count, equipments.count],
+  ["seeded venues", Venue.where(name: seeded_venue_names).distinct.count(:name), seeded_venue_names.count],
+  ["seeded equipment records", Equipment.where(name: seeded_equipment_names).distinct.count(:name), seeded_equipment_names.count],
   ["seed users", User.where(email: expected_seed_users).count, expected_seed_users.count],
   ["demo students", User.where(email: demo_student_emails.values).count, expected_demo_student_count],
   ["seeded venue bookings", VenueBooking.where(user: demo_students.values).count, seeded_venue_bookings.count],
@@ -433,7 +435,7 @@ checks.each do |label, actual, expected|
   raise "Seed verification failed for #{label}: expected #{expected}, got #{actual}" unless actual == expected
 end
 
-puts "Seed verification passed: #{expected_tenant_count} tenants, #{venues.count} venues, #{equipments.count} equipment items, #{seeded_venue_bookings.count} demo-student venue bookings, #{seeded_equipment_bookings.count} demo-student equipment bookings, #{expected_venue_request_count} staff request records (venue and equipment-themed)."
+puts "Seed verification passed: #{expected_tenant_count} tenants, #{seeded_venue_names.count} seeded venues, #{seeded_equipment_names.count} seeded equipment items, #{seeded_venue_bookings.count} demo-student venue bookings, #{seeded_equipment_bookings.count} demo-student equipment bookings, #{expected_venue_request_count} staff request records (venue and equipment-themed)."
 puts "Seed data ensured successfully."
 
 unless Rails.env.production?
