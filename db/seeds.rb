@@ -227,14 +227,15 @@ equipments = [
   { name: "Lee Woo Sing College - Basic Sound System", quantity: 6, tenant: "Lee Woo Sing College" }
 ]
 
-bootstrap_password = ENV["BOOTSTRAP_ACCOUNT_PASSWORD"]
+production_bootstrap_password = ENV["BOOTSTRAP_ACCOUNT_PASSWORD"]
+development_bootstrap_password = ENV["DEV_BOOTSTRAP_ACCOUNT_PASSWORD"]
 reset_bootstrap_accounts_once = ActiveModel::Type::Boolean.new.cast(ENV["RESET_BOOTSTRAP_ACCOUNTS_ONCE"])
 
-if Rails.env.production? && bootstrap_password.blank?
-  raise "BOOTSTRAP_ACCOUNT_PASSWORD must be set in production."
+bootstrap_password = if Rails.env.production?
+  production_bootstrap_password.presence || raise("BOOTSTRAP_ACCOUNT_PASSWORD must be set in production.")
+else
+  development_bootstrap_password.presence || "Password1!"
 end
-
-bootstrap_password = bootstrap_password.presence || "Password1!"
 
 if Rails.env.production? && reset_bootstrap_accounts_once
   puts "RESET_BOOTSTRAP_ACCOUNTS_ONCE is enabled; bootstrap account passwords will be reset in this seed run."
@@ -419,6 +420,9 @@ expected_demo_student_count = demo_student_emails.count
 expected_venue_request_count = root_staff_emails.count * 2
 seeded_venue_names = venues.map { |venue| venue[:name] }.uniq
 seeded_equipment_names = equipments.map { |equipment| equipment[:name] }.uniq
+seeded_venue_booking_ids = seeded_venue_bookings.map(&:id)
+seeded_equipment_booking_ids = seeded_equipment_bookings.map(&:id)
+seeded_venue_request_ids = seeded_venue_requests.map(&:id)
 
 checks = [
   ["tenants", Tenant.count, expected_tenant_count],
@@ -426,9 +430,9 @@ checks = [
   ["seeded equipment records", Equipment.where(name: seeded_equipment_names).distinct.count(:name), seeded_equipment_names.count],
   ["seed users", User.where(email: expected_seed_users).count, expected_seed_users.count],
   ["demo students", User.where(email: demo_student_emails.values).count, expected_demo_student_count],
-  ["seeded venue bookings", VenueBooking.where(user: demo_students.values).count, seeded_venue_bookings.count],
-  ["seeded equipment bookings", EquipmentBooking.where(user: demo_students.values).count, seeded_equipment_bookings.count],
-  ["seeded staff requests", VenueRequest.where(requester: root_staff_users.values).count, expected_venue_request_count]
+  ["seeded venue bookings", VenueBooking.where(id: seeded_venue_booking_ids).count, seeded_venue_booking_ids.count],
+  ["seeded equipment bookings", EquipmentBooking.where(id: seeded_equipment_booking_ids).count, seeded_equipment_booking_ids.count],
+  ["seeded staff requests", VenueRequest.where(id: seeded_venue_request_ids).count, expected_venue_request_count]
 ]
 
 checks.each do |label, actual, expected|
