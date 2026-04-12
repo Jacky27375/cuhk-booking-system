@@ -88,3 +88,23 @@ Given('there is a booking for {string} by {string} from today at {string} to tod
   end_datetime = Time.zone.parse("#{booking_date.strftime('%Y-%m-%d')} #{end_time}:00")
   create(:booking, venue: venue, user: user, start_time: start_datetime, end_time: end_datetime)
 end
+
+Given('there are {int} existing bookings for {string} on a date {int} days in the future') do |count, user_email, days|
+  user = User.find_by!(email: user_email)
+  booking_date = Date.current + days.days
+  day_start = Time.zone.parse("#{booking_date} 09:00:00")
+
+  venues = Venue.limit(count)
+  raise "Need at least #{count} venues for this step" if venues.size < count
+
+  venues.each_with_index do |venue, index|
+    start_time = day_start + index.hours
+    create(
+      :booking,
+      user: user,
+      venue: venue,
+      start_time: start_time,
+      end_time: start_time + 1.hour
+    )
+  end
+end

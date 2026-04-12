@@ -55,3 +55,10 @@ Feature: Equipment Booking
   Scenario: Student cannot borrow equipment for more than 7 days
     When I attempt to borrow 1 "Projector" from 5 days from now to 13 days from now
     Then I should see "Equipment booking duration cannot exceed 7 days"
+
+  # Constraint: Each student can borrow at most 5 items at the same time
+  Scenario: Student cannot borrow equipment when already holding 5 items
+    Given I already have an active equipment booking of 3 "Projector" from 5 days from now to 6 days from now
+    And I already have an active equipment booking of 2 "Laptop" from 5 days from now to 6 days from now
+    When I attempt to borrow 1 "Microphone" from 5 days from now to 6 days from now
+    Then I should see "You can borrow at most 5 items at the same time"

@@ -131,3 +131,18 @@ When('I attempt to borrow {int} {string} from {int} days from now to {int} days 
   fill_in 'End date', with: end_date
   click_button 'Borrow'
 end
+
+Given('I already have an active equipment booking of {int} {string} from {int} days from now to {int} days from now') do |qty, name, start_days, end_days|
+  user = User.find_by!(email: 'student@link.cuhk.edu.hk')
+  equipment = Equipment.find_by!(name: name)
+
+  create(
+    :equipment_booking,
+    user: user,
+    equipment: equipment,
+    quantity: qty,
+    start_date: Date.current + start_days.days,
+    end_date: Date.current + end_days.days,
+    status: :approved
+  )
+end

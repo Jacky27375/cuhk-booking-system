@@ -1,5 +1,6 @@
 class VenueBooking < Booking
   EXPIRED_PENDING_REJECTION_REASON = "Booking date has passed".freeze
+  MAX_DAILY_BOOKINGS_PER_STUDENT = 2
 
   def self.model_name
     Booking.model_name
@@ -20,6 +21,7 @@ class VenueBooking < Booking
   validate :no_time_conflict
   validate :advance_booking_limit
   validate :booking_duration_limit
+  validate :daily_booking_limit_per_student
 
   private
 
@@ -75,6 +77,26 @@ class VenueBooking < Booking
     duration_hours = ((end_time - start_time) / 3600).round
     if duration_hours > 4
       errors.add(:base, "Booking duration cannot exceed 4 hours")
+    end
+  end
+
+  def daily_booking_limit_per_student
+    return unless user&.student?
+    return unless start_time.present?
+    return if status.in?(Booking::NON_BLOCKING_VENUE_STATUSES)
+
+    booking_date = start_time.to_date
+    day_start = booking_date.beginning_of_day
+    day_end = booking_date.end_of_day
+
+    existing_count = user.venue_bookings
+                         .where.not(status: Booking.non_blocking_venue_status_values)
+                         .where(start_time: day_start..day_end)
+                         .where.not(id: id)
+                         .count
+
+    if existing_count >= MAX_DAILY_BOOKINGS_PER_STUDENT
+      errors.add(:base, "You can book at most 2 venues per day")
     end
   end
 end

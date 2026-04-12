@@ -1,4 +1,6 @@
 class EquipmentBooking < Booking
+  MAX_SIMULTANEOUS_ITEMS_PER_STUDENT = 5
+
   def self.model_name
     Booking.model_name
   end
@@ -10,6 +12,7 @@ class EquipmentBooking < Booking
   validate :equipment_quantity_available
   validate :advance_booking_limit, if: :validate_booking_dates?
   validate :booking_duration_limit, if: :validate_booking_dates?
+  validate :simultaneous_item_limit_per_student
 
   private
 
@@ -54,5 +57,21 @@ class EquipmentBooking < Booking
 
   def validate_booking_dates?
     new_record? || will_save_change_to_start_date? || will_save_change_to_end_date?
+  end
+
+  def simultaneous_item_limit_per_student
+    return unless user&.student?
+    return unless quantity.present? && start_date.present? && end_date.present?
+    return unless status.in?(Equipment::INVENTORY_HOLDING_STATUSES)
+
+    overlapping_quantity = user.equipment_bookings
+                               .where(status: Equipment::INVENTORY_HOLDING_STATUSES)
+                               .where.not(id: id)
+                               .where("start_date <= ? AND end_date >= ?", end_date, start_date)
+                               .sum(:quantity)
+
+    if overlapping_quantity + quantity.to_i > MAX_SIMULTANEOUS_ITEMS_PER_STUDENT
+      errors.add(:base, "You can borrow at most 5 items at the same time")
+    end
   end
 end

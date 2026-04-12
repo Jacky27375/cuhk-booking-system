@@ -53,4 +53,35 @@ RSpec.describe VenueBooking, type: :model do
     expect(expired_booking.reload.status).to eq('rejected')
     expect(expired_booking.rejection_reason).to eq('Booking date has passed')
   end
+
+  it 'rejects a third venue booking for the same student on the same day' do
+    booking_date = 5.days.from_now.to_date
+    time_at = ->(hour) { Time.zone.local(booking_date.year, booking_date.month, booking_date.day, hour, 0, 0) }
+
+    create(
+      :booking,
+      user: user,
+      venue: venue,
+      start_time: time_at.call(9),
+      end_time: time_at.call(10)
+    )
+    create(
+      :booking,
+      user: user,
+      venue: create(:venue, tenant: tenant, department: tenant.name),
+      start_time: time_at.call(11),
+      end_time: time_at.call(12)
+    )
+
+    booking = build(
+      :booking,
+      user: user,
+      venue: create(:venue, tenant: tenant, department: tenant.name),
+      start_time: time_at.call(13),
+      end_time: time_at.call(14)
+    )
+
+    expect(booking).not_to be_valid
+    expect(booking.errors[:base]).to include('You can book at most 2 venues per day')
+  end
 end

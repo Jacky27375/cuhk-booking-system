@@ -46,4 +46,38 @@ RSpec.describe EquipmentBooking, type: :model do
 
     expect(booking).to be_valid
   end
+
+  it 'rejects borrowing when total overlapping quantity would exceed 5' do
+    create(
+      :equipment_booking,
+      user: user,
+      equipment: equipment,
+      quantity: 3,
+      start_date: 5.days.from_now.to_date,
+      end_date: 6.days.from_now.to_date,
+      status: :approved
+    )
+    create(
+      :equipment_booking,
+      user: user,
+      equipment: create(:equipment, tenant: tenant, quantity: 5),
+      quantity: 2,
+      start_date: 5.days.from_now.to_date,
+      end_date: 6.days.from_now.to_date,
+      status: :approved
+    )
+
+    booking = build(
+      :equipment_booking,
+      user: user,
+      equipment: create(:equipment, tenant: tenant, quantity: 5),
+      quantity: 1,
+      start_date: 5.days.from_now.to_date,
+      end_date: 6.days.from_now.to_date,
+      status: :approved
+    )
+
+    expect(booking).not_to be_valid
+    expect(booking.errors[:base]).to include('You can borrow at most 5 items at the same time')
+  end
 end
