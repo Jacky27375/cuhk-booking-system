@@ -136,19 +136,6 @@ Feature: Venue Booking System
     And the "booking_end_slot" options should not include:
       | 15:00 |
 
-  Scenario: Member cannot book a venue for more than 4 hours
-    Given there is a venue "Lecture Hall A"
-    And I am logged in as "member@link.cuhk.edu.hk"
-    When I visit the venues page
-    And I click "Lecture Hall A"
-    And I click "Book Venue"
-    And I fill in "booking_date" with a date 5 days in the future
-    And I select "10:00" from "booking_start_slot"
-    And I select "15:00" from "booking_end_slot"
-    And I click "Review Booking"
-    Then I should see "Booking duration cannot exceed 4 hours"
-    And the slot "10:00 - 11:00" should not be marked selected
-
   # Constraint: Each student can book at most 2 venues per day
   Scenario: Member cannot book more than 2 venues on the same day
     Given there is a venue "Lecture Hall A"
