@@ -191,7 +191,7 @@ Production URL: `https://csci3100.tylerl.cyou`
 | `SECRET_KEY_BASE` | Yes | Generate with `openssl rand -hex 64` |
 | `POSTGRES_PASSWORD` | Yes | Production Postgres password |
 | `BOOTSTRAP_ACCOUNT_PASSWORD` | Yes | Required by `db/seeds` in production |
-| `RESEND_API_KEY` | Yes | Required for live Resend delivery |
+| `RESEND_API_KEY` | Yes | Required for email delivery |
 | `RESET_BOOTSTRAP_ACCOUNTS_ONCE` | Optional | One-time password reset switch for bootstrap accounts |
 
 ### Deployment behavior
