@@ -1,10 +1,11 @@
 # CUHK Booking System
 
 [![CI](https://github.com/Jacky27375/cuhk-booking-system/actions/workflows/ci.yml/badge.svg)](https://github.com/Jacky27375/cuhk-booking-system/actions/workflows/ci.yml)
+[![CD](https://github.com/Jacky27375/cuhk-booking-system/actions/workflows/deploy-azure.yml/badge.svg)](https://github.com/Jacky27375/cuhk-booking-system/actions/workflows/deploy-azure.yml)
 
-CUHK Booking System is **Option A** from the CSCI3100 Spring 2026 project spec (`CSCI3100_2026Spring_Project_v2.md`): a multi-tenant SaaS for booking venues and equipment across CUHK colleges, with conflict detection and approval workflows.
+CUHK Booking System is **Option A** from the CSCI3100 Spring 2026 project spec: a multi-tenant SaaS for booking venues and equipment across CUHK colleges, with conflict detection and approval workflows.
 
-## 1. Spec Alignment (Project v2)
+## 1. Spec Alignment
 
 This repository aligns with the key spec requirements:
 
