@@ -1,7 +1,11 @@
 class SessionsController < ApplicationController
   skip_before_action :require_authentication, only: [:new, :create]
+  before_action :resolve_current_session_user, only: :new
 
   def new
+    @login_form_authenticity_token = form_authenticity_token(
+      form_options: { action: login_path, method: :post }
+    )
   end
 
   def create
@@ -29,6 +33,10 @@ class SessionsController < ApplicationController
   end
 
   private
+
+  def resolve_current_session_user
+    current_user
+  end
 
   def establish_session_lock!(user)
     session_token = nil
