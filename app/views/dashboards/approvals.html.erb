@@ -13,106 +13,120 @@
   <% if venue_bookings.any? %>
     <h2 class="mb-1">Venue Approvals</h2>
     <div class="card mb-2">
-      <table id="approvals-table" class="resource-grid-table" style="margin:0;border:none;box-shadow:none;">
-        <thead>
-          <tr>
-            <th><%= sortable_header_link("Venue", "venue", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-            <th><%= sortable_header_link("Department", "department", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-            <th><%= sortable_header_link("User", "user", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-            <th><%= sortable_header_link("Date", "date", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-            <th><%= sortable_header_link("Status", "status", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-            <th>Last Action</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% venue_bookings.each do |booking| %>
-            <tr id="<%= dom_id(booking) %>">
-              <td><strong><%= booking.venue&.name || "-" %></strong></td>
-              <td><span class="badge badge-role"><%= booking.venue&.department || booking.user&.tenant&.name || "-" %></span></td>
-              <td class="text-muted"><%= booking.user.email %></td>
-              <td><%= booking.start_time&.to_date || "-" %></td>
-              <td>
-                <%= status_badge(booking.status) %>
-                <% if booking.under_review? && booking.user&.tenant&.two_step? %>
-                  <span class="badge badge-under-review">Step 1/2</span>
-                <% end %>
-              </td>
-              <td class="text-muted text-sm">
-                <% latest_step = booking.approval_steps.max_by(&:created_at) %>
-                <% if latest_step.present? %>
-                  <%= "#{latest_step.action.humanize} by #{latest_step.actor.email}" %>
-                <% else %>
-                  -
-                <% end %>
-              </td>
-              <td>
-                <div class="btn-group">
-                  <%= button_to(booking.under_review? ? "Approve (Final)" : "Approve", approve_booking_path(booking), method: :patch, class: "btn btn-success btn-sm") %>
-                  <%= form_with url: reject_booking_path(booking), method: :patch, local: true, class: "inline-reject-form" do |f| %>
-                    <%= f.text_field :rejection_reason, placeholder: "Reason", size: 18 %>
-                    <%= f.submit "Reject" %>
-                  <% end %>
-                </div>
-              </td>
+      <div class="table-scroll-shell">
+        <table id="approvals-table" class="resource-grid-table approval-bookings-table" style="margin:0;border:none;box-shadow:none;">
+          <thead>
+            <tr>
+              <th><%= sortable_header_link("Venue", "venue", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+              <th><%= sortable_header_link("Department", "department", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+              <th><%= sortable_header_link("User", "user", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+              <th><%= sortable_header_link("Date", "date", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+              <th><%= sortable_header_link("Status", "status", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+              <th>Last Action</th>
+              <th>Actions</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% venue_bookings.each do |booking| %>
+              <tr id="<%= dom_id(booking) %>">
+                <td><strong><%= booking.venue&.name || "-" %></strong></td>
+                <td><span class="badge badge-role"><%= booking.venue&.department || booking.user&.tenant&.name || "-" %></span></td>
+                <td class="text-muted"><%= booking.user.email %></td>
+                <td><%= booking.start_time&.to_date || "-" %></td>
+                <td>
+                  <%= status_badge(booking.status) %>
+                  <% if booking.under_review? && booking.user&.tenant&.two_step? %>
+                    <span class="badge badge-under-review">Step 1/2</span>
+                  <% end %>
+                </td>
+                <td class="text-muted text-sm">
+                  <% latest_step = booking.approval_steps.max_by(&:created_at) %>
+                  <% if latest_step.present? %>
+                    <%= "#{latest_step.action.humanize} by #{latest_step.actor.email}" %>
+                  <% else %>
+                    -
+                  <% end %>
+                </td>
+                <td class="approval-actions-cell">
+                  <div class="approval-action-stack">
+                    <%= button_to(booking.under_review? ? "Approve (Final)" : "Approve",
+                                  approve_booking_path(booking),
+                                  method: :patch,
+                                  class: "btn btn-success btn-sm approval-approve-button",
+                                  form: { class: "approval-approve-form" }) %>
+                    <%= form_with url: reject_booking_path(booking), method: :patch, local: true, class: "approval-reject-form" do |f| %>
+                      <%= f.label :rejection_reason, "Reason", class: "approval-reject-label" %>
+                      <%= f.text_field :rejection_reason, placeholder: "Reason for rejection", required: true, class: "approval-reject-input" %>
+                      <%= f.submit "Reject", class: "btn btn-danger btn-sm approval-reject-button" %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
     </div>
   <% end %>
 
   <% if equipment_bookings.any? %>
     <h2 class="mb-1">Equipment Approvals</h2>
     <div class="card mb-2">
-      <table id="approvals-equipment-table" class="resource-grid-table" style="margin:0;border:none;box-shadow:none;">
-        <thead>
-          <tr>
-            <th><%= sortable_header_link("Equipment", "venue", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-            <th><%= sortable_header_link("Department", "department", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-            <th><%= sortable_header_link("User", "user", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-            <th>Qty</th>
-            <th><%= sortable_header_link("Date", "date", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-            <th><%= sortable_header_link("Status", "status", current_sort: @sort_column, current_direction: @sort_direction) %></th>
-            <th>Last Action</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% equipment_bookings.each do |booking| %>
-            <tr id="<%= dom_id(booking) %>">
-              <td><strong><%= booking.equipment&.name || "-" %></strong></td>
-              <td><span class="badge badge-role"><%= booking.equipment&.tenant&.name || booking.user&.tenant&.name || "-" %></span></td>
-              <td class="text-muted"><%= booking.user.email %></td>
-              <td><%= booking.quantity || "-" %></td>
-              <td><%= booking.start_date || "-" %></td>
-              <td>
-                <%= status_badge(booking.status) %>
-                <% if booking.under_review? && booking.user&.tenant&.two_step? %>
-                  <span class="badge badge-under-review">Step 1/2</span>
-                <% end %>
-              </td>
-              <td class="text-muted text-sm">
-                <% latest_step = booking.approval_steps.max_by(&:created_at) %>
-                <% if latest_step.present? %>
-                  <%= "#{latest_step.action.humanize} by #{latest_step.actor.email}" %>
-                <% else %>
-                  -
-                <% end %>
-              </td>
-              <td>
-                <div class="btn-group">
-                  <%= button_to(booking.under_review? ? "Approve (Final)" : "Approve", approve_booking_path(booking), method: :patch, class: "btn btn-success btn-sm") %>
-                  <%= form_with url: reject_booking_path(booking), method: :patch, local: true, class: "inline-reject-form" do |f| %>
-                    <%= f.text_field :rejection_reason, placeholder: "Reason", size: 18 %>
-                    <%= f.submit "Reject" %>
-                  <% end %>
-                </div>
-              </td>
+      <div class="table-scroll-shell">
+        <table id="approvals-equipment-table" class="resource-grid-table approval-bookings-table" style="margin:0;border:none;box-shadow:none;">
+          <thead>
+            <tr>
+              <th><%= sortable_header_link("Equipment", "venue", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+              <th><%= sortable_header_link("Department", "department", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+              <th><%= sortable_header_link("User", "user", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+              <th>Qty</th>
+              <th><%= sortable_header_link("Date", "date", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+              <th><%= sortable_header_link("Status", "status", current_sort: @sort_column, current_direction: @sort_direction) %></th>
+              <th>Last Action</th>
+              <th>Actions</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% equipment_bookings.each do |booking| %>
+              <tr id="<%= dom_id(booking) %>">
+                <td><strong><%= booking.equipment&.name || "-" %></strong></td>
+                <td><span class="badge badge-role"><%= booking.equipment&.tenant&.name || booking.user&.tenant&.name || "-" %></span></td>
+                <td class="text-muted"><%= booking.user.email %></td>
+                <td><%= booking.quantity || "-" %></td>
+                <td><%= booking.start_date || "-" %></td>
+                <td>
+                  <%= status_badge(booking.status) %>
+                  <% if booking.under_review? && booking.user&.tenant&.two_step? %>
+                    <span class="badge badge-under-review">Step 1/2</span>
+                  <% end %>
+                </td>
+                <td class="text-muted text-sm">
+                  <% latest_step = booking.approval_steps.max_by(&:created_at) %>
+                  <% if latest_step.present? %>
+                    <%= "#{latest_step.action.humanize} by #{latest_step.actor.email}" %>
+                  <% else %>
+                    -
+                  <% end %>
+                </td>
+                <td class="approval-actions-cell">
+                  <div class="approval-action-stack">
+                    <%= button_to(booking.under_review? ? "Approve (Final)" : "Approve",
+                                  approve_booking_path(booking),
+                                  method: :patch,
+                                  class: "btn btn-success btn-sm approval-approve-button",
+                                  form: { class: "approval-approve-form" }) %>
+                    <%= form_with url: reject_booking_path(booking), method: :patch, local: true, class: "approval-reject-form" do |f| %>
+                      <%= f.label :rejection_reason, "Reason", class: "approval-reject-label" %>
+                      <%= f.text_field :rejection_reason, placeholder: "Reason for rejection", required: true, class: "approval-reject-input" %>
+                      <%= f.submit "Reject", class: "btn btn-danger btn-sm approval-reject-button" %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
     </div>
   <% end %>
 

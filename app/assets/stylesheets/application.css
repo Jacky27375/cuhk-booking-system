@@ -1348,29 +1348,47 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
   margin-top: 1.5rem;
 }
 
-/* ===== Inline Reject Form ===== */
-.inline-reject-form {
-  display: inline-flex;
-  align-items: center;
+/* ===== Approval Dashboard Actions ===== */
+.approval-bookings-table {
+  min-width: 1120px;
+}
+
+.approval-actions-cell {
+  min-width: 260px;
+}
+
+.approval-action-stack {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.approval-approve-form,
+.approval-reject-form {
+  margin: 0;
+}
+
+.approval-approve-button,
+.approval-reject-button {
+  width: 100%;
+}
+
+.approval-reject-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.4rem;
+  align-items: end;
 }
 
-.inline-reject-form input[type="text"] {
-  width: auto;
-  padding: 0.35rem 0.6rem;
-  font-size: 0.82rem;
+.approval-reject-label {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--gray-600);
 }
 
-.inline-reject-form input[type="submit"] {
-  padding: 0.35rem 0.75rem;
-  font-size: 0.82rem;
-  background: var(--danger);
-  color: #fff;
-  border-color: var(--danger);
-}
-
-.inline-reject-form input[type="submit"]:hover {
-  background: #DC2626;
+.approval-reject-input {
+  min-width: 0;
 }
 
 /* ===== Analytics Dashboard ===== */
@@ -1528,6 +1546,15 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
   }
   .venues-table {
     min-width: 760px;
+  }
+  .approval-bookings-table {
+    min-width: 980px;
+  }
+  .approval-actions-cell {
+    min-width: 220px;
+  }
+  .approval-reject-form {
+    grid-template-columns: 1fr;
   }
 }
 

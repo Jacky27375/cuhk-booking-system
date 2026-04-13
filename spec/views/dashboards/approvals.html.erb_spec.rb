@@ -30,6 +30,9 @@ RSpec.describe "dashboards/approvals", type: :view do
 
     assert_select "table#approvals-table.resource-grid-table"
     assert_select "table#approvals-table tbody tr", count: 2
+    assert_select "table#approvals-table td.approval-actions-cell", count: 2
+    assert_select "table#approvals-table .approval-action-stack", count: 2
+    assert_select "table#approvals-table .approval-reject-label", text: "Reason", count: 2
     expect(rendered).to include("Room 101")
     expect(rendered).to include("Pending")
   end

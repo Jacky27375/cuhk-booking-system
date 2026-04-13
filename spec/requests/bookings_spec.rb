@@ -397,6 +397,9 @@ RSpec.describe "/bookings", type: :request do
       expect(response.body).to include("Room 102")
       expect(response.body).not_to include("Room 103")
       expect(response.body).not_to include("LT1")
+      expect(response.body).to include("approval-action-stack")
+      expect(response.body).to include("approval-reject-form")
+      expect(response.body).to include("Reason for rejection")
     end
 
     it "keeps legacy venues visible when department matches tenant name" do
