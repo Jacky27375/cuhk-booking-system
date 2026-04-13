@@ -72,6 +72,53 @@ RSpec.describe 'Sessions', type: :request do
       expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include('Invalid email or password')
     end
+
+    it 'accepts a fresh CSRF token after invalidating a stale authenticated session' do
+      original_forgery_setting = ActionController::Base.allow_forgery_protection
+      ActionController::Base.allow_forgery_protection = true
+
+      browser_one = ActionDispatch::Integration::Session.new(Rails.application)
+      browser_two = ActionDispatch::Integration::Session.new(Rails.application)
+
+      browser_one.get(login_path)
+      first_authenticity_token = browser_one.response.body[/<form[^>]*action="\/login"[^>]*>.*?name="authenticity_token" value="([^"]+)"/m, 1]
+      expect(first_authenticity_token).to be_present
+
+      browser_one.post(login_path, params: {
+        authenticity_token: first_authenticity_token,
+        email: user.email,
+        password: 'Password1!'
+      })
+      expect(browser_one.status).to eq(302)
+      expect(browser_one.response.headers['Location']).to end_with(dashboard_path)
+
+      travel_to(User.active_session_lock_timeout.from_now + 1.second) do
+        browser_two.get(login_path)
+        second_authenticity_token = browser_two.response.body[/<form[^>]*action="\/login"[^>]*>.*?name="authenticity_token" value="([^"]+)"/m, 1]
+        expect(second_authenticity_token).to be_present
+
+        browser_two.post(login_path, params: {
+          authenticity_token: second_authenticity_token,
+          email: user.email,
+          password: 'Password1!'
+        })
+        expect(browser_two.status).to eq(302)
+      end
+
+      browser_one.get(login_path)
+      stale_session_token = browser_one.response.body[/<form[^>]*action="\/login"[^>]*>.*?name="authenticity_token" value="([^"]+)"/m, 1]
+      expect(stale_session_token).to be_present
+
+      browser_one.post(login_path, params: {
+        authenticity_token: stale_session_token,
+        email: user.email,
+        password: 'Password1!'
+      })
+      expect(browser_one.status).to eq(409)
+      expect(browser_one.response.body).to include('already logged in on another device')
+    ensure
+      ActionController::Base.allow_forgery_protection = original_forgery_setting
+    end
   end
 
   describe 'DELETE /logout' do
