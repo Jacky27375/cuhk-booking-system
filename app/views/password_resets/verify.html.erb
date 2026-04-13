@@ -1,0 +1,57 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <h1>Verify and Reset Password</h1>
+      <p>Enter the 6-digit code sent to <strong><%= @pending_email %></strong></p>
+    </div>
+
+    <% if flash[:alert] %>
+      <div class="alert"><%= flash[:alert] %></div>
+    <% end %>
+
+    <%= form_with url: password_reset_verify_code_path, method: :post, data: { turbo: false } do |f| %>
+      <div class="form-group">
+        <%= f.label :verification_code, "Verification Code" %>
+        <%= f.text_field :verification_code,
+                         required: true,
+                         autofocus: true,
+                         maxlength: 6,
+                         pattern: "\\d{6}",
+                         inputmode: "numeric",
+                         autocomplete: "one-time-code",
+                         placeholder: "123456" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :password, "New Password" %>
+        <%= f.password_field :password,
+                             required: true,
+                             minlength: 8,
+                             autocomplete: "new-password",
+                             placeholder: "Enter a new password" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :password_confirmation, "Confirm New Password" %>
+        <%= f.password_field :password_confirmation,
+                             required: true,
+                             minlength: 8,
+                             autocomplete: "new-password",
+                             placeholder: "Confirm your new password" %>
+      </div>
+
+      <div>
+        <%= f.submit "Verify and Reset Password", class: "btn-primary" %>
+      </div>
+    <% end %>
+
+    <div class="auth-footer">
+      <%= form_with url: password_reset_resend_code_path, method: :post, data: { turbo: false }, class: "inline" do |f| %>
+        <%= f.submit "Resend code", class: "btn btn-secondary btn-sm" %>
+      <% end %>
+      <div class="mt-1">
+        Wrong email? <%= link_to "Start over", password_reset_path %>
+      </div>
+    </div>
+  </div>
+</div>

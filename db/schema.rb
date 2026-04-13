@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_09_192339) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_13_092500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -68,6 +68,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_192339) do
     t.bigint "tenant_id", null: false
     t.datetime "updated_at", null: false
     t.index ["tenant_id"], name: "index_equipment_on_tenant_id"
+  end
+
+  create_table "password_reset_codes", force: :cascade do |t|
+    t.integer "attempt_count", default: 0, null: false
+    t.string "code_digest", null: false
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "last_sent_at", null: false
+    t.integer "resend_count", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.datetime "used_at"
+    t.index ["email"], name: "index_password_reset_codes_on_email", unique: true
+    t.index ["expires_at"], name: "index_password_reset_codes_on_expires_at"
+    t.check_constraint "attempt_count >= 0", name: "password_reset_codes_attempt_count_non_negative"
+    t.check_constraint "resend_count >= 0", name: "password_reset_codes_resend_count_non_negative"
   end
 
   create_table "signup_verification_codes", force: :cascade do |t|

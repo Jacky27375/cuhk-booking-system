@@ -11,6 +11,12 @@ Rails.application.routes.draw do
   post "signup/verify", to: "registrations#verify_code", as: :signup_verify_code
   post "signup/resend_code", to: "registrations#resend_code", as: :signup_resend_code
 
+  get  "password_reset", to: "password_resets#new"
+  post "password_reset", to: "password_resets#create"
+  get  "password_reset/verify", to: "password_resets#verify", as: :password_reset_verify
+  post "password_reset/verify", to: "password_resets#update", as: :password_reset_verify_code
+  post "password_reset/resend_code", to: "password_resets#resend_code", as: :password_reset_resend_code
+
   get "dashboard", to: "dashboards#show"
   get "approval_dashboard", to: "dashboards#approvals"
   get "admin",     to: "admin#show"

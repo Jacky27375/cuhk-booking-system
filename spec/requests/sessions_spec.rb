@@ -9,6 +9,7 @@ RSpec.describe 'Sessions', type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include('Sign In')
       expect(response.body).to include('@link.cuhk.edu.hk')
+      expect(response.body).to include('Forgot your password?')
     end
   end
 
