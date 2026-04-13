@@ -34,18 +34,54 @@ export default class extends Controller {
             return
         }
 
+        const normalizedStatus = (data.status || "").toString().toLowerCase()
+        const label = data.status_label || this.humanizeStatus(normalizedStatus)
+
         const statusNode = this.element.querySelector(
-            `[data-booking-id="${data.booking_id}"]`
+            `[data-booking-status-id="${data.booking_id}"], [data-booking-id="${data.booking_id}"]`
         )
         if (statusNode) {
-            const normalizedStatus = (data.status || "").toString().toLowerCase()
-            const label = data.status_label || this.humanizeStatus(normalizedStatus)
+            statusNode.innerHTML = ""
 
-            statusNode.textContent = label
+            const badgeNode = document.createElement("span")
+            badgeNode.className = `badge ${this.badgeClass(normalizedStatus)}`
+            badgeNode.textContent = label
+            statusNode.appendChild(badgeNode)
+
             if (normalizedStatus) {
                 statusNode.dataset.status = normalizedStatus
             }
         }
+
+        const rejectionReasonNode = this.element.querySelector(
+            `[data-booking-rejection-reason-id="${data.booking_id}"]`
+        )
+        if (rejectionReasonNode) {
+            rejectionReasonNode.textContent = this.rejectionReason(normalizedStatus, data.rejection_reason)
+        }
+    }
+
+    badgeClass(status) {
+        const mapping = {
+            pending: "badge-pending",
+            approved: "badge-approved",
+            rejected: "badge-rejected",
+            cancelled: "badge-cancelled",
+            under_review: "badge-under-review",
+            borrowed: "badge-borrowed",
+            returned: "badge-returned"
+        }
+
+        return mapping[status] || "badge-pending"
+    }
+
+    rejectionReason(status, reason) {
+        if (status !== "rejected") {
+            return ""
+        }
+
+        const normalizedReason = (reason || "").toString().trim()
+        return normalizedReason.length > 0 ? normalizedReason : "No reason provided"
     }
 
     humanizeStatus(status) {
