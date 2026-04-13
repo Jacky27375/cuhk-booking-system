@@ -35,6 +35,7 @@ class SessionsController < ApplicationController
 
     user.with_lock do
       user.reload
+      user.clear_expired_active_session_lock!
       return false if user.active_session_locked?
 
       session_token = user.issue_active_session_token!

@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe 'Sessions', type: :request do
+  include ActiveSupport::Testing::TimeHelpers
+
   let!(:user) { create(:user, :admin) }
 
   describe 'GET /login' do
@@ -43,6 +45,20 @@ RSpec.describe 'Sessions', type: :request do
 
       browser_one.get dashboard_path
       expect(browser_one.status).to eq(200)
+    end
+
+    it 'allows login when an existing lock is stale' do
+      stale_token = SecureRandom.hex(32)
+      user.update!(
+        active_session_token: stale_token,
+        active_session_token_issued_at: 13.hours.ago
+      )
+
+      post login_path, params: { email: user.email, password: 'Password1!' }
+
+      expect(response).to redirect_to(dashboard_path)
+      expect(user.reload.active_session_token).not_to eq(stale_token)
+      expect(user.active_session_token_issued_at).to be_present
     end
 
     it 'rejects invalid credentials' do
@@ -95,6 +111,19 @@ RSpec.describe 'Sessions', type: :request do
 
       get dashboard_path
       expect(response).to redirect_to(login_path)
+    end
+
+    it 'invalidates sessions after lock timeout and releases stale lock' do
+      log_in_as(user)
+
+      travel_to(User.active_session_lock_timeout.from_now + 1.second) do
+        get dashboard_path
+        expect(response).to redirect_to(login_path)
+      end
+
+      user.reload
+      expect(user.active_session_token).to be_nil
+      expect(user.active_session_token_issued_at).to be_nil
     end
 
     it 'hides Booking link for society member dashboard' do

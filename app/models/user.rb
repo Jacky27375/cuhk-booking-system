@@ -16,6 +16,8 @@ class User < ApplicationRecord
   scope :root_accounts, -> { where(is_root_account: true) }
 
   SESSION_TOKEN_LENGTH = 64
+  DEFAULT_ACTIVE_SESSION_LOCK_TIMEOUT = 12.hours
+  DEFAULT_ACTIVE_SESSION_LOCK_TOUCH_INTERVAL = 5.minutes
   CUHK_EMAIL_DOMAIN = "link.cuhk.edu.hk"
   CUHK_EMAIL_REGEX = /\A[a-zA-Z0-9._%+-]+@#{Regexp.escape(CUHK_EMAIL_DOMAIN)}\z/i
 
@@ -34,20 +36,49 @@ class User < ApplicationRecord
     true
   end
 
-  def active_session_locked?
-    active_session_token.present?
+  def self.active_session_lock_timeout
+    timeout_seconds = ENV.fetch("ACTIVE_SESSION_LOCK_TIMEOUT_SECONDS", DEFAULT_ACTIVE_SESSION_LOCK_TIMEOUT.to_i).to_i
+    timeout_seconds = DEFAULT_ACTIVE_SESSION_LOCK_TIMEOUT.to_i if timeout_seconds <= 0
+    timeout_seconds.seconds
   end
 
-  def issue_active_session_token!
+  def self.active_session_lock_touch_interval
+    interval_seconds = ENV.fetch("ACTIVE_SESSION_LOCK_TOUCH_INTERVAL_SECONDS", DEFAULT_ACTIVE_SESSION_LOCK_TOUCH_INTERVAL.to_i).to_i
+    interval_seconds = DEFAULT_ACTIVE_SESSION_LOCK_TOUCH_INTERVAL.to_i if interval_seconds <= 0
+    interval_seconds.seconds
+  end
+
+  def active_session_locked?(reference_time: Time.current)
+    active_session_token.present? && !active_session_lock_expired?(reference_time: reference_time)
+  end
+
+  def issue_active_session_token!(issued_at: Time.current)
     token = SecureRandom.hex(SESSION_TOKEN_LENGTH / 2)
-    update!(active_session_token: token)
+    update!(active_session_token: token, active_session_token_issued_at: issued_at)
     token
   end
 
   def clear_active_session_token!(token:)
     return unless active_session_token_matches?(token)
 
-    update!(active_session_token: nil)
+    clear_active_session_lock!
+  end
+
+  def clear_expired_active_session_lock!(reference_time: Time.current)
+    return false unless active_session_lock_expired?(reference_time: reference_time)
+
+    clear_active_session_lock!
+    true
+  end
+
+  def touch_active_session_lock!(token:, reference_time: Time.current)
+    return false unless active_session_token_matches?(token)
+    return false if active_session_lock_expired?(reference_time: reference_time)
+    return false if active_session_token_issued_at.present? &&
+                    active_session_token_issued_at >= (reference_time - self.class.active_session_lock_touch_interval)
+
+    update!(active_session_token_issued_at: reference_time)
+    true
   end
 
   def active_session_token_matches?(token)
@@ -55,6 +86,15 @@ class User < ApplicationRecord
     return false if active_session_token.blank? || submitted_token.blank?
 
     ActiveSupport::SecurityUtils.secure_compare(active_session_token, submitted_token)
+  end
+
+  def active_session_lock_expired?(reference_time: Time.current)
+    return false if active_session_token.blank?
+
+    issued_at = active_session_token_issued_at
+    return true if issued_at.blank?
+
+    issued_at <= (reference_time - self.class.active_session_lock_timeout)
   end
 
   def self.canonicalize_cuhk_email(local_part_or_email)
@@ -75,4 +115,10 @@ class User < ApplicationRecord
   validates :password_confirmation, presence: true, if: :new_record?
 
   normalizes :email, with: ->(email) { email.strip.downcase }
+
+  private
+
+  def clear_active_session_lock!
+    update!(active_session_token: nil, active_session_token_issued_at: nil)
+  end
 end

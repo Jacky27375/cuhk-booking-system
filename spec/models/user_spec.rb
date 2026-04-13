@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe User, type: :model do
+  include ActiveSupport::Testing::TimeHelpers
+
   describe 'validations' do
     it 'is valid with valid attributes' do
       expect(build(:user, :admin)).to be_valid
@@ -91,6 +93,38 @@ RSpec.describe User, type: :model do
 
     it 'rejects incorrect password' do
       expect(user.authenticate('wrongpassword')).to be_falsey
+    end
+  end
+
+  describe 'active session lock' do
+    let(:user) { create(:user, :admin) }
+
+    it 'stores an issued timestamp when creating a session token' do
+      travel_to(Time.zone.parse('2026-04-13 12:00:00 UTC')) do
+        user.issue_active_session_token!
+
+        expect(user.reload.active_session_token).to be_present
+        expect(user.active_session_token_issued_at).to eq(Time.current)
+      end
+    end
+
+    it 'treats legacy lock records without timestamp as expired' do
+      user.update!(active_session_token: SecureRandom.hex(32), active_session_token_issued_at: nil)
+
+      expect(user.active_session_lock_expired?).to be(true)
+    end
+
+    it 'clears lock columns when the lock has expired' do
+      user.update!(
+        active_session_token: SecureRandom.hex(32),
+        active_session_token_issued_at: 13.hours.ago
+      )
+
+      expect(user.clear_expired_active_session_lock!).to be(true)
+      user.reload
+
+      expect(user.active_session_token).to be_nil
+      expect(user.active_session_token_issued_at).to be_nil
     end
   end
 end
