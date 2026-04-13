@@ -34,8 +34,8 @@
                 <td><strong><%= booking.venue.name %></strong></td>
                 <td><%= booking.start_time %></td>
                 <td><%= booking.end_time %></td>
-                <td data-booking-id="<%= booking.id %>" data-status="<%= booking.status %>"><%= status_badge(booking.status) %></td>
-                <td class="text-muted text-sm"><%= booking.rejected? ? (booking.rejection_reason.presence || "No reason provided") : "" %></td>
+                <td data-booking-status-id="<%= booking.id %>" data-booking-id="<%= booking.id %>" data-status="<%= booking.status %>"><%= status_badge(booking.status) %></td>
+                <td data-booking-rejection-reason-id="<%= booking.id %>" class="text-muted text-sm"><%= booking.rejected? ? (booking.rejection_reason.presence || "No reason provided") : "" %></td>
                 <td>
                   <div class="btn-group">
                     <%= link_to "View", booking_path(booking), class: "btn btn-outline btn-sm" %>
@@ -73,8 +73,8 @@
                 <td><%= booking.quantity || "-" %></td>
                 <td><%= booking.start_date || booking.start_time %></td>
                 <td><%= booking.end_date || booking.end_time %></td>
-                <td data-booking-id="<%= booking.id %>" data-status="<%= booking.status %>"><%= status_badge(booking.status) %></td>
-                <td class="text-muted text-sm"><%= booking.rejected? ? (booking.rejection_reason.presence || "No reason provided") : "" %></td>
+                <td data-booking-status-id="<%= booking.id %>" data-booking-id="<%= booking.id %>" data-status="<%= booking.status %>"><%= status_badge(booking.status) %></td>
+                <td data-booking-rejection-reason-id="<%= booking.id %>" class="text-muted text-sm"><%= booking.rejected? ? (booking.rejection_reason.presence || "No reason provided") : "" %></td>
                 <td>
                   <div class="btn-group">
                     <%= link_to "View", booking_path(booking), class: "btn btn-outline btn-sm" %>
