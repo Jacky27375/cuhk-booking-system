@@ -814,6 +814,46 @@ textarea { min-height: 100px; resize: vertical; }
   white-space: nowrap;
 }
 
+.venues-table {
+  min-width: 860px;
+  table-layout: fixed;
+}
+
+.venues-table .venues-col-name {
+  width: 24%;
+}
+
+.venues-table .venues-col-name a {
+  overflow-wrap: anywhere;
+}
+
+.venues-table .venues-col-description {
+  width: 42%;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.venues-table .venues-col-department {
+  width: 18%;
+  white-space: nowrap;
+}
+
+.venues-table .venues-col-actions {
+  width: 16%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.venues-actions-group {
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+
+.venues-actions-group .btn,
+.venues-actions-group form {
+  flex: 0 0 auto;
+}
+
 /* My bookings table - same styling */
 table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) {
   width: 100%;
@@ -1065,13 +1105,31 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
 /* ===== Booking Planner ===== */
 .booking-planner {
   display: grid;
-  gap: 1.25rem;
+  gap: 1rem;
   max-width: 920px;
 }
 
-.booking-planner-controls {
+.booking-config-card {
   display: grid;
   gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.booking-config-header {
+  display: grid;
+  gap: 0.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.booking-venue-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--primary-dark);
 }
 
 .booking-date-filter {
@@ -1082,6 +1140,18 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
   box-shadow: var(--shadow-sm);
 }
 
+.booking-date-filter-inline {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.booking-date-filter-inline .booking-field {
+  max-width: 280px;
+}
+
 .booking-form {
   display: grid;
   gap: 1rem;
@@ -1090,6 +1160,13 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
   border-radius: var(--radius-lg);
   background: #fff;
   box-shadow: var(--shadow-sm);
+}
+
+.booking-form-stacked {
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
 }
 
 .booking-field {
@@ -1180,10 +1257,12 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
 }
 
 .TimeTableTitleCellOneDayOneFacilityView {
+  width: 150px;
   padding: 0.65rem 0.85rem;
   font-weight: 700;
   background: var(--primary-bg);
   color: var(--primary-dark);
+  text-align: center;
 }
 
 .TimeTableCell_Available {
@@ -1201,12 +1280,20 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
   padding: 0.3rem 0.5rem;
 }
 
+.timetable-status-cell {
+  text-align: center;
+}
+
 .timetable-slot {
-  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 110px;
+  font-size: 0.8rem;
   line-height: 1.35;
-  padding: 0.2rem 0.4rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 4px;
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .timetable-time-range {
@@ -1432,8 +1519,14 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
   .booking-time-fields {
     grid-template-columns: 1fr;
   }
+  .booking-date-filter-inline .booking-field {
+    max-width: 100%;
+  }
   .TimeTableTitleCell {
     width: 170px;
+  }
+  .venues-table {
+    min-width: 760px;
   }
 }
 

@@ -8,7 +8,7 @@
   <thead>
     <tr>
       <th scope="col" class="TimeTableTitleCell">Time Slot</th>
-      <th scope="col" class="TimeTableTitleCellOneDayOneFacilityView"><%= booking.venue&.name || 'Select a venue' %></th>
+      <th scope="col" class="TimeTableTitleCellOneDayOneFacilityView">Availability</th>
     </tr>
   </thead>
   <tbody>
@@ -17,10 +17,10 @@
         <td class="TimeTableTitleCell timetable-time-cell">
           <span class="timetable-time-range"><%= slot[:start_at].strftime('%I:%M %p') %> - <%= slot[:end_at].strftime('%I:%M %p') %></span>
         </td>
-        <td class="<%= booking_timetable_cell_class(slot) %>">
-          <div class="<%= booking_timetable_slot_class(slot) %>" data-slot-start="<%= slot[:start_at].strftime('%Y-%m-%dT%H:%M') %>" data-slot-end="<%= slot[:end_at].strftime('%Y-%m-%dT%H:%M') %>">
-            <%= slot[:label] %>
-          </div>
+        <td class="<%= booking_timetable_cell_class(slot) %> timetable-status-cell">
+          <span class="<%= booking_timetable_slot_class(slot) %>">
+            <%= booking_timetable_status_text(slot) %>
+          </span>
         </td>
       </tr>
     <% end %>

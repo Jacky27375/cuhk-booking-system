@@ -37,4 +37,15 @@ module BookingsHelper
   def booking_timetable_slot_class(slot)
     ["timetable-slot", slot[:css_class]].join(" ")
   end
+
+  def booking_timetable_status_text(slot)
+    case slot[:css_class]
+    when "timetable-slot-selected"
+      "Selected"
+    when "timetable-slot-unavailable"
+      "Unavailable"
+    else
+      "Available"
+    end
+  end
 end
