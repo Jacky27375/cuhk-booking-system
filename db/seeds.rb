@@ -352,8 +352,12 @@ demo_students.values.each_with_index do |student, index|
   )
   venue_booking.status = venue_status
   venue_booking.rejection_reason = venue_status == "rejected" ? "Seeded demo booking" : nil
-  venue_booking.save!
-  seeded_venue_bookings << venue_booking
+  if venue_booking.valid?
+    venue_booking.save!
+    seeded_venue_bookings << venue_booking
+  else
+    puts "Skipping demo venue booking for #{student.email}: #{venue_booking.errors.full_messages.to_sentence}"
+  end
 
   equipment_start_date = start_date
   equipment_end_date = equipment_start_date + seed_rng.rand(0..3).days
@@ -367,8 +371,26 @@ demo_students.values.each_with_index do |student, index|
   equipment_booking.quantity = 1
   equipment_booking.status = equipment_status
   equipment_booking.rejection_reason = equipment_status == "rejected" ? "Seeded demo booking" : nil
-  equipment_booking.save!
-  seeded_equipment_bookings << equipment_booking
+
+  if equipment_booking.valid?
+    equipment_booking.save!
+    seeded_equipment_bookings << equipment_booking
+  else
+    recoverable_errors = equipment_booking.errors[:base]
+    if recoverable_errors.include?("Not enough units available") ||
+       recoverable_errors.include?("You can borrow at most 5 items at the same time")
+      equipment_booking.status = :rejected
+      equipment_booking.rejection_reason = "Seeded demo booking auto-rejected due resource constraints"
+
+      if equipment_booking.save
+        seeded_equipment_bookings << equipment_booking
+      else
+        puts "Skipping demo equipment booking for #{student.email}: #{equipment_booking.errors.full_messages.to_sentence}"
+      end
+    else
+      puts "Skipping demo equipment booking for #{student.email}: #{equipment_booking.errors.full_messages.to_sentence}"
+    end
+  end
 end
 
 puts "Ensuring demo venue requests..."
