@@ -1254,6 +1254,7 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
   color: var(--gray-700);
   font-size: 0.85rem;
   white-space: nowrap;
+  text-align: center;
 }
 
 .TimeTableTitleCellOneDayOneFacilityView {
