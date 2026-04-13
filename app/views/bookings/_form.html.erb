@@ -1,62 +1,70 @@
 <%= turbo_frame_tag booking_planner_frame_id, class: "booking-planner" do %>
-  <%= form_with(url: booking_date_filter_url(booking), method: :get, local: true, class: "booking-date-filter", data: { turbo_frame: booking_planner_frame_id }) do %>
-    <%= hidden_field_tag :venue_id, booking.venue_id || params[:venue_id] %>
-    <div class="booking-field">
-      <%= label_tag :booking_date, "Booking date", class: "booking-label" %>
-      <%= date_field_tag :booking_date, @booking_date, required: true, min: booking_date_minimum, onchange: "this.form.requestSubmit();" %>
-    </div>
-  <% end %>
-
-  <%= render "timetable", booking: booking %>
-
-  <%= form_with(
-        model: booking,
-        url: booking_form_url(booking),
-        method: booking_form_method(booking),
-        data: {
-          turbo: false,
-          controller: "booking-time",
-          booking_time_unavailable_ranges_value: @unavailable_ranges_for_slots.map { |b| { start: b.start_time.strftime('%H:%M'), end: b.end_time.strftime('%H:%M') } }.to_json,
-          booking_time_day_end_value: "22:00",
-          booking_time_max_hours_value: 4
-        },
-        class: "booking-form"
-      ) do |form| %>
-    <% if booking.errors.any? %>
-      <div class="booking-errors">
-        <ul class="booking-error-list">
-          <% booking.errors.each do |error| %>
-            <li><%= error.full_message %></li>
-          <% end %>
-        </ul>
+  <div class="booking-planner-controls">
+    <%= form_with(url: booking_date_filter_url(booking), method: :get, local: true, class: "booking-date-filter", data: { turbo_frame: booking_planner_frame_id }) do %>
+      <%= hidden_field_tag :venue_id, booking.venue_id || params[:venue_id] %>
+      <div class="booking-field">
+        <%= label_tag :booking_date, "Booking date", class: "booking-label" %>
+        <%= date_field_tag :booking_date, @booking_date, required: true, min: booking_date_minimum, onchange: "this.form.requestSubmit();" %>
       </div>
     <% end %>
 
-    <div class="booking-field booking-resource-summary">
-      <% if booking.venue_id %>
-        <%= form.hidden_field :venue_id %>
-        <span class="booking-label">Venue</span>
-        <span><%= booking.venue&.name %></span>
-      <% else %>
-        <%= form.label :venue_id, class: "booking-label" %>
-        <%= form.collection_select :venue_id, (@venues || Venue.none), :id, :name %>
+    <%= form_with(
+          model: booking,
+          url: booking_form_url(booking),
+          method: booking_form_method(booking),
+          data: {
+            turbo: false,
+            controller: "booking-time",
+            booking_time_unavailable_ranges_value: @unavailable_ranges_for_slots.map { |b| { start: b.start_time.strftime('%H:%M'), end: b.end_time.strftime('%H:%M') } }.to_json,
+            booking_time_day_end_value: "22:00",
+            booking_time_max_hours_value: 4
+          },
+          class: "booking-form"
+        ) do |form| %>
+      <% if booking.errors.any? %>
+        <div class="booking-errors">
+          <ul class="booking-error-list">
+            <% booking.errors.each do |error| %>
+              <li><%= error.full_message %></li>
+            <% end %>
+          </ul>
+        </div>
       <% end %>
-    </div>
 
-    <%= hidden_field_tag "booking[booking_date]", @booking_date %>
+      <div class="booking-field booking-resource-summary">
+        <% if booking.venue_id %>
+          <%= form.hidden_field :venue_id %>
+          <span class="booking-label">Venue</span>
+          <span><%= booking.venue&.name %></span>
+        <% else %>
+          <%= form.label :venue_id, class: "booking-label" %>
+          <%= form.collection_select :venue_id, (@venues || Venue.none), :id, :name %>
+        <% end %>
+      </div>
 
-    <div class="booking-field">
-      <%= label_tag "booking_start_slot", "Start time", class: "booking-label" %>
-      <%= select_tag "booking[start_slot]", options_for_select(@start_slot_options, booking.start_time&.strftime('%H:%M')), include_blank: "Select start time", id: "booking_start_slot", data: { booking_time_target: "startSelect", action: "change->booking-time#startChanged" } %>
-    </div>
+      <%= hidden_field_tag "booking[booking_date]", @booking_date %>
 
-    <div class="booking-field">
-      <%= label_tag "booking_end_slot", "End time", class: "booking-label" %>
-      <%= select_tag "booking[end_slot]", options_for_select(@end_slot_options, booking.end_time&.strftime('%H:%M')), include_blank: "Select end time", id: "booking_end_slot", disabled: booking.start_time.blank?, data: { booking_time_target: "endSelect" } %>
-    </div>
+      <div class="booking-time-fields">
+        <div class="booking-field">
+          <%= label_tag "booking_start_slot", "Start time", class: "booking-label" %>
+          <%= select_tag "booking[start_slot]", options_for_select(@start_slot_options, booking.start_time&.strftime('%H:%M')), include_blank: "Select start time", id: "booking_start_slot", data: { booking_time_target: "startSelect", action: "change->booking-time#startChanged" } %>
+        </div>
 
-    <div class="booking-actions">
-      <%= form.submit booking_submit_label(booking), class: "button-primary" %>
-    </div>
+        <div class="booking-field">
+          <%= label_tag "booking_end_slot", "End time", class: "booking-label" %>
+          <%= select_tag "booking[end_slot]", options_for_select(@end_slot_options, booking.end_time&.strftime('%H:%M')), include_blank: "Select end time", id: "booking_end_slot", disabled: booking.start_time.blank?, data: { booking_time_target: "endSelect" } %>
+        </div>
+      </div>
+
+      <div class="booking-actions">
+        <%= form.submit booking_submit_label(booking), class: "button-primary" %>
+      </div>
+    <% end %>
+  </div>
+
+  <%= render "timetable", booking: booking %>
+  <p class="timetable-note">Tip: use the timetable below to verify availability before submitting.</p>
+  <% unless booking.persisted? %>
+    <p class="timetable-note">After selecting times, click "<%= booking_submit_label(booking) %>" to continue.</p>
   <% end %>
 <% end %>

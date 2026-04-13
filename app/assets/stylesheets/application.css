@@ -778,6 +778,42 @@ textarea { min-height: 100px; resize: vertical; }
   border-bottom: none;
 }
 
+.table-scroll-shell {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.venue-requests-table {
+  min-width: 980px;
+  table-layout: auto;
+}
+
+.venue-requests-table th,
+.venue-requests-table td {
+  white-space: nowrap;
+}
+
+.venue-requests-table .venue-request-description {
+  min-width: 220px;
+  max-width: 320px;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.venue-requests-table .venue-request-email {
+  max-width: 220px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.venue-requests-table .venue-request-actions,
+.venue-requests-table .venue-request-actions-header {
+  min-width: 96px;
+  text-align: right;
+  white-space: nowrap;
+}
+
 /* My bookings table - same styling */
 table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) {
   width: 100%;
@@ -962,6 +998,47 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
   color: var(--gray-900);
 }
 
+.venue-request-review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.venue-request-review-action {
+  padding: 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+}
+
+.venue-request-review-action h4 {
+  margin: 0 0 0.45rem;
+  font-size: 0.95rem;
+  color: var(--gray-900);
+}
+
+.venue-request-review-action p {
+  margin: 0 0 0.8rem;
+}
+
+.venue-request-approve-action {
+  background: var(--success-bg);
+  border-color: #A7F3D0;
+}
+
+.venue-request-reject-action {
+  background: var(--danger-bg);
+  border-color: #FECACA;
+}
+
+.venue-request-action-form,
+.venue-request-reject-form {
+  margin: 0;
+}
+
+.venue-request-review-button {
+  width: 100%;
+}
+
 /* ===== Empty State ===== */
 .empty-state {
   text-align: center;
@@ -989,11 +1066,15 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
 .booking-planner {
   display: grid;
   gap: 1.25rem;
-  max-width: 800px;
+  max-width: 920px;
+}
+
+.booking-planner-controls {
+  display: grid;
+  gap: 1rem;
 }
 
 .booking-date-filter {
-  margin-bottom: 0.5rem;
   padding: 1rem 1.25rem;
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
@@ -1014,6 +1095,13 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
 .booking-field {
   display: grid;
   gap: 0.35rem;
+}
+
+.booking-time-fields {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: end;
 }
 
 .booking-label {
@@ -1066,7 +1154,7 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
   border-collapse: separate;
   border-spacing: 0;
   width: 100%;
-  max-width: 800px;
+  max-width: 920px;
   margin: 0.75rem 0 1rem;
   font-size: 0.93rem;
   border-radius: var(--radius);
@@ -1075,18 +1163,20 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
   border: 1px solid var(--gray-200);
 }
 
+.TimeTable th,
 .TimeTable td {
   border: 1px solid var(--gray-200);
   vertical-align: middle;
 }
 
 .TimeTableTitleCell {
-  width: 150px;
+  width: 210px;
   padding: 0.65rem 0.85rem;
   font-weight: 700;
   background: var(--gray-100);
   color: var(--gray-700);
   font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 .TimeTableTitleCellOneDayOneFacilityView {
@@ -1117,6 +1207,12 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
   font-weight: 500;
+}
+
+.timetable-time-range {
+  display: inline-block;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .timetable-slot-unavailable {
@@ -1332,6 +1428,12 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
   }
   .dashboard-grid {
     grid-template-columns: 1fr;
+  }
+  .booking-time-fields {
+    grid-template-columns: 1fr;
+  }
+  .TimeTableTitleCell {
+    width: 170px;
   }
 }
 

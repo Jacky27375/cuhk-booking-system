@@ -58,21 +58,31 @@
   <div class="card">
     <div class="card-body">
       <h3 class="mb-2">Review Actions</h3>
-      <div class="btn-group mb-2">
-        <%= button_to "Approve",
-                      approve_venue_request_path(@venue_request, status: @return_status),
-                      method: :patch,
-                      class: "btn btn-primary btn-sm",
-                      data: { turbo_confirm: "Approve this venue request?" } %>
-      </div>
+      <div class="venue-request-review-grid">
+        <section class="venue-request-review-action venue-request-approve-action">
+          <h4>Approve request</h4>
+          <p class="text-muted text-sm">This will approve the request and create the venue immediately.</p>
+          <%= button_to "Approve",
+                        approve_venue_request_path(@venue_request, status: @return_status),
+                        method: :patch,
+                        class: "btn btn-success btn-sm venue-request-review-button",
+                        form: { class: "venue-request-action-form" },
+                        data: { turbo_confirm: "Approve this venue request?" } %>
+        </section>
 
-      <%= form_with url: reject_venue_request_path(@venue_request, status: @return_status), method: :patch, local: true do |f| %>
-        <div class="form-group">
-          <%= f.label :rejection_reason, "Rejection reason" %>
-          <%= f.text_field :rejection_reason, required: true, placeholder: "Reason for rejection" %>
-        </div>
-        <%= f.submit "Reject", class: "btn btn-danger btn-sm", data: { turbo_confirm: "Reject this venue request?" } %>
-      <% end %>
+        <section class="venue-request-review-action venue-request-reject-action">
+          <h4>Reject request</h4>
+          <p class="text-muted text-sm">Rejecting requires a reason so staff know what to update.</p>
+
+          <%= form_with url: reject_venue_request_path(@venue_request, status: @return_status), method: :patch, local: true, class: "venue-request-reject-form" do |f| %>
+            <div class="form-group">
+              <%= f.label :rejection_reason, "Rejection reason" %>
+              <%= f.text_field :rejection_reason, required: true, placeholder: "Reason for rejection" %>
+            </div>
+            <%= f.submit "Reject", class: "btn btn-danger btn-sm venue-request-review-button", data: { turbo_confirm: "Reject this venue request?" } %>
+          <% end %>
+        </section>
+      </div>
     </div>
   </div>
 <% end %>
