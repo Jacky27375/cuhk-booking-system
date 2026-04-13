@@ -74,3 +74,10 @@ Feature: Booking Approval Workflow
     And I am viewing "My Bookings"
     When the staff approves my booking for "Room 101"
     Then I should see the status update to "Approved" without refreshing the page
+
+  @javascript
+  Scenario: Student sees cancel action removed when booking is rejected in real-time
+    Given I am logged in as "student@link.cuhk.edu.hk"
+    And I am viewing "My Bookings"
+    When the staff rejects my booking for "Room 101" with reason "No staff available"
+    Then I should see the booking status update to "Rejected" and remove the "Cancel Booking" action without refreshing
