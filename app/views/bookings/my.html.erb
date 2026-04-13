@@ -40,7 +40,12 @@
                   <div class="btn-group">
                     <%= link_to "View", booking_path(booking), class: "btn btn-outline btn-sm" %>
                     <% if booking.cancelable_by_owner? %>
-                      <%= button_to "Cancel Booking", cancel_booking_path(booking), method: :patch, class: "btn btn-warning btn-sm", data: { turbo: false, turbo_confirm: "Cancel this booking?" } %>
+                      <%= button_to "Cancel Booking",
+                                    cancel_booking_path(booking),
+                                    method: :patch,
+                                    class: "btn btn-warning btn-sm",
+                                    data: { turbo: false, turbo_confirm: "Cancel this booking?" },
+                                    form: { data: { booking_cancel_action_id: booking.id } } %>
                     <% end %>
                   </div>
                 </td>
@@ -79,7 +84,12 @@
                   <div class="btn-group">
                     <%= link_to "View", booking_path(booking), class: "btn btn-outline btn-sm" %>
                     <% if booking.cancelable_by_owner? %>
-                      <%= button_to "Cancel Booking", cancel_booking_path(booking), method: :patch, class: "btn btn-warning btn-sm", data: { turbo: false, turbo_confirm: "Cancel this booking?" } %>
+                      <%= button_to "Cancel Booking",
+                                    cancel_booking_path(booking),
+                                    method: :patch,
+                                    class: "btn btn-warning btn-sm",
+                                    data: { turbo: false, turbo_confirm: "Cancel this booking?" },
+                                    form: { data: { booking_cancel_action_id: booking.id } } %>
                     <% end %>
                   </div>
                 </td>

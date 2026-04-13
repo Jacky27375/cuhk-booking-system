@@ -59,6 +59,25 @@ export default class extends Controller {
         if (rejectionReasonNode) {
             rejectionReasonNode.textContent = this.rejectionReason(normalizedStatus, data.rejection_reason)
         }
+
+        this.syncCancelableAction(data.booking_id, normalizedStatus)
+    }
+
+    syncCancelableAction(bookingId, status) {
+        const cancelActionNode = this.element.querySelector(
+            `[data-booking-cancel-action-id="${bookingId}"]`
+        )
+        if (!cancelActionNode) {
+            return
+        }
+
+        if (!this.ownerCancelableStatuses().includes(status)) {
+            cancelActionNode.remove()
+        }
+    }
+
+    ownerCancelableStatuses() {
+        return ["pending", "under_review", "approved"]
     }
 
     badgeClass(status) {
