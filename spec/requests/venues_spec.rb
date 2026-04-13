@@ -64,6 +64,23 @@ RSpec.describe "/venues", type: :request do
       expect(response.body.index("Alpha Room")).to be < response.body.index("Zulu Room")
     end
 
+    it "keeps the actions column consistent between admin and staff views" do
+      create(:venue, name: "Long Venue Name For Layout Stability Check", tenant: science_tenant, department: science_tenant.name)
+
+      get venues_url
+      expect(response.body).to include("venues-table")
+      expect(response.body).to include("venues-col-actions")
+      expect(response.body).to include("venues-actions-group")
+
+      staff = create(:user, :staff, tenant: science_tenant)
+      log_in_as(staff)
+      get venues_url
+
+      expect(response.body).to include("venues-table")
+      expect(response.body).to include("venues-col-actions")
+      expect(response.body).to include("venues-actions-group")
+    end
+
     it "shows root staff a request-new-venue action instead of direct creation" do
       root_staff = create(:user, :root_account, tenant: new_asia_tenant)
       log_in_as(root_staff)

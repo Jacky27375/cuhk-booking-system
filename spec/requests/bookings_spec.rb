@@ -136,9 +136,13 @@ RSpec.describe "/bookings", type: :request do
       document = Nokogiri::HTML(response.body)
       booking_date_input = document.at_css('input#booking_date')
 
+      expect(response.body).to include('booking-config-card')
+      expect(response.body).to include('booking-date-filter-inline')
       expect(response.body).to include('booking-time-fields')
       expect(response.body).to include('Time Slot')
-      expect(response.body).not_to include('Selected date:')
+      expect(response.body).to include('Availability')
+      expect(response.body).to include('review the timetable above')
+      expect(response.body).not_to include('timetable below')
       expect(booking_date_input).not_to be_nil
       expect(booking_date_input['value']).to eq(booking_date.to_s)
     end
@@ -284,7 +288,8 @@ RSpec.describe "/bookings", type: :request do
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include('Booking duration cannot exceed 4 hours')
-      expect(response.body).not_to match(/timetable-slot-selected[^>]*>\s*08:00 - 09:00/m)
+      document = Nokogiri::HTML(response.body)
+      expect(document.css('.timetable-slot.timetable-slot-selected')).to be_empty
     end
   end
 
