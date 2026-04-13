@@ -138,7 +138,7 @@ When("I reject the booking for {string} on {string} with reason {string}") do |v
   @current_booking = booking
 
   within("##{ActionView::RecordIdentifier.dom_id(booking)}") do
-    fill_in "Reason", with: reason
+    fill_in "rejection_reason", with: reason
     click_button "Reject"
   end
 end

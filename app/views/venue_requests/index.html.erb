@@ -27,38 +27,40 @@
 
 <% if @venue_requests.any? %>
   <div class="card">
-    <table class="resource-grid-table" style="margin:0; border:none; box-shadow:none;">
-      <thead>
-        <tr>
-          <th>Venue Name</th>
-          <th>Description</th>
-          <% if current_user.admin? %><th>Requested By</th><% end %>
-          <th>College</th>
-          <th>Status</th>
-          <% if current_user.admin? %><th>Requested At</th><% end %>
-          <% if current_user.admin? %><th>Reviewed By</th><% end %>
-          <% if current_user.admin? %><th>Reviewed At</th><% end %>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @venue_requests.each do |request| %>
-          <tr<%= ' style="background-color: rgba(255, 243, 205, 0.45);"' if request.pending? %>>
-            <td><strong><%= request.venue_name %></strong></td>
-            <td class="text-muted"><%= request.description %></td>
-            <% if current_user.admin? %><td><%= request.requester.email %></td><% end %>
-            <td><span class="badge badge-role"><%= request.tenant.name %></span></td>
-            <td><%= status_badge(request.status) %></td>
-            <% if current_user.admin? %><td class="text-muted"><%= request.created_at.strftime("%Y-%m-%d %H:%M") %></td><% end %>
-            <% if current_user.admin? %><td><%= request.reviewed_by&.email || "-" %></td><% end %>
-            <% if current_user.admin? %><td class="text-muted"><%= request.reviewed_at&.strftime("%Y-%m-%d %H:%M") || "-" %></td><% end %>
-            <td>
-              <%= link_to "View", venue_request_path(request, status: @status_filter), class: "btn btn-secondary btn-sm" %>
-            </td>
+    <div class="table-scroll-shell">
+      <table class="resource-grid-table venue-requests-table" style="margin:0; border:none; box-shadow:none;">
+        <thead>
+          <tr>
+            <th>Venue Name</th>
+            <th>Description</th>
+            <% if current_user.admin? %><th>Requested By</th><% end %>
+            <th>College</th>
+            <th>Status</th>
+            <% if current_user.admin? %><th>Requested At</th><% end %>
+            <% if current_user.admin? %><th>Reviewed By</th><% end %>
+            <% if current_user.admin? %><th>Reviewed At</th><% end %>
+            <th class="venue-request-actions-header">Actions</th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% @venue_requests.each do |request| %>
+            <tr<%= ' style="background-color: rgba(255, 243, 205, 0.45);"' if request.pending? %>>
+              <td><strong><%= request.venue_name %></strong></td>
+              <td class="text-muted venue-request-description"><%= request.description.presence || "-" %></td>
+              <% if current_user.admin? %><td class="venue-request-email"><%= request.requester.email %></td><% end %>
+              <td><span class="badge badge-role"><%= request.tenant.name %></span></td>
+              <td><%= status_badge(request.status) %></td>
+              <% if current_user.admin? %><td class="text-muted"><%= request.created_at.strftime("%Y-%m-%d %H:%M") %></td><% end %>
+              <% if current_user.admin? %><td><%= request.reviewed_by&.email || "-" %></td><% end %>
+              <% if current_user.admin? %><td class="text-muted"><%= request.reviewed_at&.strftime("%Y-%m-%d %H:%M") || "-" %></td><% end %>
+              <td class="venue-request-actions">
+                <%= link_to "View", venue_request_path(request, status: @status_filter), class: "btn btn-secondary btn-sm" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
   </div>
 <% else %>
   <div class="empty-state">
