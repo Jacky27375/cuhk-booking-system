@@ -26,12 +26,12 @@ When('I open the edit booking page for my booking on a date {int} days in the fu
 end
 
 Then('I should see timetable date {string}') do |date|
-  expect(page).to have_content("Selected date: #{date}")
+  expect(find('#booking_date', visible: :all).value).to eq(date)
 end
 
 Then('I should see timetable date for {int} days in the future') do |days|
   date = (Date.current + days.days).strftime('%Y-%m-%d')
-  expect(page).to have_content("Selected date: #{date}")
+  expect(find('#booking_date', visible: :all).value).to eq(date)
 end
 
 Given('there is a booking for {string} by {string} from {int} days in the future at {string} to {int} days in the future at {string}') do |venue_name, user_email, start_days, start_time, end_days, end_time|

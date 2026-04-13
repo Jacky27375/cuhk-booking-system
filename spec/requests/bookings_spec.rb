@@ -128,6 +128,21 @@ RSpec.describe "/bookings", type: :request do
       expect(response).to be_successful
     end
 
+    it "shows compact booking controls and a readable timetable time column" do
+      booking_date = 5.days.from_now.to_date
+
+      get new_booking_url, params: { venue_id: venue.id, booking_date: booking_date.to_s }
+
+      document = Nokogiri::HTML(response.body)
+      booking_date_input = document.at_css('input#booking_date')
+
+      expect(response.body).to include('booking-time-fields')
+      expect(response.body).to include('Time Slot')
+      expect(response.body).not_to include('Selected date:')
+      expect(booking_date_input).not_to be_nil
+      expect(booking_date_input['value']).to eq(booking_date.to_s)
+    end
+
     it "excludes unavailable start slots" do
       booking_date = 5.days.from_now.to_date
       other_user = create(:user, tenant: tenant, email: "other-student@link.cuhk.edu.hk")

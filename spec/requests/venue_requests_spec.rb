@@ -28,6 +28,8 @@ RSpec.describe 'Venue Requests', type: :request do
       expect(response.body).to include('Reviewed By')
       expect(response.body).to include('Reviewed At')
       expect(response.body).to include('View')
+      expect(response.body).to include('table-scroll-shell')
+      expect(response.body).to include('venue-requests-table')
     end
 
     it 'denies student access' do
@@ -99,6 +101,20 @@ RSpec.describe 'Venue Requests', type: :request do
       expect(response.body).to include('Venue Request Details')
       expect(response.body).to include('Duplicate')
       expect(response.body).to include(venue_requests_path(status: 'all'))
+    end
+
+    it 'uses distinct approve/reject action sections for pending requests' do
+      pending_request = create(:venue_request, requester: staff_user, tenant: tenant, status: :pending)
+      log_in_as(admin_user)
+
+      get venue_request_path(pending_request), params: { status: 'pending' }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('venue-request-review-grid')
+      expect(response.body).to include('btn btn-success btn-sm venue-request-review-button')
+      expect(response.body).to include('btn btn-danger btn-sm venue-request-review-button')
+      expect(response.body).to include('Approve request')
+      expect(response.body).to include('Reject request')
     end
 
     it 'blocks other staff from viewing the request' do
