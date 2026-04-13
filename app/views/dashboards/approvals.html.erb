@@ -55,8 +55,7 @@
                                   class: "btn btn-success btn-sm approval-approve-button",
                                   form: { class: "approval-approve-form" }) %>
                     <%= form_with url: reject_booking_path(booking), method: :patch, local: true, class: "approval-reject-form" do |f| %>
-                      <%= f.label :rejection_reason, "Reason", class: "approval-reject-label" %>
-                      <%= f.text_field :rejection_reason, placeholder: "Reason for rejection", required: true, class: "approval-reject-input" %>
+                      <%= f.text_field :rejection_reason, placeholder: "Reason for rejection", required: true, class: "approval-reject-input", aria: { label: "Reason" } %>
                       <%= f.submit "Reject", class: "btn btn-danger btn-sm approval-reject-button" %>
                     <% end %>
                   </div>
@@ -116,8 +115,7 @@
                                   class: "btn btn-success btn-sm approval-approve-button",
                                   form: { class: "approval-approve-form" }) %>
                     <%= form_with url: reject_booking_path(booking), method: :patch, local: true, class: "approval-reject-form" do |f| %>
-                      <%= f.label :rejection_reason, "Reason", class: "approval-reject-label" %>
-                      <%= f.text_field :rejection_reason, placeholder: "Reason for rejection", required: true, class: "approval-reject-input" %>
+                      <%= f.text_field :rejection_reason, placeholder: "Reason for rejection", required: true, class: "approval-reject-input", aria: { label: "Reason" } %>
                       <%= f.submit "Reject", class: "btn btn-danger btn-sm approval-reject-button" %>
                     <% end %>
                   </div>

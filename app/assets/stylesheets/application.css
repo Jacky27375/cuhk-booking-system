@@ -1379,14 +1379,6 @@ table:not(.resource-grid-table):not(.TimeTable):not(.analytics-heatmap table) tb
   align-items: end;
 }
 
-.approval-reject-label {
-  grid-column: 1 / -1;
-  margin: 0;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--gray-600);
-}
-
 .approval-reject-input {
   min-width: 0;
 }
