@@ -93,6 +93,34 @@ RSpec.describe "/bookings", type: :request do
       expect(response).to be_successful
     end
 
+    it "shows rejected bookings without cancel action and with rejection reason" do
+      booking = create(
+        :booking,
+        user: user,
+        venue: venue,
+        status: :rejected,
+        rejection_reason: "No staff available"
+      )
+
+      get my_bookings_path
+
+      document = Nokogiri::HTML(response.body)
+      booking_row = document.at_css("tr#booking_#{booking.id}")
+      expect(booking_row).not_to be_nil
+
+      status_cell = booking_row.at_css("td[data-booking-id='#{booking.id}']")
+      expect(status_cell).not_to be_nil
+      expect(status_cell["data-status"]).to eq("rejected")
+      expect(status_cell.text).to include("Rejected")
+
+      reason_cell = booking_row.at_css("td[data-booking-rejection-reason-id='#{booking.id}']")
+      expect(reason_cell).not_to be_nil
+      expect(reason_cell.text).to include("No staff available")
+
+      cancel_action = booking_row.at_css("[data-booking-cancel-action-id='#{booking.id}']")
+      expect(cancel_action).to be_nil
+    end
+
     it "blocks staff from accessing my bookings" do
       staff = create(:user, :staff, tenant: tenant)
       log_in_as(staff)

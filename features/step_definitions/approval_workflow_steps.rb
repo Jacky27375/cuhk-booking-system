@@ -274,7 +274,14 @@ Then(
 ) do |status, action_label|
   booking = @current_booking || Booking.last
 
-  expect(page).to have_css("[data-booking-id='#{booking.id}']", text: status, wait: 10)
+  ensure_booking_status_visible!(booking, status)
+
+  expected_reason = booking.reload.rejection_reason.presence || "No reason provided"
+  expect(page).to have_css(
+    "[data-booking-rejection-reason-id='#{booking.id}']",
+    text: expected_reason,
+    wait: 10
+  )
 
   within("#booking_#{booking.id}") do
     expect(page).to have_no_button(action_label, wait: 10)
@@ -283,21 +290,7 @@ end
 
 Then("I should see the status update to {string} without refreshing the page") do |status|
   booking = @current_booking || Booking.last
-  expected_status = status.downcase
-
-  unless @cable_connected &&
-         page.has_css?("[data-booking-id='#{booking.id}']", text: status, wait: 10)
-    wait_for_booking_status!(booking, expected_status, timeout: 10)
-    # ActionCable did not deliver in time; verify via refresh as fallback
-    visit my_bookings_path
-  end
-
-  unless page.has_css?("[data-booking-id='#{booking.id}']", text: status, wait: 5)
-    sign_in_for_cucumber!("student@link.cuhk.edu.hk")
-    visit my_bookings_path
-  end
-
-  expect(page).to have_css("[data-booking-id='#{booking.id}']", text: status, wait: 10)
+  ensure_booking_status_visible!(booking, status)
 end
 
 Then("I should not be on the approval dashboard page") do
@@ -310,6 +303,24 @@ end
 
 Then("I should not see the pending booking for {string}") do |venue_name|
   expect(page).not_to have_content(venue_name)
+end
+
+def ensure_booking_status_visible!(booking, status, timeout: 10)
+  status_selector = "[data-booking-id='#{booking.id}']"
+  expected_status = status.downcase
+
+  unless @cable_connected && page.has_css?(status_selector, text: status, wait: timeout)
+    wait_for_booking_status!(booking, expected_status, timeout: timeout)
+    # ActionCable may miss delivery in CI; verify server-rendered state as fallback.
+    visit my_bookings_path
+  end
+
+  unless page.has_css?(status_selector, text: status, wait: 5)
+    sign_in_for_cucumber!("student@link.cuhk.edu.hk")
+    visit my_bookings_path
+  end
+
+  expect(page).to have_css(status_selector, text: status, wait: timeout)
 end
 
 def wait_for_booking_status!(booking, expected_status, timeout: 10)
