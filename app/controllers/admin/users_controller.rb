@@ -14,7 +14,7 @@ class Admin::UsersController < ApplicationController
 
     @user.destroy!
     redirect_to admin_users_path, notice: "Account deleted: #{@user.email}"
-  rescue ActiveRecord::RecordNotDestroyed, ActiveRecord::InvalidForeignKey
+  rescue ActiveRecord::DeleteRestrictionError, ActiveRecord::RecordNotDestroyed, ActiveRecord::InvalidForeignKey
     redirect_to admin_users_path, alert: "Account could not be deleted because dependent records still reference it."
   end
 
@@ -45,6 +45,7 @@ class Admin::UsersController < ApplicationController
 
   def account_deletion_blocked_message(user)
     return "You cannot delete your own admin account." if user == current_user
+    return "Root staff accounts are protected and cannot be deleted." if user.root_staff_account?
     return "You cannot delete the last admin account." if user.admin? && User.admin.count <= 1
 
     "Account could not be deleted."

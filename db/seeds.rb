@@ -23,7 +23,7 @@ root_staff_emails = {
   "S.H. Ho College" => "staff_root_shho@link.cuhk.edu.hk",
   "CW Chu College" => "staff_root_cwchu@link.cuhk.edu.hk",
   "Wu Yee Sun College" => "staff_root_wuyeesun@link.cuhk.edu.hk",
-  "Lee Woo Sing College" => "staff_root_leewoosin@link.cuhk.edu.hk"
+  "Lee Woo Sing College" => "staff_root_leewoosing@link.cuhk.edu.hk"
 }
 
 demo_student_emails = {
@@ -238,7 +238,7 @@ else
 end
 
 if Rails.env.production? && reset_bootstrap_accounts_once
-  puts "RESET_BOOTSTRAP_ACCOUNTS_ONCE is enabled; bootstrap account passwords will be reset in this seed run."
+  puts "RESET_BOOTSTRAP_ACCOUNTS_ONCE is enabled; canonical bootstrap admin/root accounts will be reset and reconciled in this seed run."
 end
 
 puts "Ensuring tenants..."
@@ -275,34 +275,17 @@ equipments.each do |equipment_attrs|
   end
 end
 
-puts "Ensuring admin account..."
-admin = User.find_or_initialize_by(email: "admin@link.cuhk.edu.hk")
-admin.role = :admin
-admin.tenant = tenants["University"]
+puts "Ensuring admin and root staff accounts..."
+bootstrap_accounts = BootstrapAccountReconciler.new(
+  tenants: tenants,
+  root_staff_emails: root_staff_emails,
+  bootstrap_password: bootstrap_password,
+  reset_passwords: reset_bootstrap_accounts_once,
+  reconcile_obsolete_accounts: Rails.env.production? && reset_bootstrap_accounts_once
+).call
 
-if reset_bootstrap_accounts_once || admin.new_record? || admin.password_digest.blank?
-  admin.password = bootstrap_password
-  admin.password_confirmation = bootstrap_password
-end
-
-admin.save!
-
-puts "Ensuring root staff accounts..."
-root_staff_users = {}
-root_staff_emails.each do |college_name, email|
-  user = User.find_or_initialize_by(email: email)
-  user.role = :staff
-  user.is_root_account = true
-  user.tenant = tenants.fetch(college_name)
-
-  if reset_bootstrap_accounts_once || user.new_record? || user.password_digest.blank?
-    user.password = bootstrap_password
-    user.password_confirmation = bootstrap_password
-  end
-
-  user.save!
-  root_staff_users[college_name] = user
-end
+admin = bootstrap_accounts.fetch(:admin)
+root_staff_users = bootstrap_accounts.fetch(:root_staff_users)
 
 puts "Ensuring demo student accounts..."
 demo_students = {}
