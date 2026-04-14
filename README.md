@@ -83,14 +83,19 @@ RAILS_ENV=test bin/rails db:create db:prepare
 | Purpose | Command |
 | --- | --- |
 | RSpec suite | `bundle exec rspec` |
+| Single RSpec file | `bundle exec rspec spec/requests/bookings_spec.rb` |
+| Single RSpec example | `bundle exec rspec spec/requests/bookings_spec.rb:165` |
 | Cucumber suite | `bundle exec cucumber` |
-| Rails test suite | `bin/rails test` |
+| Single Cucumber feature | `bundle exec cucumber features/approval_workflow.feature` |
+| Single Cucumber scenario | `bundle exec cucumber features/approval_workflow.feature:54` |
 | RuboCop | `bin/rubocop` |
 | Brakeman | `bin/brakeman --no-pager` |
 | Bundler audit | `bin/bundler-audit` |
 | Importmap audit | `bin/importmap audit` |
 | Local CI script | `bin/ci` |
 | Match GitHub CI checks locally | `bin/rubocop && bin/brakeman --no-pager && bin/bundler-audit && bin/importmap audit && bundle exec rspec && bundle exec cucumber` |
+
+`bin/ci` prepares a clean test database, runs the same active test suites as project CI (`bundle exec rspec` + `bundle exec cucumber`), and then replants test seeds.
 
 The following canonical journeys are covered by stable Cucumber scenarios:
 
