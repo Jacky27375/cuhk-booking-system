@@ -19,6 +19,8 @@ RSpec.describe 'Registrations', type: :request do
       expect(response.body).not_to include('University')
       expect(response.body).to include('@link.cuhk.edu.hk')
       expect(response.body).to include('Generate strong password')
+      expect(response.body).to include('At least 10 characters')
+      expect(response.body).to include('Includes uppercase, lowercase, number, and symbol')
     end
   end
 
@@ -45,6 +47,22 @@ RSpec.describe 'Registrations', type: :request do
       verification = SignupVerificationCode.find_by(email: 'newstudent@link.cuhk.edu.hk')
       expect(verification).to be_present
       expect(ActionMailer::Base.deliveries.count).to eq(1)
+    end
+
+    it 'rejects weak passwords that do not meet complexity requirements' do
+      weak_password_params = valid_params.deep_merge(user: {
+        password: 'password12',
+        password_confirmation: 'password12'
+      })
+
+      expect {
+        post signup_path, params: weak_password_params
+      }.not_to change(User, :count)
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include(
+        'must include at least one uppercase letter, one lowercase letter, one number, and one symbol'
+      )
     end
 
     it 'still ignores role parameter in pending signup data' do
