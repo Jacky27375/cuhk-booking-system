@@ -5,6 +5,15 @@
 
 CUHK Booking System is **Option A** from the CSCI3100 Spring 2026 project spec: a multi-tenant SaaS for booking venues and equipment across CUHK colleges, with conflict detection and approval workflows.
 
+## Team Members
+
+| SID | Name | GitHub Username |
+| --- | --- | --- |
+| 1155212489 | Cheuk Hung Yam | `Jacky27375` |
+| 1155212546 | Cheung Wai Ho | `RiskyPork` |
+| 1155209296 | Lam Chun Yu | `tylerjlcy` |
+| 1155213662 | Tong Man Kit | `Ga8riel520` |
+
 ## 1. Spec Alignment
 
 This repository aligns with the key spec requirements:
@@ -293,19 +302,19 @@ Ownership is calculated from **non-merge** commits only, weighted by **line impa
 
 | Implemented Feature | Contributors (Strict Audit %) | Notes |
 | --- | --- | --- |
-| Authentication & Session Security | Tyler 75.07%; Jacky 13.88%; Joe 5.93%; Sam 5.12% | Mapped auth/session files (`SessionsController`, `ApplicationController`, `User`), auth policy, auth Cucumber scenarios, and session-token migrations. |
-| Student Registration & Verification Codes | Tyler 69.85%; Joe 12.67%; Jacky 10.19%; Sam 7.29% | Mapped signup flow (`RegistrationsController`), verification model/service, signup mailer views, registration Cucumber coverage, and verification-code migration. |
-| Tenant Isolation & Scoped Visibility | Jacky 47.45%; Joe 34.38%; Tyler 13.96%; Sam 4.20% | Mapped tenant/visibility scope files (`Tenant`, `Venue`, `Equipment`, `BookingScopeQuery`, `BookingAccessPolicy`) plus tenant-isolation scenarios/specs. |
-| Venue Management (CRUD + Sorting) | Jacky 64.96%; Sam 17.20%; Tyler 10.02%; Joe 7.82% | Mapped venue CRUD/sorting files (`VenuesController`, venue views/helpers), sorting BDD coverage, request/view/routing specs, and venue schema migrations. |
-| Equipment Inventory & Borrowing | Sam 58.98%; Jacky 36.45%; Tyler 2.99%; Joe 1.57% | Mapped equipment inventory + borrow flow (`EquipmentsController`, `EquipmentBooking`, equipment views), equipment booking scenarios/specs, and equipment/STI migrations. |
-| Venue Booking Timetable & Conflict Checks | Jacky 78.21%; Tyler 12.93%; Sam 5.13%; Joe 3.73% | Mapped timetable/conflict files (`BookingConflictChecker`, booking-time Stimulus controller, `VenueBooking` validations, timetable views) with BDD/spec coverage. |
-| Approval Workflow, Lifecycle & Realtime Status | Jacky 39.32%; Tyler 21.57%; Sam 21.33%; Joe 17.79% | Mapped booking lifecycle + approvals (`BookingsController`, `DashboardsController`, `Booking`, `ApprovalStep`), expiry job, ActionCable status updates, approval scenarios, and related specs/migrations. |
-| Venue Request Workflow | Tyler 56.68%; Joe 41.32%; Jacky 2.00% | Mapped staff submit/admin review flow (`VenueRequestsController`, `VenueRequest`, venue-request views), venue-request scenarios/specs, and migration. |
-| Admin User & Staff Account Management | Tyler 51.92%; Joe 42.09%; Sam 5.99% | Mapped admin/staff account surfaces (`Admin::UsersController`, `StaffAccountsController`, admin/staff views), staff-account scenarios, and admin/staff request specs. |
-| Analytics Dashboard & Reporting | Sam 82.56%; Jacky 17.29%; Joe 0.15% | Mapped analytics implementation (`AnalyticsController`, analytics dashboard view, chart Stimulus controller), analytics BDD scenarios, and analytics specs. |
-| API v1 & API Key Authentication | Joe 94.89%; Jacky 4.19%; Sam 0.92% | Mapped API boundary (`Api::V1::*`, `ApiAuthenticatable`, `ApiKey`), API request/model specs, and API-key migration. |
-| Email Delivery Integration (SendGrid/Resend) | Joe 72.35%; Tyler 23.27%; Sam 2.55%; Jacky 1.84% | Mapped booking email delivery services (legacy SendGrid + current Resend), booking mailers/views, email BDD scenario, and service/mailer specs. |
-| Seed Data & Bootstrap Account Provisioning | Jacky 49.63%; Tyler 25.38%; Joe 15.96%; Sam 9.03% | Mapped data/bootstrap provisioning files (`db/seeds.rb`, `BootstrapAccountReconciler`, reset task) and reconciler specs. |
-| UI/UX Styling & Layout Polish | Sam 65.69%; Tyler 19.75%; Jacky 14.01%; Joe 0.55% | Mapped visual polish files (global stylesheet, application layout, dashboard shell, helper-level presentation updates). |
-| Test Harness & BDD Infrastructure | Joe 56.42%; Sam 24.02%; Tyler 16.76%; Jacky 2.79% | Mapped test runtime/support plumbing (`spec_helper`, `rails_helper`, Cucumber support env, task wiring, test runner scripts). |
-| CI/CD & Azure Deployment Pipeline | Jacky 53.57%; Tyler 45.89%; Joe 0.54% | Mapped delivery pipeline files (GitHub Actions CI/CD workflows, Azure compose/deploy files, Docker/deployment configs). |
+| Authentication & Session Security | tylerjlcy 75.07%; Jacky27375 13.88%; RiskyPork 5.93%; Ga8riel520 5.12% | Mapped auth/session files (`SessionsController`, `ApplicationController`, `User`), auth policy, auth Cucumber scenarios, and session-token migrations. |
+| Student Registration & Verification Codes | tylerjlcy 69.85%; RiskyPork 12.67%; Jacky27375 10.19%; Ga8riel520 7.29% | Mapped signup flow (`RegistrationsController`), verification model/service, signup mailer views, registration Cucumber coverage, and verification-code migration. |
+| Tenant Isolation & Scoped Visibility | Jacky27375 47.45%; RiskyPork 34.38%; tylerjlcy 13.96%; Ga8riel520 4.20% | Mapped tenant/visibility scope files (`Tenant`, `Venue`, `Equipment`, `BookingScopeQuery`, `BookingAccessPolicy`) plus tenant-isolation scenarios/specs. |
+| Venue Management (CRUD + Sorting) | Jacky27375 64.96%; Ga8riel520 17.20%; tylerjlcy 10.02%; RiskyPork 7.82% | Mapped venue CRUD/sorting files (`VenuesController`, venue views/helpers), sorting BDD coverage, request/view/routing specs, and venue schema migrations. |
+| Equipment Inventory & Borrowing | Ga8riel520 58.98%; Jacky27375 36.45%; tylerjlcy 2.99%; RiskyPork 1.57% | Mapped equipment inventory + borrow flow (`EquipmentsController`, `EquipmentBooking`, equipment views), equipment booking scenarios/specs, and equipment/STI migrations. |
+| Venue Booking Timetable & Conflict Checks | Jacky27375 78.21%; tylerjlcy 12.93%; Ga8riel520 5.13%; RiskyPork 3.73% | Mapped timetable/conflict files (`BookingConflictChecker`, booking-time Stimulus controller, `VenueBooking` validations, timetable views) with BDD/spec coverage. |
+| Approval Workflow, Lifecycle & Realtime Status | Jacky27375 39.32%; tylerjlcy 21.57%; Ga8riel520 21.33%; RiskyPork 17.79% | Mapped booking lifecycle + approvals (`BookingsController`, `DashboardsController`, `Booking`, `ApprovalStep`), expiry job, ActionCable status updates, approval scenarios, and related specs/migrations. |
+| Venue Request Workflow | tylerjlcy 56.68%; RiskyPork 41.32%; Jacky27375 2.00% | Mapped staff submit/admin review flow (`VenueRequestsController`, `VenueRequest`, venue-request views), venue-request scenarios/specs, and migration. |
+| Admin User & Staff Account Management | tylerjlcy 51.92%; RiskyPork 42.09%; Ga8riel520 5.99% | Mapped admin/staff account surfaces (`Admin::UsersController`, `StaffAccountsController`, admin/staff views), staff-account scenarios, and admin/staff request specs. |
+| Analytics Dashboard & Reporting | Ga8riel520 82.56%; Jacky27375 17.29%; RiskyPork 0.15% | Mapped analytics implementation (`AnalyticsController`, analytics dashboard view, chart Stimulus controller), analytics BDD scenarios, and analytics specs. |
+| API v1 & API Key Authentication | RiskyPork 94.89%; Jacky27375 4.19%; Ga8riel520 0.92% | Mapped API boundary (`Api::V1::*`, `ApiAuthenticatable`, `ApiKey`), API request/model specs, and API-key migration. |
+| Email Delivery Integration (SendGrid/Resend) | RiskyPork 72.35%; tylerjlcy 23.27%; Ga8riel520 2.55%; Jacky27375 1.84% | Mapped booking email delivery services (legacy SendGrid + current Resend), booking mailers/views, email BDD scenario, and service/mailer specs. |
+| Seed Data & Bootstrap Account Provisioning | Jacky27375 49.63%; tylerjlcy 25.38%; RiskyPork 15.96%; Ga8riel520 9.03% | Mapped data/bootstrap provisioning files (`db/seeds.rb`, `BootstrapAccountReconciler`, reset task) and reconciler specs. |
+| UI/UX Styling & Layout Polish | Ga8riel520 65.69%; tylerjlcy 19.75%; Jacky27375 14.01%; RiskyPork 0.55% | Mapped visual polish files (global stylesheet, application layout, dashboard shell, helper-level presentation updates). |
+| Test Harness & BDD Infrastructure | RiskyPork 56.42%; Ga8riel520 24.02%; tylerjlcy 16.76%; Jacky27375 2.79% | Mapped test runtime/support plumbing (`spec_helper`, `rails_helper`, Cucumber support env, task wiring, test runner scripts). |
+| CI/CD & Azure Deployment Pipeline | Jacky27375 53.57%; tylerjlcy 45.89%; RiskyPork 0.54% | Mapped delivery pipeline files (GitHub Actions CI/CD workflows, Azure compose/deploy files, Docker/deployment configs). |
