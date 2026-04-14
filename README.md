@@ -130,7 +130,7 @@ Running `bin/rails reset` or `bin/rails db:seed` ensures:
 
 | Tenant/College | Root staff email | Demo student email |
 | --- | --- | --- |
-| University | `staff_root_university@link.cuhk.edu.hk` | / |
+| University | `staff_root_university@link.cuhk.edu.hk` | - |
 | Chung Chi College | `staff_root_chungchi@link.cuhk.edu.hk` | `demo_student_chungchi@link.cuhk.edu.hk` |
 | New Asia College | `staff_root_newasia@link.cuhk.edu.hk` | `demo_student_newasia@link.cuhk.edu.hk` |
 | United College | `staff_root_united@link.cuhk.edu.hk` | `demo_student_united@link.cuhk.edu.hk` |
