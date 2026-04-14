@@ -32,15 +32,32 @@ RSpec.describe User, type: :model do
       expect(user).not_to be_valid
     end
 
-    it 'requires a password of at least 8 characters' do
-      user = build(:user, password: 'short', password_confirmation: 'short')
+    it 'requires a password of at least 10 characters' do
+      user = build(:user, password: 'Short1!', password_confirmation: 'Short1!')
       expect(user).not_to be_valid
-      expect(user.errors[:password]).to include("is too short (minimum is 8 characters)")
+      expect(user.errors[:password]).to include("is too short (minimum is 10 characters)")
+    end
+
+    it 'requires password complexity with uppercase, lowercase, number, and symbol' do
+      user = build(:user, password: 'Password12', password_confirmation: 'Password12')
+      expect(user).not_to be_valid
+      expect(user.errors[:password]).to include(
+        "must include at least one uppercase letter, one lowercase letter, one number, and one symbol"
+      )
     end
 
     it 'normalizes email to lowercase' do
-      user = create(:user, email: ' Admin@link.CUHK.edu.hk ')
-      expect(user.email).to eq('admin@link.cuhk.edu.hk')
+      user = create(:user, email: ' MixedCaseUser@link.CUHK.edu.hk ')
+      expect(user.email).to eq('mixedcaseuser@link.cuhk.edu.hk')
+    end
+  end
+
+  describe '.generate_compliant_password' do
+    it 'returns a password that satisfies complexity requirements' do
+      password = described_class.generate_compliant_password(length: 12)
+
+      expect(password.length).to be >= 12
+      expect(password).to match(User::PASSWORD_COMPLEXITY_REGEX)
     end
   end
 

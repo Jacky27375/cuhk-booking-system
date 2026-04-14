@@ -20,6 +20,13 @@ class User < ApplicationRecord
   DEFAULT_ACTIVE_SESSION_LOCK_TOUCH_INTERVAL = 5.minutes
   CUHK_EMAIL_DOMAIN = "link.cuhk.edu.hk"
   CUHK_EMAIL_REGEX = /\A[a-zA-Z0-9._%+-]+@#{Regexp.escape(CUHK_EMAIL_DOMAIN)}\z/i
+  PASSWORD_MIN_LENGTH = 10
+  PASSWORD_COMPLEXITY_REGEX = /\A(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+\z/
+  PASSWORD_COMPLEXITY_MESSAGE = "must include at least one uppercase letter, one lowercase letter, one number, and one symbol"
+  PASSWORD_UPPERCASE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ"
+  PASSWORD_LOWERCASE_CHARS = "abcdefghijkmnopqrstuvwxyz"
+  PASSWORD_DIGIT_CHARS = "23456789"
+  PASSWORD_SYMBOL_CHARS = "!@#$%^&*()-_=+[]{}?"
 
   def root_account?
     is_root_account
@@ -108,16 +115,63 @@ class User < ApplicationRecord
     "#{local_part}@#{CUHK_EMAIL_DOMAIN}"
   end
 
+  def self.generate_compliant_password(length: 14)
+    target_length = [length.to_i, PASSWORD_MIN_LENGTH].max
+    required_sets = [
+      PASSWORD_UPPERCASE_CHARS,
+      PASSWORD_LOWERCASE_CHARS,
+      PASSWORD_DIGIT_CHARS,
+      PASSWORD_SYMBOL_CHARS
+    ]
+
+    password_characters = required_sets.map { |set| random_password_character(set) }
+    all_characters = required_sets.join
+
+    while password_characters.length < target_length
+      password_characters << random_password_character(all_characters)
+    end
+
+    secure_shuffle(password_characters).join
+  end
+
   validates :email, presence: true,
                     uniqueness: { case_sensitive: false },
                     format: { with: CUHK_EMAIL_REGEX,
                               message: "must be a valid @link.cuhk.edu.hk address" }
-  validates :password, length: { minimum: 8 }, if: -> { new_record? || password.present? }
+  validates :password, length: { minimum: PASSWORD_MIN_LENGTH }, if: :password_validation_required?
+  validate :password_must_meet_complexity_requirements, if: :password_validation_required?
   validates :password_confirmation, presence: true, if: :new_record?
 
   normalizes :email, with: ->(email) { email.strip.downcase }
 
   private
+
+  def self.random_password_character(characters)
+    characters[SecureRandom.random_number(characters.length)]
+  end
+  private_class_method :random_password_character
+
+  def self.secure_shuffle(values)
+    shuffled_values = values.dup
+
+    (shuffled_values.length - 1).downto(1) do |index|
+      swap_index = SecureRandom.random_number(index + 1)
+      shuffled_values[index], shuffled_values[swap_index] = shuffled_values[swap_index], shuffled_values[index]
+    end
+
+    shuffled_values
+  end
+  private_class_method :secure_shuffle
+
+  def password_validation_required?
+    new_record? || password.present?
+  end
+
+  def password_must_meet_complexity_requirements
+    return if password.to_s.match?(PASSWORD_COMPLEXITY_REGEX)
+
+    errors.add(:password, PASSWORD_COMPLEXITY_MESSAGE)
+  end
 
   def clear_active_session_lock!
     update!(active_session_token: nil, active_session_token_issued_at: nil)
