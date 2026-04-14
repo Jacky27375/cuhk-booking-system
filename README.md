@@ -112,7 +112,7 @@ bin/setup --skip-server
 bin/dev
 ```
 
-The app is available at: `http://localhost:3000`
+The app is available at: `http://localhost:3000`, with seed data in place.
 
 ### Reset + reseed demo data
 
