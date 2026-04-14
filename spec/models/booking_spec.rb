@@ -190,10 +190,26 @@ RSpec.describe Booking, type: :model do
 
       expect(ActionCable.server).to receive(:broadcast).with(
         "booking_status_user_#{booking.user_id}",
-        hash_including(booking_id: booking.id, status: 'approved', status_label: 'Approved')
+        hash_including(booking_id: booking.id, status: 'approved', status_label: 'Approved', rejection_reason: nil)
       )
 
       booking.update!(status: :approved)
+    end
+
+    it 'broadcasts rejection reason when status changes to rejected' do
+      booking = create(:booking, status: :pending)
+
+      expect(ActionCable.server).to receive(:broadcast).with(
+        "booking_status_user_#{booking.user_id}",
+        hash_including(
+          booking_id: booking.id,
+          status: 'rejected',
+          status_label: 'Rejected',
+          rejection_reason: 'Capacity issue'
+        )
+      )
+
+      booking.reject!('Capacity issue')
     end
 
     it 'does not broadcast when status is unchanged' do

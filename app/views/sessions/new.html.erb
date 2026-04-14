@@ -13,6 +13,7 @@
 
     <%= form_with url: login_path,
                   method: :post,
+                  authenticity_token: @login_form_authenticity_token,
                   data: {
                     turbo: false,
                     controller: "domain-lock-email",

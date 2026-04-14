@@ -19,11 +19,20 @@ class ApplicationController < ActionController::Base
     return @current_user if user_id.blank?
 
     user = User.find_by(id: user_id)
-    unless user && user.active_session_token_matches?(session[:active_session_token])
+    session_token = session[:active_session_token]
+
+    unless user&.active_session_token_matches?(session_token)
       reset_session
       return @current_user
     end
 
+    if user.active_session_lock_expired?
+      user.clear_expired_active_session_lock!
+      reset_session
+      return @current_user
+    end
+
+    user.touch_active_session_lock!(token: session_token)
     @current_user = user
   end
 

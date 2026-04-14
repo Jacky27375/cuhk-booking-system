@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'nokogiri'
 
 RSpec.describe 'Admin user management', type: :request do
   let!(:tenant) { create(:tenant, name: 'New Asia College') }
@@ -27,6 +28,19 @@ RSpec.describe 'Admin user management', type: :request do
       expect(response).to redirect_to(root_path)
       expect(flash[:alert]).to eq('You are not authorized to perform this action.')
     end
+
+    it 'shows root staff accounts as protected without delete action' do
+      log_in_as(admin)
+
+      get admin_users_path
+
+      document = Nokogiri::HTML(response.body)
+      root_row = document.css('tr').find { |row| row.text.include?(root_staff.email) }
+
+      expect(root_row).not_to be_nil
+      expect(root_row.text).to include('Protected')
+      expect(root_row.at_css("form[action='#{admin_user_path(root_staff)}']")).to be_nil
+    end
   end
 
   describe 'DELETE /admin/users/:id' do
@@ -50,6 +64,17 @@ RSpec.describe 'Admin user management', type: :request do
 
       expect(response).to redirect_to(admin_users_path)
       expect(flash[:alert]).to eq('You cannot delete your own admin account.')
+    end
+
+    it 'blocks deleting root staff accounts' do
+      log_in_as(admin)
+
+      expect {
+        delete admin_user_path(root_staff)
+      }.not_to change(User, :count)
+
+      expect(response).to redirect_to(admin_users_path)
+      expect(flash[:alert]).to eq('Root staff accounts are protected and cannot be deleted.')
     end
   end
 

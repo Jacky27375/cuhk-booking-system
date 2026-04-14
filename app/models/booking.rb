@@ -97,7 +97,12 @@ class Booking < ApplicationRecord
   def broadcast_status_change
     ActionCable.server.broadcast(
       "booking_status_user_#{user_id}",
-      { booking_id: id, status: status, status_label: status.titleize }
+      {
+        booking_id: id,
+        status: status,
+        status_label: status.titleize,
+        rejection_reason: rejected? ? rejection_reason : nil
+      }
     )
   end
 

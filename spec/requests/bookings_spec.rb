@@ -93,6 +93,34 @@ RSpec.describe "/bookings", type: :request do
       expect(response).to be_successful
     end
 
+    it "shows rejected bookings without cancel action and with rejection reason" do
+      booking = create(
+        :booking,
+        user: user,
+        venue: venue,
+        status: :rejected,
+        rejection_reason: "No staff available"
+      )
+
+      get my_bookings_path
+
+      document = Nokogiri::HTML(response.body)
+      booking_row = document.at_css("tr#booking_#{booking.id}")
+      expect(booking_row).not_to be_nil
+
+      status_cell = booking_row.at_css("td[data-booking-id='#{booking.id}']")
+      expect(status_cell).not_to be_nil
+      expect(status_cell["data-status"]).to eq("rejected")
+      expect(status_cell.text).to include("Rejected")
+
+      reason_cell = booking_row.at_css("td[data-booking-rejection-reason-id='#{booking.id}']")
+      expect(reason_cell).not_to be_nil
+      expect(reason_cell.text).to include("No staff available")
+
+      cancel_action = booking_row.at_css("[data-booking-cancel-action-id='#{booking.id}']")
+      expect(cancel_action).to be_nil
+    end
+
     it "blocks staff from accessing my bookings" do
       staff = create(:user, :staff, tenant: tenant)
       log_in_as(staff)
@@ -126,6 +154,25 @@ RSpec.describe "/bookings", type: :request do
     it "renders a successful response" do
       get new_booking_url
       expect(response).to be_successful
+    end
+
+    it "shows compact booking controls and a readable timetable time column" do
+      booking_date = 5.days.from_now.to_date
+
+      get new_booking_url, params: { venue_id: venue.id, booking_date: booking_date.to_s }
+
+      document = Nokogiri::HTML(response.body)
+      booking_date_input = document.at_css('input#booking_date')
+
+      expect(response.body).to include('booking-config-card')
+      expect(response.body).to include('booking-date-filter-inline')
+      expect(response.body).to include('booking-time-fields')
+      expect(response.body).to include('Time Slot')
+      expect(response.body).to include('Availability')
+      expect(response.body).to include('review the timetable above')
+      expect(response.body).not_to include('timetable below')
+      expect(booking_date_input).not_to be_nil
+      expect(booking_date_input['value']).to eq(booking_date.to_s)
     end
 
     it "excludes unavailable start slots" do
@@ -269,7 +316,8 @@ RSpec.describe "/bookings", type: :request do
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include('Booking duration cannot exceed 4 hours')
-      expect(response.body).not_to match(/timetable-slot-selected[^>]*>\s*08:00 - 09:00/m)
+      document = Nokogiri::HTML(response.body)
+      expect(document.css('.timetable-slot.timetable-slot-selected')).to be_empty
     end
   end
 
@@ -377,6 +425,9 @@ RSpec.describe "/bookings", type: :request do
       expect(response.body).to include("Room 102")
       expect(response.body).not_to include("Room 103")
       expect(response.body).not_to include("LT1")
+      expect(response.body).to include("approval-action-stack")
+      expect(response.body).to include("approval-reject-form")
+      expect(response.body).to include("Reason for rejection")
     end
 
     it "keeps legacy venues visible when department matches tenant name" do
