@@ -113,23 +113,24 @@ Running `bin/rails reset` or `bin/rails db:seed` ensures:
 - Seeded staff-submitted request records (venue and equipment-themed)
 - Bootstrap admin/root/demo user accounts
 
-### Seed password behavior
+### Seed password behavior for all demo accounts (IMPORTANT)
 
 - **Development/Test:** `DEV_BOOTSTRAP_ACCOUNT_PASSWORD` if set, otherwise `Password1!`
-- **Production:** `BOOTSTRAP_ACCOUNT_PASSWORD` is required
+- **Production:** `BOOTSTRAP_ACCOUNT_PASSWORD` is required. The secret we used is provided in BlackBoard submission. 
 
 ### Login accounts
 
 **Admin**
 
-| Role | Email | Password |
+| Role | Email | Password (Dev/Test) |
 | --- | --- | --- |
 | Admin | `admin@link.cuhk.edu.hk` | `Password1!` (unless overridden by bootstrap env vars above) |
 
 **Root staff + demo student (one per college)**
 
-| College | Root staff email | Demo student email |
+| Tenant/College | Root staff email | Demo student email |
 | --- | --- | --- |
+| University | `staff_root_university@link.cuhk.edu.hk` | / |
 | Chung Chi College | `staff_root_chungchi@link.cuhk.edu.hk` | `demo_student_chungchi@link.cuhk.edu.hk` |
 | New Asia College | `staff_root_newasia@link.cuhk.edu.hk` | `demo_student_newasia@link.cuhk.edu.hk` |
 | United College | `staff_root_united@link.cuhk.edu.hk` | `demo_student_united@link.cuhk.edu.hk` |
