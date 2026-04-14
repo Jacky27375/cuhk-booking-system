@@ -169,20 +169,20 @@ Role scoping is consistent with web behavior:
 
 Ownership is summarized from repository contribution history (aliases used in history: **Joe = RiskyPork**, **Sam = Ga8riel520**).
 
-| Implemented feature | Primary | Secondary | Evidence |
-| --- | --- | --- | --- |
-| Architecture design | Joe | — |  |
-| Authentication and role-based access | Jacky | Tyler | `SessionsController`, `ApplicationController`, `features/authentication.feature`, `features/role_access.feature` |
-| CI, coverage, and security quality gates | Tyler | Jacky | `.github/workflows/ci.yml`, `bin/ci`, security/lint commands in `bin/*` |
-| Azure deployment pipeline and health checks | Tyler | Jacky | `.github/workflows/deploy-azure.yml`, `deploy/docker-compose.azure.yml`, `config/routes.rb` (`/up`) |
-| Venue booking timetable and conflict handling | Jacky | Joe | `BookingsController` timetable flow, `VenueBooking`, `BookingConflictChecker` |
-| Multi-tenant isolation and authorization policies | Jacky | Joe | `Venue.visible_to_user`, `Equipment.visible_to_user`, `BookingScopeQuery`, `BookingAccessPolicy` |
-| Equipment booking and inventory flow | Sam | Jacky | `EquipmentBooking`, `Equipment#available_quantity`, `features/equipment_booking.feature` |
-| Approval workflow and lifecycle transitions | Joe | Tyler | `DashboardsController#approvals`, `BookingsController#approve/#reject`, `ApprovalStep`, `features/approval_workflow.feature` |
-| Realtime booking status updates (ActionCable) | Joe | Jacky | `BookingStatusChannel`, `Booking#broadcast_status_change`, `booking_status_controller.js` |
-| Analytics dashboard and utilization reporting | Sam | Jacky | `AnalyticsController`, `app/views/analytics/show.html.erb`, Chart.js integration |
-| API v1 and Resend email integration | Joe | Jacky | `Api::V1::*Controller`, `ApiAuthenticatable`, `ResendEmailService` |
-| Resource table sorting and query optimization | Jacky | Sam | sorting branches in `BookingsController`/`VenuesController`/`DashboardsController` |
+| Implemented Feature | Contributors (Strict Audit %) | Notes |
+| --- | --- | --- |
+|Architecture Desing & Deploy | Joe
+| Authentication & Role-Based Access | Jacky (57.2%), Tyler (29.9%), Sam (9.5%), Joe (RiskyPork) (3.4%) | User/session auth flow, role access scenarios, and seed-role foundations plus follow-up refinements. |
+| CI, Coverage & Security Quality Gates | Tyler (54.5%), Jacky (43.5%), Joe (RiskyPork) (2.0%) | CI evolution, security scan hardening, and workflow/lint follow-up work. |
+| Azure Deployment Pipeline & Health Checks | Tyler (57.9%), Jacky (41.0%), Joe (RiskyPork) (1.1%) | Azure CD pipeline, deployment compose wiring, diagnostics, and `/up` health-check support. |
+| Venue Booking, Timetable & Conflict Handling | Jacky (73.7%), Joe (RiskyPork) (16.6%), Tyler (8.4%), Sam (1.3%) | Venue CRUD, timetable/slot UX, conflict checks, and booking confirmation flow with later hardening. |
+| Multi-Tenant Isolation & Authorization Policies | Jacky (72.9%), Joe (RiskyPork) (26.9%), Sam (0.4%) | Policy/query authorization and tenant visibility controls with shared-resource scoping hardening. |
+| Equipment Booking & Inventory Flow | Sam (56.2%), Jacky (30.0%), Joe (RiskyPork) (7.8%), Tyler (6.0%) | Equipment domain and borrow flow with validation/lifecycle refinements. |
+| Approval Workflow & Lifecycle Transitions | Joe (RiskyPork) (56.4%), Tyler (21.0%), Jacky (20.6%), Sam (2.2%) | Approval dashboard, state transitions, and workflow tests/mail hooks with two-step and cancellation extensions. |
+| Realtime Booking Status Updates (ActionCable) | Joe (RiskyPork) (81.3%), Jacky (18.7%) | Channel/stream status broadcasting for user bookings with frontend status handling. |
+| Analytics Dashboard & Utilization Reporting | Sam (80.8%), Jacky (19.2%) | Analytics controller/views, chart rendering, trend/date filtering, and request/BDD coverage. |
+| API v1 + Resend Email Integration | Joe (RiskyPork) (95.7%), Jacky (4.3%) | API-key auth, v1 endpoints, Resend delivery service wiring, and related specs. |
+| Resource Table Sorting & Query Optimization | Jacky (54.5%), Sam (16.5%), Joe (RiskyPork) (16.2%), Tyler (12.8%) | Sortable listings for bookings/venues/equipment and Arel-based sorting refactor. |
 
 ## 8. Coverage Evidence (SimpleCov)
 
