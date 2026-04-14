@@ -27,14 +27,37 @@ This repository aligns with the key spec requirements:
 
 ### Prerequisites
 
-- Ruby `3.4.8`
-- PostgreSQL running locally (defaults from `config/database.yml`: host `127.0.0.1`, port `5432`, user `postgres`, password `postgres`)
+- Git
+- Ruby `3.4.8` (see `.ruby-version`)
+- Bundler (`gem install bundler`)
+- PostgreSQL reachable at `127.0.0.1:5432` with user/password `postgres`/`postgres` (defaults in `config/database.yml`)
+
+You can provide PostgreSQL in either way:
+
+1. Local PostgreSQL service
+2. Docker container (recommended):
+
+```bash
+# First time only (create container)
+docker run -d \
+  --name cuhk-booking-postgres \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -p 5432:5432 \
+  -v cuhk-booking-postgres-data:/var/lib/postgresql/data \
+  postgres:16
+
+# Next runs
+docker start cuhk-booking-postgres
+```
 
 ### Start locally
 
 ```bash
 git clone <repository_url>
 cd cuhk-booking-system
+# If using Docker Postgres and container already exists:
+# docker start cuhk-booking-postgres
 bin/setup --skip-server
 bin/dev
 ```
