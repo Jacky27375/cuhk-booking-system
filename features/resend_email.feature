@@ -6,8 +6,8 @@ Feature: Resend Email Notifications (External API)
   Background:
     Given the following users exist:
       | email                        | password  | role           |
-      | student@link.cuhk.edu.hk     | password1 | student |
-      | staff@link.cuhk.edu.hk       | password1 | staff          |
+      | student@link.cuhk.edu.hk     | Password1! | student |
+      | staff@link.cuhk.edu.hk       | Password1! | staff          |
     And the following venues exist:
       | name     | department      |
       | Room 201 | Science Faculty |

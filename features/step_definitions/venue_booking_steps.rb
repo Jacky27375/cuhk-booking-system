@@ -14,7 +14,7 @@ end
 Given('I am logged in as {string}') do |email|
   user = User.find_by!(email: email)
   user.update!(active_session_token: nil)
-  password = ["password", "password1", "Password1!"].find { |value| user.authenticate(value) }
+  password = ["Password1!", "password1", "password"].find { |value| user.authenticate(value) }
   raise "No valid password found for #{email}" unless password
 
   visit login_path
