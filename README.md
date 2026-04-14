@@ -175,26 +175,83 @@ Student self-registration is also available on `/signup` and is restricted to th
 
 ## 6. API v1 Quick Reference
 
-Authentication:
+API v1 uses token auth and returns JSON. Local base URL is usually `http://localhost:3000`.
 
-- `Authorization: Bearer <api_key>` header (preferred), or
-- `api_key` request parameter (fallback)
+### Authentication
 
-API routes (`config/routes.rb`):
+- Preferred: `Authorization: Bearer <api_key>`
+- Fallback: `api_key` request parameter
 
-- `GET /api/v1/venues`
-- `GET /api/v1/venues/:id`
-- `GET /api/v1/equipment`
-- `GET /api/v1/equipment/:id`
-- `GET /api/v1/bookings`
-- `GET /api/v1/bookings/:id`
-- `POST /api/v1/bookings`
+> **Note on API Key Management:** API key issuance is currently restricted to the Rails console. This is an intentional MVP design choice to minimize the security attack surface and enforce manual administrative vetting for programmatic integration requests. A self-service management UI is slated for a future iteration.
 
-Role scoping is consistent with web behavior:
+To create an API key, run this using the Rails runner:
 
-- Admin: all records
-- Staff: tenant-scoped records
-- Student: own bookings only
+```bash
+bin/rails runner 'user = User.find_by!(email: "demo_student_shaw@link.cuhk.edu.hk"); key = user.api_keys.create!(name: "TA Demo Key", expires_at: 30.days.from_now); puts key.token'
+```
+
+### Routes
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| `GET` | `/api/v1/venues` | List visible venues |
+| `GET` | `/api/v1/venues/:id` | Show one visible venue |
+| `GET` | `/api/v1/equipment` | List visible equipment with availability |
+| `GET` | `/api/v1/equipment/:id` | Show one visible equipment item |
+| `GET` | `/api/v1/bookings` | List bookings in caller scope |
+| `GET` | `/api/v1/bookings/:id` | Show one booking in caller scope |
+| `POST` | `/api/v1/bookings` | Create booking (**student role only**) |
+
+### Query parameters
+
+- Pagination on list endpoints: `page` (default `1`), `per_page` (default `25`, max `100`)
+- `GET /api/v1/bookings` filters: `status` (for example `pending`, `approved`, `rejected`) and `type` (`venue` or `equipment`)
+
+### Booking create payloads
+
+Venue booking:
+
+```json
+{
+  "booking_type": "venue",
+  "venue_id": 1,
+  "start_time": "2026-04-20T10:00:00+08:00",
+  "end_time": "2026-04-20T12:00:00+08:00"
+}
+```
+
+Equipment booking:
+
+```json
+{
+  "booking_type": "equipment",
+  "equipment_id": 3,
+  "quantity": 2,
+  "start_date": "2026-04-20",
+  "end_date": "2026-04-22"
+}
+```
+
+### Example usage
+
+```bash
+API_KEY="<paste_api_key_here>"
+BASE_URL="http://localhost:3000"
+
+curl -s -H "Authorization: Bearer $API_KEY" "$BASE_URL/api/v1/venues"
+curl -s -H "Authorization: Bearer $API_KEY" "$BASE_URL/api/v1/equipment?page=1&per_page=10"
+curl -s -H "Authorization: Bearer $API_KEY" "$BASE_URL/api/v1/bookings?status=pending&type=venue"
+```
+
+### Access scope and common responses
+
+- Admin: sees all records
+- Staff: sees tenant-scoped records
+- Student: sees own bookings only
+- `POST /api/v1/bookings` by non-student returns `403 Forbidden`
+- Missing/invalid/inactive/expired key returns `401 Unauthorized`
+- Requesting out-of-scope records returns `404 Not Found`
+- Validation failures return `422 Unprocessable Content`
 
 ## 7. Implemented Features and Ownership
 
