@@ -1,16 +1,19 @@
 import { Controller } from "@hotwired/stimulus"
 
 const PASSWORD_LENGTH = 14
+const MIN_PASSWORD_LENGTH = 10
 const UPPERCASE = "ABCDEFGHJKLMNPQRSTUVWXYZ"
 const LOWERCASE = "abcdefghijkmnopqrstuvwxyz"
 const NUMBERS = "23456789"
 const SYMBOLS = "!@#$%^&*()-_=+[]{}?"
+const PASSWORD_COMPLEXITY_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/
 
 export default class extends Controller {
   static targets = [
     "password",
     "passwordConfirmation",
     "minLengthRule",
+    "complexityRule",
     "confirmationRule",
     "rulesSummary",
     "generatedPanel",
@@ -30,13 +33,15 @@ export default class extends Controller {
     const password = this.passwordTarget.value.toString()
     const confirmation = this.passwordConfirmationTarget.value.toString()
 
-    const hasMinimumLength = password.length >= 8
+    const hasMinimumLength = password.length >= MIN_PASSWORD_LENGTH
+    const meetsComplexity = PASSWORD_COMPLEXITY_REGEX.test(password)
     const confirmationMatches = confirmation.length > 0 && password === confirmation
 
     this.applyRuleState(this.minLengthRuleTarget, hasMinimumLength)
+    this.applyRuleState(this.complexityRuleTarget, meetsComplexity)
     this.applyRuleState(this.confirmationRuleTarget, confirmationMatches)
 
-    this.applySummaryState(hasMinimumLength && confirmationMatches)
+    this.applySummaryState(hasMinimumLength && meetsComplexity && confirmationMatches)
   }
 
   generatePassword(event) {

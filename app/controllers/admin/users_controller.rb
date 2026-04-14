@@ -24,7 +24,7 @@ class Admin::UsersController < ApplicationController
       return
     end
 
-    generated_password = SecureRandom.base58(16)
+    generated_password = User.generate_compliant_password(length: 16)
     @user.password = generated_password
     @user.password_confirmation = generated_password
     @user.save!

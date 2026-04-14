@@ -219,7 +219,7 @@ When("the staff approves my booking for {string}") do |venue_name|
   Capybara.using_session("staff_session") do
     visit login_path
     fill_in "Email", with: "staff"
-    fill_in "Password", with: "password1"
+    fill_in "Password", with: "Password1!"
     click_button "Sign In"
 
     visit approval_dashboard_path
@@ -249,7 +249,7 @@ When("the staff rejects my booking for {string} with reason {string}") do |venue
   Capybara.using_session("staff_session") do
     visit login_path
     fill_in "Email", with: "staff"
-    fill_in "Password", with: "password1"
+    fill_in "Password", with: "Password1!"
     click_button "Sign In"
 
     visit approval_dashboard_path
@@ -339,7 +339,7 @@ end
 
 def sign_in_for_cucumber!(email)
   user = User.find_by!(email: email)
-  password = ["password", "password1", "Password1!"].find { |value| user.authenticate(value) }
+  password = ["Password1!", "password1", "password"].find { |value| user.authenticate(value) }
   raise "No valid password found for #{email}" unless password
 
   user.update!(active_session_token: nil)

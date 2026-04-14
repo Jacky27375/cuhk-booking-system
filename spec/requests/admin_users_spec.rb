@@ -93,6 +93,8 @@ RSpec.describe 'Admin user management', type: :request do
       payload_email = temp_password_payload["email"] || temp_password_payload[:email]
       expect(generated_password).to be_present
       expect(payload_email).to eq(root_staff.email)
+      expect(generated_password.length).to be >= User::PASSWORD_MIN_LENGTH
+      expect(generated_password).to match(User::PASSWORD_COMPLEXITY_REGEX)
 
       root_staff.reload
       expect(root_staff.authenticate(generated_password)).to eq(root_staff)
