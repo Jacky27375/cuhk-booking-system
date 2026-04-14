@@ -31,6 +31,7 @@ class User < ApplicationRecord
 
   def deletable_by_admin?(acting_admin)
     return false if acting_admin == self
+    return false if root_staff_account?
     return false if admin? && User.admin.count <= 1
 
     true

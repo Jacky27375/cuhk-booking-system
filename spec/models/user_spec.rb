@@ -96,6 +96,22 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe '#deletable_by_admin?' do
+    let(:acting_admin) { create(:user, :admin) }
+
+    it 'returns false for root staff accounts' do
+      root_staff = create(:user, :root_account, tenant: create(:tenant))
+
+      expect(root_staff.deletable_by_admin?(acting_admin)).to be(false)
+    end
+
+    it 'returns true for regular staff accounts' do
+      staff = create(:user, :staff, tenant: create(:tenant))
+
+      expect(staff.deletable_by_admin?(acting_admin)).to be(true)
+    end
+  end
+
   describe 'active session lock' do
     let(:user) { create(:user, :admin) }
 
