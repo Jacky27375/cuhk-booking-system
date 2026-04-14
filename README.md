@@ -138,7 +138,7 @@ Running `bin/rails reset` or `bin/rails db:seed` ensures:
 | S.H. Ho College | `staff_root_shho@link.cuhk.edu.hk` | `demo_student_shho@link.cuhk.edu.hk` |
 | CW Chu College | `staff_root_cwchu@link.cuhk.edu.hk` | `demo_student_cwchu@link.cuhk.edu.hk` |
 | Wu Yee Sun College | `staff_root_wuyeesun@link.cuhk.edu.hk` | `demo_student_wuyeesun@link.cuhk.edu.hk` |
-| Lee Woo Sing College | `staff_root_leewoosin@link.cuhk.edu.hk` | `demo_student_leewoosin@link.cuhk.edu.hk` |
+| Lee Woo Sing College | `staff_root_leewoosing@link.cuhk.edu.hk` | `demo_student_leewoosing@link.cuhk.edu.hk` |
 
 Student self-registration is also available on `/signup` and is restricted to the college allow-list in `RegistrationsController`.
 
