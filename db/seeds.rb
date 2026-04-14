@@ -15,6 +15,7 @@ colleges = [
 
 # Root staff account email mapping
 root_staff_emails = {
+  "University" => "staff_root_university@link.cuhk.edu.hk",
   "Chung Chi College" => "staff_root_chungchi@link.cuhk.edu.hk",
   "New Asia College" => "staff_root_newasia@link.cuhk.edu.hk",
   "United College" => "staff_root_united@link.cuhk.edu.hk",
@@ -452,7 +453,7 @@ unless Rails.env.production?
   puts "=== Seeded Accounts ==="
   puts "Admin: admin@link.cuhk.edu.hk / #{bootstrap_password}"
   puts ""
-  puts "Root Staff Accounts (one per college):"
+  puts "Root Staff Accounts (colleges + University):"
   root_staff_emails.each do |college_name, email|
     puts "  #{college_name}: #{email} / #{bootstrap_password}"
   end

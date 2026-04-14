@@ -15,6 +15,7 @@ RSpec.describe BootstrapAccountReconciler do
 
   let(:root_staff_emails) do
     {
+      "University" => "staff_root_university@link.cuhk.edu.hk",
       "New Asia College" => "staff_root_newasia@link.cuhk.edu.hk",
       "Lee Woo Sing College" => "staff_root_leewoosing@link.cuhk.edu.hk"
     }
@@ -48,9 +49,17 @@ RSpec.describe BootstrapAccountReconciler do
         tenant: lee_woo_sing_tenant,
         email: "staff_root_leewoosin@link.cuhk.edu.hk"
       )
+      stale_university_root = create(
+        :user,
+        :root_account,
+        tenant: university_tenant,
+        email: "staff_root_university_legacy@link.cuhk.edu.hk"
+      )
 
       lee_venue = create(:venue, tenant: lee_woo_sing_tenant, department: lee_woo_sing_tenant.name)
       stale_booking = create(:booking, user: stale_lee_root, venue: lee_venue)
+      university_venue = create(:venue, tenant: university_tenant, department: university_tenant.name)
+      stale_university_booking = create(:booking, user: stale_university_root, venue: university_venue)
       stale_api_key = create(:api_key, user: stale_lee_root)
       stale_request = create(:venue_request, requester: stale_lee_root, tenant: lee_woo_sing_tenant)
       stale_root_step = create(:approval_step, actor: stale_lee_root)
@@ -75,19 +84,24 @@ RSpec.describe BootstrapAccountReconciler do
       ).call
 
       canonical_lee_root = User.find_by!(email: "staff_root_leewoosing@link.cuhk.edu.hk")
+      canonical_university_root = User.find_by!(email: "staff_root_university@link.cuhk.edu.hk")
 
       expect(result[:admin]).to eq(canonical_admin)
-      expect(result[:root_staff_users].keys).to contain_exactly("New Asia College", "Lee Woo Sing College")
+      expect(result[:root_staff_users].keys).to contain_exactly("University", "New Asia College", "Lee Woo Sing College")
       expect(result[:root_staff_users]["Lee Woo Sing College"]).to eq(canonical_lee_root)
+      expect(result[:root_staff_users]["University"]).to eq(canonical_university_root)
 
       expect(canonical_admin.reload.authenticate(bootstrap_password)).to eq(canonical_admin)
       expect(canonical_new_asia_root.reload.authenticate(bootstrap_password)).to eq(canonical_new_asia_root)
       expect(canonical_lee_root.authenticate(bootstrap_password)).to eq(canonical_lee_root)
+      expect(canonical_university_root.authenticate(bootstrap_password)).to eq(canonical_university_root)
 
       expect(User.exists?(stale_admin.id)).to be(false)
       expect(User.exists?(stale_lee_root.id)).to be(false)
+      expect(User.exists?(stale_university_root.id)).to be(false)
 
       expect(stale_booking.reload.user_id).to eq(canonical_lee_root.id)
+      expect(stale_university_booking.reload.user_id).to eq(canonical_university_root.id)
       expect(stale_api_key.reload.user_id).to eq(canonical_lee_root.id)
       expect(stale_request.reload.requester_id).to eq(canonical_lee_root.id)
       expect(stale_root_step.reload.actor_id).to eq(canonical_lee_root.id)
@@ -112,6 +126,14 @@ RSpec.describe BootstrapAccountReconciler do
         password: "KeepCurrent1!",
         password_confirmation: "KeepCurrent1!"
       )
+      university_root = create(
+        :user,
+        :root_account,
+        tenant: university_tenant,
+        email: "staff_root_university@link.cuhk.edu.hk",
+        password: "KeepCurrent1!",
+        password_confirmation: "KeepCurrent1!"
+      )
 
       described_class.new(
         tenants: tenants,
@@ -123,8 +145,10 @@ RSpec.describe BootstrapAccountReconciler do
 
       expect(admin.reload.authenticate("KeepCurrent1!")).to eq(admin)
       expect(new_asia_root.reload.authenticate("KeepCurrent1!")).to eq(new_asia_root)
+      expect(university_root.reload.authenticate("KeepCurrent1!")).to eq(university_root)
       expect(admin.authenticate(bootstrap_password)).to be_falsey
       expect(new_asia_root.authenticate(bootstrap_password)).to be_falsey
+      expect(university_root.authenticate(bootstrap_password)).to be_falsey
     end
   end
 end

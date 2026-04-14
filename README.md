@@ -102,10 +102,11 @@ The seed run also prints a verification summary and fails fast if the expected t
 |------|-------|----------|
 | **Admin** | `admin@link.cuhk.edu.hk` | `Password1!` |
 
-**Root Staff Accounts (one per college, can create other staff):**
+**Root Staff Accounts (colleges + University, can create other staff):**
 
-| College | Email | Password |
-|---------|-------|----------|
+| Tenant/College | Email | Password |
+|---------------|-------|----------|
+| University | `staff_root_university@link.cuhk.edu.hk` | `Password1!` |
 | Chung Chi College | `staff_root_chungchi@link.cuhk.edu.hk` | `Password1!` |
 | New Asia College | `staff_root_newasia@link.cuhk.edu.hk` | `Password1!` |
 | United College | `staff_root_united@link.cuhk.edu.hk` | `Password1!` |
