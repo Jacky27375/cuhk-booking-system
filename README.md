@@ -32,7 +32,7 @@ Team size is 4, so the minimum is 3 advanced features. The product includes **6*
 
 | Advanced feature | Why this is beyond CRUD | Where to verify quickly |
 | --- | --- | --- |
-| External API integration (Resend) | Transactional email delivery for approval/rejection and signup verification, with API response handling and failure paths | [features/sendgrid_email.feature](features/sendgrid_email.feature), [app/services/resend_email_service.rb](app/services/resend_email_service.rb), [app/services/signup_verification_service.rb](app/services/signup_verification_service.rb) |
+| External API integration (Resend) | Transactional email delivery for approval/rejection and signup OTP verification, with API response handling and failure paths | [features/sendgrid_email.feature](features/sendgrid_email.feature), [app/services/resend_email_service.rb](app/services/resend_email_service.rb), [app/services/signup_verification_service.rb](app/services/signup_verification_service.rb) |
 | Real-time updates (ActionCable/WebSocket) | Student "My Bookings" status updates and action-state sync without page refresh after staff decisions | [features/approval_workflow.feature](features/approval_workflow.feature) (`@javascript` scenarios), [app/channels/booking_status_channel.rb](app/channels/booking_status_channel.rb), [app/javascript/controllers/booking_status_controller.js](app/javascript/controllers/booking_status_controller.js) |
 | Background job automation | Scheduled auto-rejection of expired pending venue bookings to keep approval queue consistent | [app/jobs/expire_pending_venue_bookings_job.rb](app/jobs/expire_pending_venue_bookings_job.rb), [config/recurring.yml](config/recurring.yml), [features/approval_workflow.feature](features/approval_workflow.feature) |
 | Analytics dashboard (interactive charts) | Multi-metric operational analytics (status distribution, occupancy, trends, heatmap, equipment utilization) with date-range filtering | [features/analytics_dashboard.feature](features/analytics_dashboard.feature), [app/controllers/analytics_controller.rb](app/controllers/analytics_controller.rb), [app/views/analytics/show.html.erb](app/views/analytics/show.html.erb), [app/javascript/controllers/chart_controller.js](app/javascript/controllers/chart_controller.js) |
@@ -48,7 +48,32 @@ Team size is 4, so the minimum is 3 advanced features. The product includes **6*
 - **Realtime:** ActionCable
 - **Testing:** RSpec, Cucumber, SimpleCov
 
-## 3. Local Development Setup
+## 3. Deployment (Azure VM)
+
+Production URL: `https://csci3100.tylerl.cyou`
+
+- CI workflow: `.github/workflows/ci.yml`
+- CD workflow: `.github/workflows/deploy-azure.yml`
+- Runtime compose file: `deploy/docker-compose.azure.yml`
+
+### Required GitHub repository secrets
+
+| Secret | Required | Notes |
+| --- | --- | --- |
+| `AZURE_VM_HOST` | Yes | VM public IP or DNS |
+| `AZURE_VM_SSH_KEY` | Yes | Private key content for SSH |
+| `RAILS_MASTER_KEY` | Yes | Must match `config/credentials.yml.enc` |
+| `SECRET_KEY_BASE` | Yes | Generate with `openssl rand -hex 64` |
+| `POSTGRES_PASSWORD` | Yes | Production Postgres password |
+| `BOOTSTRAP_ACCOUNT_PASSWORD` | Yes | Required by `db/seeds` in production |
+| `RESEND_API_KEY` | Yes | Required for email delivery |
+| `RESET_BOOTSTRAP_ACCOUNTS_ONCE` | Optional | One-time password reset switch for bootstrap accounts |
+
+### Deployment behavior
+
+The CD workflow deploys to `/opt/cuhk-booking-system`, starts containers with Docker Compose, and health-checks `GET /up`. On failed health checks, it rolls back to the previous release automatically.
+
+## 4. Local Development Setup
 
 ### Prerequisites
 
@@ -97,42 +122,6 @@ bin/rails reset
 
 `bin/rails reset` maps to `db:reset` and reseeds the project demo dataset.
 
-## 4. Test and Quality Commands
-
-Before running test suites:
-
-```bash
-RAILS_ENV=test bin/rails db:create db:prepare
-```
-
-| Purpose | Command |
-| --- | --- |
-| RSpec suite | `bundle exec rspec` |
-| Single RSpec file | `bundle exec rspec spec/requests/bookings_spec.rb` |
-| Single RSpec example | `bundle exec rspec spec/requests/bookings_spec.rb:165` |
-| Cucumber suite | `bundle exec cucumber` |
-| Single Cucumber feature | `bundle exec cucumber features/approval_workflow.feature` |
-| Single Cucumber scenario | `bundle exec cucumber features/approval_workflow.feature:54` |
-| RuboCop | `bin/rubocop` |
-| Brakeman | `bin/brakeman --no-pager` |
-| Bundler audit | `bin/bundler-audit` |
-| Importmap audit | `bin/importmap audit` |
-| Local CI script | `bin/ci` |
-| Match GitHub CI checks locally | `bin/rubocop && bin/brakeman --no-pager && bin/bundler-audit && bin/importmap audit && bundle exec rspec && bundle exec cucumber` |
-
-`bin/ci` prepares a clean test database, runs the same active test suites as project CI (`bundle exec rspec` + `bundle exec cucumber`), and then replants test seeds.
-
-The following canonical journeys are covered by stable Cucumber scenarios:
-
-| Journey ID | Canonical journey | Scenario coverage | Expected outcome |
-| --- | --- | --- | --- |
-| J-01 | Authentication and role access | [features/authentication.feature](features/authentication.feature) scenarios: `Successful login as admin`, `Successful login as staff`, `Successful login as student`, `Failed login with incorrect password`, `Failed login with non-existent email`, `User logs out`, `Unauthenticated user is redirected to login`; [features/role_access.feature](features/role_access.feature) scenarios: `Admin can access admin panel`, `Admin dashboard hides My Bookings link`, `Admin cannot access My Bookings page directly`, `Admin cannot edit a booking` | Users can sign in and are blocked from unauthorized areas. |
-| J-02 | Venue booking slot selection and validation | [features/booking_timetable.feature](features/booking_timetable.feature) scenarios: `Timetable shows booked and available slots for selected date`, `Unavailable start time options are hidden`, `End time appears only after start time and only shows valid slots`, `Booking with non hourly increments is rejected`, `Selected slot is highlighted on edit page` | Available slots are shown first, invalid times stay hidden or rejected, and the selected slot remains visible during edits. |
-| J-03 | Booking approval lifecycle | [features/approval_workflow.feature](features/approval_workflow.feature) scenarios: `Staff sees pending booking requests`, `Staff approves a booking`, `Two-step tenant requires two approvals before final approval`, `Staff cannot manage bookings from another department`, `Staff cannot approve another department booking via direct request`, `Society member cannot access approval dashboard`, `Society member can cancel own pending booking`, `Pending booking is automatically rejected after its booking date passes`, `Student is notified in real-time when booking is approved` | Staff can review and act on bookings, unauthorized users are blocked, expired pending bookings are auto-rejected, and approvals trigger notifications. |
-| J-04 | Venue request submission and admin review | [features/venue_requests.feature](features/venue_requests.feature) scenarios: `Staff can submit a venue request`, `Admin can approve a venue request`, `Admin can reject a venue request`, `Admin panel links directly to pending venue-request review`, `Admin sees all pending staff venue requests on approval dashboard`, `Staff approval dashboard does not show pending venue requests`, `Student cannot access venue requests` | Staff can submit requests, admins can review and see all pending requests, and non-admin users do not see the admin request queue. |
-
-Each journey above has at least one positive scenario and, where it matters, a stable negative-path check.
-
 ## 5. Seed Data and Demo Accounts
 
 Running `bin/rails reset` or `bin/rails db:seed` ensures:
@@ -173,7 +162,52 @@ Running `bin/rails reset` or `bin/rails db:seed` ensures:
 
 Student self-registration is also available on `/signup` and is restricted to the college allow-list in `RegistrationsController`.
 
-## 6. API v1 Quick Reference
+## 6. Test and Quality Commands
+
+Before running test suites:
+
+```bash
+RAILS_ENV=test bin/rails db:create db:prepare
+```
+
+| Purpose | Command |
+| --- | --- |
+| RSpec suite | `bundle exec rspec` |
+| Cucumber suite | `bundle exec cucumber` |
+| RuboCop | `bin/rubocop` |
+| Brakeman | `bin/brakeman --no-pager` |
+| Bundler audit | `bin/bundler-audit` |
+| Importmap audit | `bin/importmap audit` |
+| Local CI script | `bin/ci` |
+| Match GitHub CI checks locally | `bin/rubocop && bin/brakeman --no-pager && bin/bundler-audit && bin/importmap audit && bundle exec rspec && bundle exec cucumber` |
+
+`bin/ci` prepares a clean test database, runs the same active test suites as project CI (`bundle exec rspec` + `bundle exec cucumber`), and then replants test seeds.
+
+The following canonical journeys are covered by stable Cucumber scenarios:
+
+| Journey ID | Canonical journey | Scenario coverage | Expected outcome |
+| --- | --- | --- | --- |
+| J-01 | Authentication and role access | [features/authentication.feature](features/authentication.feature) scenarios: `Successful login as admin`, `Successful login as staff`, `Successful login as student`, `Failed login with incorrect password`, `Failed login with non-existent email`, `User logs out`, `Unauthenticated user is redirected to login`; [features/role_access.feature](features/role_access.feature) scenarios: `Admin can access admin panel`, `Admin dashboard hides My Bookings link`, `Admin cannot access My Bookings page directly`, `Admin cannot edit a booking` | Users can sign in and are blocked from unauthorized areas. |
+| J-02 | Venue booking slot selection and validation | [features/booking_timetable.feature](features/booking_timetable.feature) scenarios: `Timetable shows booked and available slots for selected date`, `Unavailable start time options are hidden`, `End time appears only after start time and only shows valid slots`, `Booking with non hourly increments is rejected`, `Selected slot is highlighted on edit page` | Available slots are shown first, invalid times stay hidden or rejected, and the selected slot remains visible during edits. |
+| J-03 | Booking approval lifecycle | [features/approval_workflow.feature](features/approval_workflow.feature) scenarios: `Staff sees pending booking requests`, `Staff approves a booking`, `Two-step tenant requires two approvals before final approval`, `Staff cannot manage bookings from another department`, `Staff cannot approve another department booking via direct request`, `Society member cannot access approval dashboard`, `Society member can cancel own pending booking`, `Pending booking is automatically rejected after its booking date passes`, `Student is notified in real-time when booking is approved` | Staff can review and act on bookings, unauthorized users are blocked, expired pending bookings are auto-rejected, and approvals trigger notifications. |
+| J-04 | Venue request submission and admin review | [features/venue_requests.feature](features/venue_requests.feature) scenarios: `Staff can submit a venue request`, `Admin can approve a venue request`, `Admin can reject a venue request`, `Admin panel links directly to pending venue-request review`, `Admin sees all pending staff venue requests on approval dashboard`, `Staff approval dashboard does not show pending venue requests`, `Student cannot access venue requests` | Staff can submit requests, admins can review and see all pending requests, and non-admin users do not see the admin request queue. |
+
+Each journey above has at least one positive scenario and, where it matters, a stable negative-path check.
+
+## 7. Coverage Evidence (SimpleCov)
+
+SimpleCov is enabled with `minimum_coverage 80` in `.simplecov`.
+
+After running test suites, coverage artifacts are available at:
+
+- Local HTML report: `coverage/index.html`
+- Local Cobertura XML: `coverage/coverage.xml`
+- GitHub Actions artifact: `merged-coverage-report`
+
+#### SimpleCov Report
+![SimpleCov Report](./SimpleCov_Report.png)
+
+## 8. API v1 Quick Reference
 
 API v1 uses token auth and returns JSON. Local base URL is usually `http://localhost:3000`.
 
@@ -253,7 +287,7 @@ curl -s -H "Authorization: Bearer $API_KEY" "$BASE_URL/api/v1/bookings?status=pe
 - Requesting out-of-scope records returns `404 Not Found`
 - Validation failures return `422 Unprocessable Content`
 
-## 7. Implemented Features and Ownership
+## 9. Implemented Features and Ownership
 
 Ownership is calculated from **non-merge** commits only, weighted by **line impact** (`added + deleted`) on mapped feature files/directories, with bot commits (for example Dependabot) excluded.
 
@@ -275,41 +309,3 @@ Ownership is calculated from **non-merge** commits only, weighted by **line impa
 | UI/UX Styling & Layout Polish | Sam 65.69%; Tyler 19.75%; Jacky 14.01%; Joe 0.55% | Mapped visual polish files (global stylesheet, application layout, dashboard shell, helper-level presentation updates). |
 | Test Harness & BDD Infrastructure | Joe 56.42%; Sam 24.02%; Tyler 16.76%; Jacky 2.79% | Mapped test runtime/support plumbing (`spec_helper`, `rails_helper`, Cucumber support env, task wiring, test runner scripts). |
 | CI/CD & Azure Deployment Pipeline | Jacky 53.57%; Tyler 45.89%; Joe 0.54% | Mapped delivery pipeline files (GitHub Actions CI/CD workflows, Azure compose/deploy files, Docker/deployment configs). |
-
-## 8. Coverage Evidence (SimpleCov)
-
-SimpleCov is enabled with `minimum_coverage 80` in `.simplecov`.
-
-After running test suites, coverage artifacts are available at:
-
-- Local HTML report: `coverage/index.html`
-- Local Cobertura XML: `coverage/coverage.xml`
-- GitHub Actions artifact: `merged-coverage-report`
-
-#### SimpleCov Report
-![SimpleCov Report](./SimpleCov_Report.png)
-
-## 9. Deployment (Azure VM)
-
-Production URL: `https://csci3100.tylerl.cyou`
-
-- CI workflow: `.github/workflows/ci.yml`
-- CD workflow: `.github/workflows/deploy-azure.yml`
-- Runtime compose file: `deploy/docker-compose.azure.yml`
-
-### Required GitHub repository secrets
-
-| Secret | Required | Notes |
-| --- | --- | --- |
-| `AZURE_VM_HOST` | Yes | VM public IP or DNS |
-| `AZURE_VM_SSH_KEY` | Yes | Private key content for SSH |
-| `RAILS_MASTER_KEY` | Yes | Must match `config/credentials.yml.enc` |
-| `SECRET_KEY_BASE` | Yes | Generate with `openssl rand -hex 64` |
-| `POSTGRES_PASSWORD` | Yes | Production Postgres password |
-| `BOOTSTRAP_ACCOUNT_PASSWORD` | Yes | Required by `db/seeds` in production |
-| `RESEND_API_KEY` | Yes | Required for email delivery |
-| `RESET_BOOTSTRAP_ACCOUNTS_ONCE` | Optional | One-time password reset switch for bootstrap accounts |
-
-### Deployment behavior
-
-The CD workflow deploys to `/opt/cuhk-booking-system`, starts containers with Docker Compose, and health-checks `GET /up`. On failed health checks, it rolls back to the previous release automatically.
