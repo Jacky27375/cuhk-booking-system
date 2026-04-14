@@ -114,7 +114,7 @@ The seed run also prints a verification summary and fails fast if the expected t
 | S.H. Ho College | `staff_root_shho@link.cuhk.edu.hk` | `Password1!` |
 | CW Chu College | `staff_root_cwchu@link.cuhk.edu.hk` | `Password1!` |
 | Wu Yee Sun College | `staff_root_wuyeesun@link.cuhk.edu.hk` | `Password1!` |
-| Lee Woo Sing College | `staff_root_leewoosin@link.cuhk.edu.hk` | `Password1!` |
+| Lee Woo Sing College | `staff_root_leewoosing@link.cuhk.edu.hk` | `Password1!` |
 
 Student accounts can be created via the signup page (students select their college during registration).
 
