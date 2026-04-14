@@ -194,7 +194,8 @@ After running test suites, coverage artifacts are available at:
 - Local Cobertura XML: `coverage/coverage.xml`
 - GitHub Actions artifact: `merged-coverage-report`
 
-> For submission packaging, capture the screenshot directly from `coverage/index.html` after your latest full test run.
+#### SimpleCov Report
+![SimpleCov Report](./SimpleCov_Report.png)
 
 ## 9. Deployment (Azure VM)
 
