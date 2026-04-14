@@ -14,6 +14,31 @@ This repository aligns with the key spec requirements:
 - **Testing stack required by spec** (`RSpec` + `Cucumber`) integrated in GitHub Actions
 - **Public cloud deployment** (Azure VM deployment workflow + `/up` health check)
 
+## 1.1 End-Product Feature Showcase (Core + Advanced)
+
+This section is designed for fast TA review: **what is implemented**, **why it matters**, and **where to verify it**.
+
+### Core Features (Option A Requirements)
+
+| Core requirement from project spec | What is implemented in this product | Where to verify quickly |
+| --- | --- | --- |
+| Conflict detection (prevent double booking) | Date-based venue timetable, unavailable slot filtering, end-slot dependency on start-slot, overlap rejection, and booking-duration constraints | [features/booking_timetable.feature](features/booking_timetable.feature), [app/services/booking_conflict_checker.rb](app/services/booking_conflict_checker.rb), [app/models/venue_booking.rb](app/models/venue_booking.rb) |
+| Approval workflow | Pending -> under-review (for two-step tenants) -> approved/rejected, rejection reasons, owner cancellation controls, and approval history records | [features/approval_workflow.feature](features/approval_workflow.feature), [app/controllers/bookings_controller.rb](app/controllers/bookings_controller.rb), [app/models/approval_step.rb](app/models/approval_step.rb), [app/views/dashboards/approvals.html.erb](app/views/dashboards/approvals.html.erb) |
+| SaaS multi-tenant isolation | Tenant-aware visibility/scoping for venues, equipment, and bookings; role-based access boundaries for student/staff/admin | [features/tenant_access_control.feature](features/tenant_access_control.feature), [features/staff_scoped_management.feature](features/staff_scoped_management.feature), [app/services/booking_scope_query.rb](app/services/booking_scope_query.rb), [app/models/venue.rb](app/models/venue.rb), [app/models/equipment.rb](app/models/equipment.rb) |
+
+### Advanced Features (N-1 Rule Evidence)
+
+Team size is 4, so the minimum is 3 advanced features. The product includes **6**:
+
+| Advanced feature | Why this is beyond CRUD | Where to verify quickly |
+| --- | --- | --- |
+| External API integration (Resend) | Transactional email delivery for approval/rejection and signup verification, with API response handling and failure paths | [features/sendgrid_email.feature](features/sendgrid_email.feature), [app/services/resend_email_service.rb](app/services/resend_email_service.rb), [app/services/signup_verification_service.rb](app/services/signup_verification_service.rb) |
+| Real-time updates (ActionCable/WebSocket) | Student "My Bookings" status updates and action-state sync without page refresh after staff decisions | [features/approval_workflow.feature](features/approval_workflow.feature) (`@javascript` scenarios), [app/channels/booking_status_channel.rb](app/channels/booking_status_channel.rb), [app/javascript/controllers/booking_status_controller.js](app/javascript/controllers/booking_status_controller.js) |
+| Background job automation | Scheduled auto-rejection of expired pending venue bookings to keep approval queue consistent | [app/jobs/expire_pending_venue_bookings_job.rb](app/jobs/expire_pending_venue_bookings_job.rb), [config/recurring.yml](config/recurring.yml), [features/approval_workflow.feature](features/approval_workflow.feature) |
+| Analytics dashboard (interactive charts) | Multi-metric operational analytics (status distribution, occupancy, trends, heatmap, equipment utilization) with date-range filtering | [features/analytics_dashboard.feature](features/analytics_dashboard.feature), [app/controllers/analytics_controller.rb](app/controllers/analytics_controller.rb), [app/views/analytics/show.html.erb](app/views/analytics/show.html.erb), [app/javascript/controllers/chart_controller.js](app/javascript/controllers/chart_controller.js) |
+| API v1 with token auth | Programmatic access layer with API key authentication, role-based scoping, and pagination for venues/equipment/bookings | [config/routes.rb](config/routes.rb), [app/controllers/concerns/api_authenticatable.rb](app/controllers/concerns/api_authenticatable.rb), [app/controllers/api/v1/bookings_controller.rb](app/controllers/api/v1/bookings_controller.rb) |
+| Security hardening (session lock + signup verification gate) | Single active web session lock, session lock expiry/touch policy, and verified-email signup gate with OTP + resend/attempt limits | [app/controllers/sessions_controller.rb](app/controllers/sessions_controller.rb), [app/controllers/application_controller.rb](app/controllers/application_controller.rb), [app/controllers/registrations_controller.rb](app/controllers/registrations_controller.rb), [app/models/signup_verification_code.rb](app/models/signup_verification_code.rb) |
+
 ## 2. Tech Stack
 
 - **Ruby:** `3.4.8` (`.ruby-version`)
@@ -173,22 +198,26 @@ Role scoping is consistent with web behavior:
 
 ## 7. Implemented Features and Ownership
 
-Ownership is summarized from repository contribution history (aliases used in history: **Joe = RiskyPork**, **Sam = Ga8riel520**).
+Ownership is calculated from **non-merge** commits only, weighted by **line impact** (`added + deleted`) on mapped feature files/directories, with bot commits (for example Dependabot) excluded.
 
 | Implemented Feature | Contributors (Strict Audit %) | Notes |
 | --- | --- | --- |
-|Architecture Desing & Deploy | Joe
-| Authentication & Role-Based Access | Jacky (57.2%), Tyler (29.9%), Sam (9.5%), Joe (RiskyPork) (3.4%) | User/session auth flow, role access scenarios, and seed-role foundations plus follow-up refinements. |
-| CI, Coverage & Security Quality Gates | Tyler (54.5%), Jacky (43.5%), Joe (RiskyPork) (2.0%) | CI evolution, security scan hardening, and workflow/lint follow-up work. |
-| Azure Deployment Pipeline & Health Checks | Tyler (57.9%), Jacky (41.0%), Joe (RiskyPork) (1.1%) | Azure CD pipeline, deployment compose wiring, diagnostics, and `/up` health-check support. |
-| Venue Booking, Timetable & Conflict Handling | Jacky (73.7%), Joe (RiskyPork) (16.6%), Tyler (8.4%), Sam (1.3%) | Venue CRUD, timetable/slot UX, conflict checks, and booking confirmation flow with later hardening. |
-| Multi-Tenant Isolation & Authorization Policies | Jacky (72.9%), Joe (RiskyPork) (26.9%), Sam (0.4%) | Policy/query authorization and tenant visibility controls with shared-resource scoping hardening. |
-| Equipment Booking & Inventory Flow | Sam (56.2%), Jacky (30.0%), Joe (RiskyPork) (7.8%), Tyler (6.0%) | Equipment domain and borrow flow with validation/lifecycle refinements. |
-| Approval Workflow & Lifecycle Transitions | Joe (RiskyPork) (56.4%), Tyler (21.0%), Jacky (20.6%), Sam (2.2%) | Approval dashboard, state transitions, and workflow tests/mail hooks with two-step and cancellation extensions. |
-| Realtime Booking Status Updates (ActionCable) | Joe (RiskyPork) (81.3%), Jacky (18.7%) | Channel/stream status broadcasting for user bookings with frontend status handling. |
-| Analytics Dashboard & Utilization Reporting | Sam (80.8%), Jacky (19.2%) | Analytics controller/views, chart rendering, trend/date filtering, and request/BDD coverage. |
-| API v1 + Resend Email Integration | Joe (RiskyPork) (95.7%), Jacky (4.3%) | API-key auth, v1 endpoints, Resend delivery service wiring, and related specs. |
-| Resource Table Sorting & Query Optimization | Jacky (54.5%), Sam (16.5%), Joe (RiskyPork) (16.2%), Tyler (12.8%) | Sortable listings for bookings/venues/equipment and Arel-based sorting refactor. |
+| Authentication & Session Security | Tyler 75.07%; Jacky 13.88%; Joe 5.93%; Sam 5.12% | Mapped auth/session files (`SessionsController`, `ApplicationController`, `User`), auth policy, auth Cucumber scenarios, and session-token migrations. |
+| Student Registration & Verification Codes | Tyler 69.85%; Joe 12.67%; Jacky 10.19%; Sam 7.29% | Mapped signup flow (`RegistrationsController`), verification model/service, signup mailer views, registration Cucumber coverage, and verification-code migration. |
+| Tenant Isolation & Scoped Visibility | Jacky 47.45%; Joe 34.38%; Tyler 13.96%; Sam 4.20% | Mapped tenant/visibility scope files (`Tenant`, `Venue`, `Equipment`, `BookingScopeQuery`, `BookingAccessPolicy`) plus tenant-isolation scenarios/specs. |
+| Venue Management (CRUD + Sorting) | Jacky 64.96%; Sam 17.20%; Tyler 10.02%; Joe 7.82% | Mapped venue CRUD/sorting files (`VenuesController`, venue views/helpers), sorting BDD coverage, request/view/routing specs, and venue schema migrations. |
+| Equipment Inventory & Borrowing | Sam 58.98%; Jacky 36.45%; Tyler 2.99%; Joe 1.57% | Mapped equipment inventory + borrow flow (`EquipmentsController`, `EquipmentBooking`, equipment views), equipment booking scenarios/specs, and equipment/STI migrations. |
+| Venue Booking Timetable & Conflict Checks | Jacky 78.21%; Tyler 12.93%; Sam 5.13%; Joe 3.73% | Mapped timetable/conflict files (`BookingConflictChecker`, booking-time Stimulus controller, `VenueBooking` validations, timetable views) with BDD/spec coverage. |
+| Approval Workflow, Lifecycle & Realtime Status | Jacky 39.32%; Tyler 21.57%; Sam 21.33%; Joe 17.79% | Mapped booking lifecycle + approvals (`BookingsController`, `DashboardsController`, `Booking`, `ApprovalStep`), expiry job, ActionCable status updates, approval scenarios, and related specs/migrations. |
+| Venue Request Workflow | Tyler 56.68%; Joe 41.32%; Jacky 2.00% | Mapped staff submit/admin review flow (`VenueRequestsController`, `VenueRequest`, venue-request views), venue-request scenarios/specs, and migration. |
+| Admin User & Staff Account Management | Tyler 51.92%; Joe 42.09%; Sam 5.99% | Mapped admin/staff account surfaces (`Admin::UsersController`, `StaffAccountsController`, admin/staff views), staff-account scenarios, and admin/staff request specs. |
+| Analytics Dashboard & Reporting | Sam 82.56%; Jacky 17.29%; Joe 0.15% | Mapped analytics implementation (`AnalyticsController`, analytics dashboard view, chart Stimulus controller), analytics BDD scenarios, and analytics specs. |
+| API v1 & API Key Authentication | Joe 94.89%; Jacky 4.19%; Sam 0.92% | Mapped API boundary (`Api::V1::*`, `ApiAuthenticatable`, `ApiKey`), API request/model specs, and API-key migration. |
+| Email Delivery Integration (SendGrid/Resend) | Joe 72.35%; Tyler 23.27%; Sam 2.55%; Jacky 1.84% | Mapped booking email delivery services (legacy SendGrid + current Resend), booking mailers/views, email BDD scenario, and service/mailer specs. |
+| Seed Data & Bootstrap Account Provisioning | Jacky 49.63%; Tyler 25.38%; Joe 15.96%; Sam 9.03% | Mapped data/bootstrap provisioning files (`db/seeds.rb`, `BootstrapAccountReconciler`, reset task) and reconciler specs. |
+| UI/UX Styling & Layout Polish | Sam 65.69%; Tyler 19.75%; Jacky 14.01%; Joe 0.55% | Mapped visual polish files (global stylesheet, application layout, dashboard shell, helper-level presentation updates). |
+| Test Harness & BDD Infrastructure | Joe 56.42%; Sam 24.02%; Tyler 16.76%; Jacky 2.79% | Mapped test runtime/support plumbing (`spec_helper`, `rails_helper`, Cucumber support env, task wiring, test runner scripts). |
+| CI/CD & Azure Deployment Pipeline | Jacky 53.57%; Tyler 45.89%; Joe 0.54% | Mapped delivery pipeline files (GitHub Actions CI/CD workflows, Azure compose/deploy files, Docker/deployment configs). |
 
 ## 8. Coverage Evidence (SimpleCov)
 
